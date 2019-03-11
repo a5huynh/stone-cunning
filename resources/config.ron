@@ -1,0 +1,6 @@
+(
+    game: (
+        tile_height: 256,
+        tile_width: 256,
+    ),
+)
