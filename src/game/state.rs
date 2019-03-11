@@ -13,11 +13,18 @@ use amethyst::{
         SpriteSheetHandle,
         Texture,
         TextureMetadata,
+        Transparent,
         VirtualKeyCode,
     },
 };
 
-use super::entity::{ Floor };
+use super::{
+    config::GameConfig,
+    entity::{ Floor },
+    math::{
+        cart2iso
+    },
+};
 
 pub const MAP_HEIGHT: f32 = 1024.0;
 pub const MAP_WIDTH: f32 = 1024.0;
@@ -69,15 +76,31 @@ fn initialize_map(world: &mut World, sprite_sheet: SpriteSheetHandle) {
         sprite_number: 0,
     };
 
-    let mut transform = Transform::default();
-    transform.set_xyz(0.0, 0.0, 0.0);
+    let (tile_height, tile_width) = {
+        let config = &world.read_resource::<GameConfig>();
+        (config.tile_height, config.tile_width)
+    };
 
-    world.create_entity()
-        .with(sprite_render.clone())
-        .with(Floor::default())
-        .with(transform)
-        .build();
+    for y in 0..2 {
+        for x in 0..2 {
+            let cart_x = ((2 - x) * tile_height / 2) as f32;
+            let cart_y = ((2 - y) * tile_width / 2) as f32;
+
+            let (iso_x, iso_y) = cart2iso(cart_x, cart_y);
+
+            let mut transform = Transform::default();
+            transform.set_xyz(iso_x, iso_y, 0.0);
+
+            world.create_entity()
+                .with(sprite_render.clone())
+                .with(Floor::default())
+                .with(transform)
+                .with(Transparent)
+                .build();
+        }
+    }
 }
+
 
 fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
     let texture_handle = {
