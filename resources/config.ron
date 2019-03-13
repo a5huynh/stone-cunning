@@ -4,5 +4,6 @@
         map_width: 10,
         tile_height: 256,
         tile_width: 256,
+        map_move_speed: 10.0,
     ),
 )

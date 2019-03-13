@@ -1,6 +1,9 @@
 use amethyst::{
     assets::{ AssetStorage, Loader },
-    core::transform::Transform,
+    core::{
+        Parent,
+        transform::Transform
+    },
     input::{ is_close_requested, is_key_down },
     prelude::*,
     renderer::{
@@ -20,7 +23,7 @@ use amethyst::{
 
 use super::{
     config::GameConfig,
-    entity::{ Floor },
+    entity::{ CameraFollow, Floor },
     math::{
         cart2iso
     },
@@ -59,6 +62,12 @@ fn initialize_camera(world: &mut World) {
     let mut transform = Transform::default();
     transform.set_z(1.0);
 
+    // Add an entity we can use to move around the camera.
+    let entity = world.create_entity()
+        .with(CameraFollow::default())
+        .with(transform.clone())
+        .build();
+
     world.create_entity()
         .with(Camera::from(Projection::orthographic(
             -FRAC_MAP_WIDTH_2,
@@ -66,6 +75,7 @@ fn initialize_camera(world: &mut World) {
             -FRAC_MAP_HEIGHT_2,
             FRAC_MAP_HEIGHT_2,
         )))
+        .with(Parent { entity })
         .with(transform)
         .build();
 }
