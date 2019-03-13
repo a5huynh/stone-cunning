@@ -29,13 +29,13 @@ fn main() -> amethyst::Result<()> {
 
     let resource_root = format!("{}/resources", application_root_dir());
     let path = format!("{}/display_config.ron", resource_root);
-    // let binding_path = format!("{}/bindings.ron", resource_root);
+    let binding_path = format!("{}/bindings.ron", resource_root);
     let config_path = format!("{}/config.ron", resource_root);
 
     let config = DisplayConfig::load(&path);
     let game_config = DwarfConfig::load(&config_path);
-    let input_bundle = InputBundle::<String, String>::new();
-        // .with_bindings_from_file(binding_path)?;
+    let input_bundle = InputBundle::<String, String>::new()
+        .with_bindings_from_file(binding_path)?;
 
     // Setup the rendering pipeline
     let pipe = Pipeline::build()
@@ -65,7 +65,7 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(UiBundle::<String, String>::new())?
         // Register the systems, give it a name, and specify any
         // dependencies for that system.
-        .with_bundle(input_bundle)?;
+        .with_bundle(input_bundle)?
 
     let mut game = Application::build("./", RunningState)?
         .with_resource(game_config.game)
