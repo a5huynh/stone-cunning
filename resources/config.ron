@@ -1,5 +1,7 @@
 (
     game: (
+        map_height: 10,
+        map_width: 10,
         tile_height: 256,
         tile_width: 256,
     ),

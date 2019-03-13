@@ -76,15 +76,20 @@ fn initialize_map(world: &mut World, sprite_sheet: SpriteSheetHandle) {
         sprite_number: 0,
     };
 
-    let (tile_height, tile_width) = {
+    let (map_height, map_width, tile_height, tile_width) = {
         let config = &world.read_resource::<GameConfig>();
-        (config.tile_height, config.tile_width)
+        (
+            config.map_height,
+            config.map_width,
+            config.tile_height,
+            config.tile_width
+        )
     };
 
-    for y in 0..2 {
-        for x in 0..2 {
-            let cart_x = ((2 - x) * tile_height / 2) as f32;
-            let cart_y = ((2 - y) * tile_width / 2) as f32;
+    for y in 0..map_height {
+        for x in 0..map_width {
+            let cart_x = ((map_width - x) * tile_width / 2) as f32;
+            let cart_y = ((map_height - y) * tile_height / 2) as f32;
 
             let (iso_x, iso_y) = cart2iso(cart_x, cart_y);
 
