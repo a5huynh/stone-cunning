@@ -25,7 +25,13 @@ impl Component for Floor {
 }
 
 #[derive(Default)]
-pub struct Player;
+pub struct Player {
+    // Direction the player is facing radians
+    pub direction: f32,
+    // Used to keep track of the player's animation frame.
+    pub ticks: f32,
+}
+
 impl Component for Player {
     type Storage = DenseVecStorage<Self>;
 }
