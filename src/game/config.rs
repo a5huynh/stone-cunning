@@ -13,6 +13,18 @@ pub struct GameConfig {
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
+pub struct PlayerConfig {
+    pub move_speed: f32,
+    // Number of frames in the movement animation.
+    pub move_num_frames: u32,
+    // How fast the animation will occur.
+    pub move_tick: f32,
+}
+
+
+
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct DwarfConfig {
     pub game: GameConfig,
+    pub player: PlayerConfig,
 }

@@ -71,9 +71,9 @@ fn main() -> amethyst::Result<()> {
 
     let mut game = Application::build("./", RunningState)?
         .with_resource(game_config.game)
+        .with_resource(game_config.player)
         // .with_resource(game_config.enemy)
         // .with_resource(game_config.game)
-        // .with_resource(game_config.player)
         .build(game_data)?;
 
     game.run();

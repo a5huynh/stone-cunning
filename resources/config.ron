@@ -1,4 +1,9 @@
 (
+    player: (
+        move_speed: 5.0,
+        move_num_frames: 3,
+        move_tick: 0.1,
+    ),
     game: (
         map_height: 10,
         map_width: 10,
