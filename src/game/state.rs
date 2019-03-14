@@ -23,7 +23,7 @@ use amethyst::{
 
 use super::{
     config::GameConfig,
-    entity::{ CameraFollow, Floor },
+    entity::{ CameraFollow, Floor, Player },
     math::{
         cart2iso
     },
@@ -40,10 +40,13 @@ impl SimpleState for RunningState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         let sprite_sheet_handle = load_sprite_sheet(world);
+        let player_sprite_handle = load_player_sprite_sheet(world);
 
         world.register::<Floor>();
+        world.register::<Player>();
         initialize_map(world, sprite_sheet_handle);
         initialize_camera(world);
+        Player::initialize(world, player_sprite_handle);
     }
 
     fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
@@ -134,6 +137,30 @@ fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
     let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
     loader.load(
         "./resources/textures/spritesheet.ron",
+        SpriteSheetFormat,
+        texture_handle,
+        (),
+        &sprite_sheet_store
+    )
+}
+
+fn load_player_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
+    let texture_handle = {
+        let loader = world.read_resource::<Loader>();
+        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
+        loader.load(
+            "./resources/assets/player/player_spritesheet.png",
+            PngFormat,
+            TextureMetadata::srgb_scale(),
+            (),
+            &texture_storage
+        )
+    };
+
+    let loader = world.read_resource::<Loader>();
+    let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
+    loader.load(
+        "./resources/assets/player/player_spritesheet.ron",
         SpriteSheetFormat,
         texture_handle,
         (),
