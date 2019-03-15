@@ -19,8 +19,11 @@ pub struct PlayerConfig {
     pub move_num_frames: u32,
     // How fast the animation will occur.
     pub move_tick: f32,
+    // Offset in the player spritesheet for each player animation.
+    // 0: idle
+    // 1-8: player movement
+    pub animation_offsets: [u32; 9],
 }
-
 
 
 #[derive(Debug, Default, Deserialize, Serialize)]

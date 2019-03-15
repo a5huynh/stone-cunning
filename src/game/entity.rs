@@ -24,10 +24,27 @@ impl Component for Floor {
     type Storage = DenseVecStorage<Self>;
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub enum Direction {
+    IDLE = 0,
+    WEST = 1,
+    NORTHWEST = 2,
+    NORTH = 3,
+    NORTHEAST = 4,
+    EAST = 5,
+    SOUTHEAST = 6,
+    SOUTH = 7,
+    SOUTHWEST = 8,
+}
+
+impl Default for Direction {
+    fn default() -> Self { Direction::IDLE }
+}
+
 #[derive(Default)]
 pub struct Player {
     // Direction the player is facing radians
-    pub direction: f32,
+    pub direction: Direction,
     // Used to keep track of the player's animation frame.
     pub ticks: f32,
 }
@@ -52,5 +69,34 @@ impl Player {
             .with(player_transform)
             .with(Transparent)
             .build();
+    }
+
+    /// Determine which way the player is facing based on the last
+    /// movement transform.
+    pub fn calculate_direction(x: f64, y: f64) -> Direction {
+
+        if x < 0.0 {
+            if y > 0.0 {
+                return Direction::NORTHWEST;
+            } else if y < 0.0 {
+                return Direction::SOUTHWEST
+            }
+            return Direction::WEST;
+        } else if x > 0.0 {
+            if y > 0.0 {
+                return Direction::NORTHEAST;
+            } else if y < 0.0 {
+                return Direction::SOUTHEAST;
+            }
+            return Direction::EAST;
+        } else if x == 0.0 {
+            if y > 0.0 {
+                return Direction::NORTH;
+            } else if y < 0.0 {
+                return Direction::SOUTH;
+            }
+        }
+
+        return Direction::IDLE;
     }
 }

@@ -16,7 +16,7 @@ use amethyst::{
 
 use super::super::{
     config::PlayerConfig,
-    entity::Player,
+    entity::{ Player },
 };
 
 pub struct PlayerMovement;
@@ -48,10 +48,13 @@ impl<'s> System<'s> for PlayerMovement {
             // handle character animation
             let mut idle = true;
             // Start of the animation for this direction;
-            let dir_offset = 1;
             if x_move != 0.0 || y_move != 0.0 {
                 idle = false;
             }
+
+            let new_dir = Player::calculate_direction(x_move, y_move);
+            let dir_offset = player_config.animation_offsets[new_dir.clone() as usize];
+            let has_new_dir = new_dir != player.direction;
 
             // 1, 2, 3, 4
             if idle {
@@ -62,13 +65,16 @@ impl<'s> System<'s> for PlayerMovement {
                     player.ticks = 0.0;
 
                     let sprite_max = player_config.move_num_frames + dir_offset - 1;
-                    sprite.sprite_number = sprite.sprite_number + 1;
+                    if has_new_dir {
+                        sprite.sprite_number = dir_offset as usize;
+                        player.direction = new_dir.clone();
+                    } else {
+                        sprite.sprite_number = sprite.sprite_number + 1;
+                    }
 
                     if sprite.sprite_number > sprite_max as usize {
                         sprite.sprite_number = dir_offset as usize;
                     }
-
-                    println!("sprite changed to: {}", sprite.sprite_number);
                 }
             }
 

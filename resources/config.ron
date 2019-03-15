@@ -3,6 +3,7 @@
         move_speed: 5.0,
         move_num_frames: 3,
         move_tick: 0.1,
+        animation_offsets: (0, 1, 4, 7, 10, 13, 16, 19, 22)
     ),
     game: (
         map_height: 10,
