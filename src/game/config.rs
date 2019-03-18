@@ -9,6 +9,7 @@ pub struct GameConfig {
     pub map_width: u32,
     pub tile_height: u32,
     pub tile_width: u32,
+    pub tile_scale: f32,
     pub map_move_speed: f32,
 }
 

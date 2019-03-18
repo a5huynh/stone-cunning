@@ -89,25 +89,30 @@ fn initialize_map(world: &mut World, sprite_sheet: SpriteSheetHandle) {
         sprite_number: 0,
     };
 
-    let (map_height, map_width, tile_height, tile_width) = {
+    let (map_height, map_width, tile_height, tile_width, tile_scale) = {
         let config = &world.read_resource::<GameConfig>();
         (
             config.map_height,
             config.map_width,
             config.tile_height,
-            config.tile_width
+            config.tile_width,
+            config.tile_scale
         )
     };
 
+    let scaled_width = (tile_width as f32 * tile_scale) / 2.0;
+    let scaled_height = (tile_height as f32 * tile_scale) / 2.0;
+
     for y in 0..map_height {
         for x in 0..map_width {
-            let cart_x = ((map_width - x) * tile_width / 2) as f32;
-            let cart_y = ((map_height - y) * tile_height / 2) as f32;
+            let cart_x = (map_width - x) as f32 * scaled_width;
+            let cart_y = (map_height - y) as f32 * scaled_height;
 
             let (iso_x, iso_y) = cart2iso(cart_x, cart_y);
 
             let mut transform = Transform::default();
             transform.set_xyz(iso_x, iso_y, 0.0);
+            transform.set_scale(tile_scale, tile_scale, tile_scale);
 
             world.create_entity()
                 .with(sprite_render.clone())
