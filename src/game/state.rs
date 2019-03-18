@@ -86,7 +86,7 @@ fn initialize_camera(world: &mut World) {
 fn initialize_map(world: &mut World, sprite_sheet: SpriteSheetHandle) {
     let sprite_render = SpriteRender {
         sprite_sheet: sprite_sheet.clone(),
-        sprite_number: 0,
+        sprite_number: 2,
     };
 
     let (map_height, map_width, tile_height, tile_width, tile_scale) = {
@@ -130,7 +130,7 @@ fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
         let loader = world.read_resource::<Loader>();
         let texture_storage = world.read_resource::<AssetStorage<Texture>>();
         loader.load(
-            "./resources/textures/spritesheet.png",
+            "./resources/textures/terrain/spritesheet.png",
             PngFormat,
             TextureMetadata::srgb_scale(),
             (),
@@ -141,7 +141,7 @@ fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
     let loader = world.read_resource::<Loader>();
     let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
     loader.load(
-        "./resources/textures/spritesheet.ron",
+        "./resources/textures/terrain/spritesheet.ron",
         SpriteSheetFormat,
         texture_handle,
         (),
