@@ -18,12 +18,12 @@ use amethyst::{
         TextureMetadata,
         Transparent,
         VirtualKeyCode,
-    },
+    }
 };
 
 use super::{
     config::GameConfig,
-    entity::{ CameraFollow, Floor, Player },
+    entity::{ ActivityConsole, CameraFollow, Floor, Player },
     math::{
         cart2iso
     },
@@ -47,6 +47,7 @@ impl SimpleState for RunningState {
         initialize_map(world, sprite_sheet_handle);
         initialize_camera(world);
         Player::initialize(world, player_sprite_handle);
+        ActivityConsole::initialize(world);
     }
 
     fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
@@ -148,6 +149,7 @@ fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
         &sprite_sheet_store
     )
 }
+
 
 fn load_player_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
     let texture_handle = {

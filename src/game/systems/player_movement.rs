@@ -12,11 +12,12 @@ use amethyst::{
     },
     input::InputHandler,
     renderer::SpriteRender,
+    ui::UiText,
 };
 
 use super::super::{
     config::PlayerConfig,
-    entity::{ Player },
+    entity::{ ActivityConsole, Player }
 };
 
 pub struct PlayerMovement;
@@ -27,7 +28,9 @@ impl<'s> System<'s> for PlayerMovement {
         WriteStorage<'s, Transform>,
         WriteStorage<'s, SpriteRender>,
         Read<'s, InputHandler<String, String>>,
-        Read<'s, Time>
+        Read<'s, Time>,
+        WriteStorage<'s, UiText>,
+        ReadExpect<'s, ActivityConsole>,
     );
 
     fn run(&mut self, (
@@ -36,7 +39,9 @@ impl<'s> System<'s> for PlayerMovement {
         mut transforms,
         mut sprites,
         input,
-        time
+        time,
+        mut ui_text,
+        activity_console,
     ): Self::SystemData) {
         let x_move = input.axis_value("player_x").unwrap();
         let y_move = input.axis_value("player_y").unwrap();
@@ -45,6 +50,18 @@ impl<'s> System<'s> for PlayerMovement {
             transform.translate_x(x_move as f32 * player_config.move_speed);
             transform.translate_y(y_move as f32 * player_config.move_speed);
 
+            if let Some(text) = ui_text.get_mut(activity_console.text_handle) {
+                let x = transform.translation().x;
+                let y = transform.translation().y;
+
+                let map_x = (x / 96.0).floor();
+                let map_y = (y / 96.0).floor();
+
+                text.text = format!(
+                    "Player: ({}, {}) ({}, {})",
+                    x, y, map_x, map_y,
+                )
+            }
             // handle character animation
             let mut idle = true;
             // Start of the animation for this direction;
@@ -77,7 +94,6 @@ impl<'s> System<'s> for PlayerMovement {
                     }
                 }
             }
-
         }
     }
 }

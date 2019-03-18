@@ -1,11 +1,18 @@
 use amethyst::{
+    assets::{ Loader },
     core::transform::Transform,
-    ecs::prelude::{Component, DenseVecStorage},
+    ecs::prelude::{Component, DenseVecStorage, Entity},
     prelude::*,
     renderer::{
         SpriteSheetHandle,
         SpriteRender,
         Transparent,
+    },
+    ui::{
+        Anchor,
+        TtfFormat,
+        UiText,
+        UiTransform,
     }
 };
 
@@ -98,5 +105,47 @@ impl Player {
         }
 
         return Direction::IDLE;
+    }
+}
+
+pub struct ActivityConsole {
+    pub text_handle: Entity,
+}
+
+impl Component for ActivityConsole {
+    type Storage = DenseVecStorage<Self>;
+}
+
+impl ActivityConsole {
+    pub fn initialize(world: &mut World) {
+        let font = world.read_resource::<Loader>().load(
+            "resources/fonts/PxPlus_IBM_VGA8.ttf",
+            TtfFormat,
+            Default::default(),
+            (),
+            &world.read_resource(),
+        );
+
+        let transform = UiTransform::new(
+            "DEBUG".to_string(),
+            Anchor::TopLeft,
+            // x, y, z
+            140.0, -20.0, 1.0,
+            // width, height
+            400.0, 40.0,
+            // Tab order
+            0
+        );
+
+        let text_handle = world.create_entity()
+            .with(transform)
+            .with(UiText::new(
+                font.clone(),
+                "Player is on x, y:".to_string(),
+                [1., 1., 1., 1.],
+                25.,
+            )).build();
+
+        world.add_resource(ActivityConsole { text_handle });
     }
 }
