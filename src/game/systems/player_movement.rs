@@ -15,9 +15,10 @@ use amethyst::{
     ui::UiText,
 };
 
-use super::super::{
+use crate::game::{
     config::PlayerConfig,
-    entity::{ ActivityConsole, Player }
+    entity::{ ActivityConsole, Player },
+    math::{ iso2cart },
 };
 
 pub struct PlayerMovement;
@@ -54,8 +55,9 @@ impl<'s> System<'s> for PlayerMovement {
                 let x = transform.translation().x;
                 let y = transform.translation().y;
 
-                let map_x = (x / 96.0).floor();
-                let map_y = (y / 96.0).floor();
+                let (cartx, carty) = iso2cart(x, y);
+                let map_x = (cartx / 48.0).floor();
+                let map_y = (carty / 48.0).floor();
 
                 text.text = format!(
                     "Player: ({}, {}) ({}, {})",
