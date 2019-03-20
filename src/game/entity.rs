@@ -31,6 +31,12 @@ impl Component for Floor {
     type Storage = DenseVecStorage<Self>;
 }
 
+#[derive(Default)]
+pub struct Object;
+impl Component for Object {
+    type Storage = DenseVecStorage<Self>;
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Direction {
     IDLE = 0,

@@ -1,5 +1,4 @@
 use amethyst::{
-    assets::{ AssetStorage, Loader },
     core::{
         Parent,
         transform::Transform
@@ -8,25 +7,19 @@ use amethyst::{
     prelude::*,
     renderer::{
         Camera,
-        PngFormat,
         Projection,
         SpriteRender,
-        SpriteSheet,
-        SpriteSheetFormat,
         SpriteSheetHandle,
-        Texture,
-        TextureMetadata,
         Transparent,
         VirtualKeyCode,
     }
 };
 
-use super::{
+use crate::game::{
     config::GameConfig,
-    entity::{ ActivityConsole, CameraFollow, Floor, Player },
-    math::{
-        cart2iso
-    },
+    entity::{ ActivityConsole, CameraFollow, Floor, Object, Player },
+    math::{ cart2iso },
+    sprite::{ load_sprite_sheet },
 };
 
 pub const MAP_HEIGHT: f32 = 1024.0;
@@ -39,14 +32,23 @@ pub struct RunningState;
 impl SimpleState for RunningState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
-        let sprite_sheet_handle = load_sprite_sheet(world);
-        let player_sprite_handle = load_player_sprite_sheet(world);
+
+        let object_spritesheet_handle = load_sprite_sheet(world, "objects");
+        let terrain_spritesheet_handle = load_sprite_sheet(world, "terrain");
+        let player_spritesheet_handle = load_sprite_sheet(world, "player");
 
         world.register::<Floor>();
+        world.register::<Object>();
         world.register::<Player>();
-        initialize_map(world, sprite_sheet_handle);
+
+        initialize_map(
+            world,
+            terrain_spritesheet_handle,
+            object_spritesheet_handle
+        );
+
         initialize_camera(world);
-        Player::initialize(world, player_sprite_handle);
+        Player::initialize(world, player_spritesheet_handle);
         ActivityConsole::initialize(world);
     }
 
@@ -84,8 +86,12 @@ fn initialize_camera(world: &mut World) {
         .build();
 }
 
-fn initialize_map(world: &mut World, sprite_sheet: SpriteSheetHandle) {
-    let sprite_render = SpriteRender {
+fn initialize_map(
+    world: &mut World,
+    sprite_sheet: SpriteSheetHandle,
+    objects_sheet: SpriteSheetHandle
+) {
+    let terrain_render = SpriteRender {
         sprite_sheet: sprite_sheet.clone(),
         sprite_number: 2,
     };
@@ -116,61 +122,30 @@ fn initialize_map(world: &mut World, sprite_sheet: SpriteSheetHandle) {
             transform.set_scale(tile_scale, tile_scale, tile_scale);
 
             world.create_entity()
-                .with(sprite_render.clone())
+                .with(terrain_render.clone())
                 .with(Floor::default())
                 .with(transform)
                 .with(Transparent)
                 .build();
         }
     }
-}
 
-
-fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
-    let texture_handle = {
-        let loader = world.read_resource::<Loader>();
-        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
-        loader.load(
-            "./resources/textures/terrain/spritesheet.png",
-            PngFormat,
-            TextureMetadata::srgb_scale(),
-            (),
-            &texture_storage
-        )
+    let object_render = SpriteRender {
+        sprite_sheet: objects_sheet.clone(),
+        sprite_number: 2,
     };
 
-    let loader = world.read_resource::<Loader>();
-    let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
-    loader.load(
-        "./resources/textures/terrain/spritesheet.ron",
-        SpriteSheetFormat,
-        texture_handle,
-        (),
-        &sprite_sheet_store
-    )
-}
+    let cart_x = 5.0 * scaled_width;
+    let cart_y = 5.0 * scaled_height;
+    let (iso_x, iso_y) = cart2iso(cart_x, cart_y);
 
-
-fn load_player_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
-    let texture_handle = {
-        let loader = world.read_resource::<Loader>();
-        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
-        loader.load(
-            "./resources/assets/player/player_spritesheet.png",
-            PngFormat,
-            TextureMetadata::srgb_scale(),
-            (),
-            &texture_storage
-        )
-    };
-
-    let loader = world.read_resource::<Loader>();
-    let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
-    loader.load(
-        "./resources/assets/player/player_spritesheet.ron",
-        SpriteSheetFormat,
-        texture_handle,
-        (),
-        &sprite_sheet_store
-    )
+    let mut transform = Transform::default();
+    transform.set_xyz(iso_x, iso_y, 0.0);
+    transform.set_scale(tile_scale, tile_scale, tile_scale);
+    world.create_entity()
+        .with(object_render.clone())
+        .with(Object::default())
+        .with(transform)
+        .with(Transparent)
+        .build();
 }
