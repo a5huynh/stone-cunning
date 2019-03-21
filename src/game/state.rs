@@ -91,11 +91,6 @@ fn initialize_map(
     sprite_sheet: SpriteSheetHandle,
     objects_sheet: SpriteSheetHandle
 ) {
-    let terrain_render = SpriteRender {
-        sprite_sheet: sprite_sheet.clone(),
-        sprite_number: 2,
-    };
-
     let (map_height, map_width, tile_height, tile_width, tile_scale) = {
         let config = &world.read_resource::<GameConfig>();
         (
@@ -112,17 +107,23 @@ fn initialize_map(
 
     for y in 0..map_height {
         for x in 0..map_width {
-            let cart_x = (map_width - x) as f32 * scaled_width;
-            let cart_y = (map_height - y) as f32 * scaled_height;
+            let terrain_render = SpriteRender {
+                sprite_sheet: sprite_sheet.clone(),
+                sprite_number: ((x + y) % 3) as usize,
+            };
 
+            let cart_x = x as f32 * scaled_width;
+            let cart_y = y as f32 * scaled_height;
+            let zindex = (x + y) as f32;
             let (iso_x, iso_y) = cart2iso(cart_x, cart_y);
 
             let mut transform = Transform::default();
-            transform.set_xyz(iso_x, iso_y, 0.0);
+            // Add tile offset as config option.
+            transform.set_xyz(iso_x, iso_y, -zindex);
             transform.set_scale(tile_scale, tile_scale, tile_scale);
 
             world.create_entity()
-                .with(terrain_render.clone())
+                .with(terrain_render)
                 .with(Floor::default())
                 .with(transform)
                 .with(Transparent)
@@ -140,7 +141,7 @@ fn initialize_map(
     let (iso_x, iso_y) = cart2iso(cart_x, cart_y);
 
     let mut transform = Transform::default();
-    transform.set_xyz(iso_x, iso_y, 0.0);
+    transform.set_xyz(iso_x, iso_y + 32.0, -8.0);
     transform.set_scale(tile_scale, tile_scale, tile_scale);
     world.create_entity()
         .with(object_render.clone())

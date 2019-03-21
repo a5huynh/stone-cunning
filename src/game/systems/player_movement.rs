@@ -48,20 +48,27 @@ impl<'s> System<'s> for PlayerMovement {
         let y_move = input.axis_value("player_y").unwrap();
 
         for (player, transform, sprite) in (&mut players, &mut transforms, &mut sprites).join() {
-            transform.translate_x(x_move as f32 * player_config.move_speed);
-            transform.translate_y(y_move as f32 * player_config.move_speed);
+            let player_x = transform.translation().x;
+            let player_y = transform.translation().y;
+
+            let mut new_x = player_x + x_move as f32 * player_config.move_speed;
+            let mut new_y = player_y + y_move as f32 * player_config.move_speed;
+
+            // Check collisions
+
+            let (cartx, carty) = iso2cart(new_x, new_y);
+            let map_x = (cartx / 48.0).floor();
+            let map_y = (carty / 48.0).floor();
+            let zindex = map_x + map_y - 1.0;
+
+            transform.set_x(new_x);
+            transform.set_y(new_y);
+            transform.set_z(-zindex);
 
             if let Some(text) = ui_text.get_mut(activity_console.text_handle) {
-                let x = transform.translation().x;
-                let y = transform.translation().y;
-
-                let (cartx, carty) = iso2cart(x, y);
-                let map_x = (cartx / 48.0).floor();
-                let map_y = (carty / 48.0).floor();
-
                 text.text = format!(
-                    "Player: ({}, {}) ({}, {})",
-                    x, y, map_x, map_y,
+                    "Player: ({}, {}, {}) ({}, {})",
+                    new_x, new_y, -zindex, map_x, map_y,
                 )
             }
             // handle character animation
