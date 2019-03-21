@@ -17,8 +17,8 @@ use amethyst::{
 
 use crate::game::{
     config::PlayerConfig,
-    entity::{ ActivityConsole, Player, Map },
-    math::{ iso2cart },
+    entity::{ ActivityConsole, Player },
+    map::Map,
 };
 
 pub struct PlayerMovement;
@@ -56,17 +56,13 @@ impl<'s> System<'s> for PlayerMovement {
             let mut new_x = player_x + x_move as f32 * player_config.move_speed;
             let mut new_y = player_y + y_move as f32 * player_config.move_speed;
 
-            // Check collisions
-
-            let (cartx, carty) = iso2cart(new_x, new_y);
-            let map_x = (cartx / 48.0).floor();
-            let map_y = (carty / 48.0).floor();
-            let zindex = map_x + map_y - 1.0;
-
-            if let Some(_) = map.objects.get(&(map_x as u32, map_y as u32)) {
+            if map.has_collision(new_x, new_y) {
                 new_x = player_x;
                 new_y = player_y;
             }
+
+            let (map_x, map_y) = map.to_map_coords(new_x, new_y);
+            let zindex = (map_x as f32 + map_y as f32 - 1.0) as f32;
 
             transform.set_x(new_x);
             transform.set_y(new_y);

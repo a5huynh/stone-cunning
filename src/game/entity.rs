@@ -16,8 +16,6 @@ use amethyst::{
     }
 };
 
-use std::collections::HashMap;
-
 #[derive(Default)]
 /// Used to move the camera and to follow around other entities
 pub struct CameraFollow;
@@ -113,11 +111,6 @@ impl Player {
 
         return Direction::IDLE;
     }
-}
-
-#[derive(Default)]
-pub struct Map {
-    pub objects: HashMap<(u32, u32), u32>,
 }
 
 pub struct ActivityConsole {

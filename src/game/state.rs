@@ -8,17 +8,13 @@ use amethyst::{
     renderer::{
         Camera,
         Projection,
-        SpriteRender,
-        SpriteSheetHandle,
-        Transparent,
         VirtualKeyCode,
     }
 };
 
 use crate::game::{
-    config::GameConfig,
-    entity::{ ActivityConsole, CameraFollow, Floor, Object, Player, Map },
-    math::{ cart2iso },
+    entity::{ ActivityConsole, CameraFollow, Floor, Object, Player },
+    map::Map,
     sprite::{ load_sprite_sheet },
 };
 
@@ -37,19 +33,16 @@ impl SimpleState for RunningState {
         let terrain_spritesheet_handle = load_sprite_sheet(world, "terrain");
         let player_spritesheet_handle = load_sprite_sheet(world, "player");
 
-        world.add_resource(Map::default());
         world.register::<Floor>();
         world.register::<Object>();
         world.register::<Player>();
 
-        initialize_map(
-            world,
-            terrain_spritesheet_handle,
-            object_spritesheet_handle
-        );
-
         initialize_camera(world);
+        // Initialize map terrain & objects.
+        Map::initialize(world, terrain_spritesheet_handle, object_spritesheet_handle);
+        // Initalize player.
         Player::initialize(world, player_spritesheet_handle);
+        // Setup activity console.
         ActivityConsole::initialize(world);
     }
 
@@ -85,72 +78,4 @@ fn initialize_camera(world: &mut World) {
         .with(Parent { entity })
         .with(transform)
         .build();
-}
-
-fn initialize_map(
-    world: &mut World,
-    sprite_sheet: SpriteSheetHandle,
-    objects_sheet: SpriteSheetHandle
-) {
-    let (map_height, map_width, tile_height, tile_width, tile_scale) = {
-        let config = &world.read_resource::<GameConfig>();
-        (
-            config.map_height,
-            config.map_width,
-            config.tile_height,
-            config.tile_width,
-            config.tile_scale
-        )
-    };
-
-    let scaled_width = (tile_width as f32 * tile_scale) / 2.0;
-    let scaled_height = (tile_height as f32 * tile_scale) / 2.0;
-
-    for y in 0..map_height {
-        for x in 0..map_width {
-            let terrain_render = SpriteRender {
-                sprite_sheet: sprite_sheet.clone(),
-                sprite_number: ((x + y) % 3) as usize,
-            };
-
-            let cart_x = x as f32 * scaled_width;
-            let cart_y = y as f32 * scaled_height;
-            let zindex = (x + y) as f32;
-            let (iso_x, iso_y) = cart2iso(cart_x, cart_y);
-
-            let mut transform = Transform::default();
-            // Add tile offset as config option.
-            transform.set_xyz(iso_x, iso_y, -zindex);
-            transform.set_scale(tile_scale, tile_scale, tile_scale);
-
-            world.create_entity()
-                .with(terrain_render)
-                .with(Floor::default())
-                .with(transform)
-                .with(Transparent)
-                .build();
-        }
-    }
-
-    let object_render = SpriteRender {
-        sprite_sheet: objects_sheet.clone(),
-        sprite_number: 2,
-    };
-
-    let cart_x = 5.0 * scaled_width;
-    let cart_y = 5.0 * scaled_height;
-    let (iso_x, iso_y) = cart2iso(cart_x, cart_y);
-
-    let mut transform = Transform::default();
-    transform.set_xyz(iso_x, iso_y + 32.0, -8.0);
-    transform.set_scale(tile_scale, tile_scale, tile_scale);
-    world.create_entity()
-        .with(object_render.clone())
-        .with(Object::default())
-        .with(transform)
-        .with(Transparent)
-        .build();
-
-    let mut map = world.write_resource::<Map>();
-    map.objects.insert((5, 5), 2);
 }
