@@ -16,6 +16,7 @@ use amethyst::{
     }
 };
 
+use std::collections::HashMap;
 
 #[derive(Default)]
 /// Used to move the camera and to follow around other entities
@@ -69,7 +70,7 @@ impl Component for Player {
 impl Player {
     pub fn initialize(world: &mut World, player_sprite: SpriteSheetHandle) {
         let mut player_transform = Transform::default();
-        player_transform.set_xyz(0.0, 0.0, 0.0);
+        player_transform.set_xyz(0.0, 0.0, 1.0);
 
         let sprite_render = SpriteRender {
             sprite_sheet: player_sprite.clone(),
@@ -112,6 +113,11 @@ impl Player {
 
         return Direction::IDLE;
     }
+}
+
+#[derive(Default)]
+pub struct Map {
+    pub objects: HashMap<(u32, u32), u32>,
 }
 
 pub struct ActivityConsole {

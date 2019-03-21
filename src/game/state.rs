@@ -17,7 +17,7 @@ use amethyst::{
 
 use crate::game::{
     config::GameConfig,
-    entity::{ ActivityConsole, CameraFollow, Floor, Object, Player },
+    entity::{ ActivityConsole, CameraFollow, Floor, Object, Player, Map },
     math::{ cart2iso },
     sprite::{ load_sprite_sheet },
 };
@@ -37,6 +37,7 @@ impl SimpleState for RunningState {
         let terrain_spritesheet_handle = load_sprite_sheet(world, "terrain");
         let player_spritesheet_handle = load_sprite_sheet(world, "player");
 
+        world.add_resource(Map::default());
         world.register::<Floor>();
         world.register::<Object>();
         world.register::<Player>();
@@ -66,7 +67,7 @@ impl SimpleState for RunningState {
 
 fn initialize_camera(world: &mut World) {
     let mut transform = Transform::default();
-    transform.set_z(1.0);
+    transform.set_z(10.0);
 
     // Add an entity we can use to move around the camera.
     let entity = world.create_entity()
@@ -149,4 +150,7 @@ fn initialize_map(
         .with(transform)
         .with(Transparent)
         .build();
+
+    let mut map = world.write_resource::<Map>();
+    map.objects.insert((5, 5), 2);
 }

@@ -17,7 +17,7 @@ use amethyst::{
 
 use crate::game::{
     config::PlayerConfig,
-    entity::{ ActivityConsole, Player },
+    entity::{ ActivityConsole, Player, Map },
     math::{ iso2cart },
 };
 
@@ -32,6 +32,7 @@ impl<'s> System<'s> for PlayerMovement {
         Read<'s, Time>,
         WriteStorage<'s, UiText>,
         ReadExpect<'s, ActivityConsole>,
+        ReadExpect<'s, Map>,
     );
 
     fn run(&mut self, (
@@ -43,6 +44,7 @@ impl<'s> System<'s> for PlayerMovement {
         time,
         mut ui_text,
         activity_console,
+        map,
     ): Self::SystemData) {
         let x_move = input.axis_value("player_x").unwrap();
         let y_move = input.axis_value("player_y").unwrap();
@@ -60,6 +62,11 @@ impl<'s> System<'s> for PlayerMovement {
             let map_x = (cartx / 48.0).floor();
             let map_y = (carty / 48.0).floor();
             let zindex = map_x + map_y - 1.0;
+
+            if let Some(_) = map.objects.get(&(map_x as u32, map_y as u32)) {
+                new_x = player_x;
+                new_y = player_y;
+            }
 
             transform.set_x(new_x);
             transform.set_y(new_y);
