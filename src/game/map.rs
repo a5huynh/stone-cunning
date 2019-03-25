@@ -57,7 +57,7 @@ impl Map {
                 world.create_entity()
                     .with(terrain_render)
                     .with(Floor::default())
-                    .with(map.place(x as f32, y as f32, 0.0))
+                    .with(map.place(x as i32, y as i32, 0.0))
                     .with(Transparent)
                     .build();
             }
@@ -71,7 +71,7 @@ impl Map {
         world.create_entity()
             .with(object_render.clone())
             .with(Object::default())
-            .with(map.place(5.0, 5.0, 1.0))
+            .with(map.place(5, 5, 1.0))
             .with(Transparent)
             .build();
 
@@ -104,12 +104,21 @@ impl Map {
         )
     }
 
-    pub fn place(&self, x: f32, y: f32, zindex: f32) -> Transform {
+    /// Creates a transform that would place an object on the map using
+    /// map coordinates at <x, y> w/ zindex.
+    ///
+    /// The zoffset is a float, to allow for multiple objects coexisting
+    /// on a single tile in a certain order.
+    pub fn place(&self, x: i32, y: i32, zoffset: f32) -> Transform {
         let mut transform = Transform::default();
 
-        let (iso_x, iso_y) = cart2iso(x * self.tile_width / 2.0, y * self.tile_height / 2.0);
+        let (iso_x, iso_y) = cart2iso(
+            x as f32 * self.tile_width / 2.0,
+            y as f32 * self.tile_height / 2.0
+        );
 
-        transform.set_xyz(iso_x, iso_y, -(x + y) + zindex);
+        let z = -(x + y) as f32;
+        transform.set_xyz(iso_x, iso_y, z + zoffset);
         transform
     }
 }

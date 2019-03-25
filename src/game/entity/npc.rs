@@ -30,7 +30,7 @@ impl DwarfNPC {
                 sprite_number: 0,
             })
             .with(DwarfNPC::default())
-            .with(map.place(2.0, 2.0, 1.0))
+            .with(map.place(2, 2, 1.0))
             .with(Transparent)
             .build();
     }
