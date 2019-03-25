@@ -12,8 +12,10 @@ use amethyst::{
 
 mod terrain;
 mod player;
+mod npc;
 pub use terrain::*;
 pub use player::*;
+pub use npc::*;
 
 #[derive(Default)]
 /// Used to move the camera and to follow around other entities

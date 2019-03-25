@@ -13,7 +13,14 @@ use amethyst::{
 };
 
 use crate::game::{
-    entity::{ ActivityConsole, CameraFollow, Floor, Object, Player },
+    entity::{
+        ActivityConsole,
+        CameraFollow,
+        DwarfNPC,
+        Floor,
+        Object,
+        Player
+    },
     map::Map,
     sprite::{ load_sprite_sheet },
 };
@@ -32,6 +39,7 @@ impl SimpleState for RunningState {
         let object_spritesheet_handle = load_sprite_sheet(world, "objects");
         let terrain_spritesheet_handle = load_sprite_sheet(world, "terrain");
         let player_spritesheet_handle = load_sprite_sheet(world, "player");
+        let npc_spritesheet_handle = load_sprite_sheet(world, "npc");
 
         world.register::<Floor>();
         world.register::<Object>();
@@ -40,7 +48,9 @@ impl SimpleState for RunningState {
         initialize_camera(world);
         // Initialize map terrain & objects.
         Map::initialize(world, terrain_spritesheet_handle, object_spritesheet_handle);
-        // Initalize player.
+        // Initialize dwarf.
+        DwarfNPC::initialize(world, npc_spritesheet_handle);
+        // Initialize player.
         Player::initialize(world, player_spritesheet_handle);
         // Setup activity console.
         ActivityConsole::initialize(world);
