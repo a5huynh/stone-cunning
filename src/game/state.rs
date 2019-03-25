@@ -47,13 +47,15 @@ impl SimpleState for RunningState {
 
         initialize_camera(world);
         // Initialize map terrain & objects.
-        Map::initialize(world, terrain_spritesheet_handle, object_spritesheet_handle);
+        let map = Map::initialize(world, terrain_spritesheet_handle, object_spritesheet_handle);
         // Initialize dwarf.
-        DwarfNPC::initialize(world, npc_spritesheet_handle);
+        DwarfNPC::initialize(world, &map, npc_spritesheet_handle);
         // Initialize player.
         Player::initialize(world, player_spritesheet_handle);
         // Setup activity console.
         ActivityConsole::initialize(world);
+
+        world.add_resource(map);
     }
 
     fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {

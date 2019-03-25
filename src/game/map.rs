@@ -17,10 +17,12 @@ use crate::game::{
 
 /// Map resource used to convert coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Map {
     pub tile_width: f32,
     pub tile_height: f32,
+    /// zoom level.
+    pub tile_scale: f32,
     // TODO: Support multiple objects per tile.
     // TODO: Support multi-tile objects.
     pub objects: HashMap<(i32, i32), u32>,
@@ -31,7 +33,7 @@ impl Map {
         world: &mut World,
         terrain_sprites: SpriteSheetHandle,
         object_sprites: SpriteSheetHandle
-    ) {
+    ) -> Map {
         let (map_height, map_width, tile_height, tile_width, tile_scale) = {
             let config = &world.read_resource::<GameConfig>();
             (
@@ -43,8 +45,11 @@ impl Map {
             )
         };
 
-        let scaled_width = (tile_width as f32 * tile_scale) / 2.0;
-        let scaled_height = (tile_height as f32 * tile_scale) / 2.0;
+        let map = Map::new(
+            tile_width as f32,
+            tile_height as f32,
+            tile_scale
+        );
 
         for y in 0..map_height {
             for x in 0..map_width {
@@ -53,15 +58,8 @@ impl Map {
                     sprite_number: ((x + y) % 3) as usize,
                 };
 
-                let cart_x = x as f32 * scaled_width;
-                let cart_y = y as f32 * scaled_height;
-                let zindex = (x + y) as f32;
-                let (iso_x, iso_y) = cart2iso(cart_x, cart_y);
-
-                let mut transform = Transform::default();
-                // Add tile offset as config option.
-                transform.set_xyz(iso_x, iso_y, -zindex);
-                transform.set_scale(tile_scale, tile_scale, tile_scale);
+                let mut transform = map.place(x as f32, y as f32, 0.01);
+                transform.set_scale(map.tile_scale, map.tile_scale, map.tile_scale);
 
                 world.create_entity()
                     .with(terrain_render)
@@ -77,13 +75,9 @@ impl Map {
             sprite_number: 2,
         };
 
-        let cart_x = 5.0 * scaled_width;
-        let cart_y = 5.0 * scaled_height;
-        let (iso_x, iso_y) = cart2iso(cart_x, cart_y);
+        let mut transform = map.place(5.0, 5.0, 1.0);
+        transform.set_scale(map.tile_scale, map.tile_scale, map.tile_scale);
 
-        let mut transform = Transform::default();
-        transform.set_xyz(iso_x, iso_y + (5.0 * tile_scale), -9.0);
-        transform.set_scale(tile_scale, tile_scale, tile_scale);
         world.create_entity()
             .with(object_render.clone())
             .with(Object::default())
@@ -92,17 +86,20 @@ impl Map {
             .build();
 
         let mut map = Map::new(
-            scaled_width,
-            scaled_height
+            tile_width as f32,
+            tile_height as f32,
+            tile_scale
         );
         map.objects.insert((5, 5), 2);
-        world.add_resource(map);
+
+        map
     }
 
-    pub fn new(tile_width: f32, tile_height: f32) -> Self {
+    pub fn new(tile_width: f32, tile_height: f32, tile_scale: f32) -> Self {
         Map {
             tile_width,
             tile_height,
+            tile_scale,
             objects: HashMap::new()
         }
     }
@@ -119,8 +116,19 @@ impl Map {
         let (cartx, carty) = iso2cart(x, y);
         // Convert cartesian coordinates to map coordinates.
         (
-            (cartx / self.tile_width) as i32,
-            (carty / self.tile_height) as i32
+            (cartx / (self.tile_width * self.tile_scale)) as i32,
+            (carty / (self.tile_height * self.tile_scale)) as i32
         )
+    }
+
+    pub fn place(&self, x: f32, y: f32, zindex: f32) -> Transform {
+        let mut  transform = Transform::default();
+
+        let scaled_width = (self.tile_width * self.tile_scale) / 2.0;
+        let scaled_height = (self.tile_height * self.tile_scale) / 2.0;
+        let (iso_x, iso_y) = cart2iso(x * scaled_width, y * scaled_height);
+
+        transform.set_xyz(iso_x, iso_y, -(x + y) + zindex);
+        transform
     }
 }
