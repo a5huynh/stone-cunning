@@ -27,6 +27,7 @@ impl Player {
     pub fn initialize(world: &mut World, player_sprite: SpriteSheetHandle) {
         let mut player_transform = Transform::default();
         player_transform.set_xyz(0.0, 0.0, 1.0);
+        player_transform.set_scale(0.5, 0.5, 0.5);
 
         let sprite_render = SpriteRender {
             sprite_sheet: player_sprite.clone(),

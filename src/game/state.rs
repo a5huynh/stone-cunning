@@ -27,8 +27,8 @@ use crate::game::{
 
 pub const MAP_HEIGHT: f32 = 1024.0;
 pub const MAP_WIDTH: f32 = 1024.0;
-pub const FRAC_MAP_HEIGHT_2: f32 = MAP_HEIGHT / 2.0;
-pub const FRAC_MAP_WIDTH_2: f32 = MAP_WIDTH / 2.0;
+pub const FRAC_MAP_HEIGHT_2: f32 = MAP_HEIGHT / 6.0;
+pub const FRAC_MAP_WIDTH_2: f32 = MAP_WIDTH / 6.0;
 
 pub struct RunningState;
 

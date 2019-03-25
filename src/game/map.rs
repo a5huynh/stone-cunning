@@ -21,8 +21,6 @@ use crate::game::{
 pub struct Map {
     pub tile_width: f32,
     pub tile_height: f32,
-    /// zoom level.
-    pub tile_scale: f32,
     // TODO: Support multiple objects per tile.
     // TODO: Support multi-tile objects.
     pub objects: HashMap<(i32, i32), u32>,
@@ -34,21 +32,19 @@ impl Map {
         terrain_sprites: SpriteSheetHandle,
         object_sprites: SpriteSheetHandle
     ) -> Map {
-        let (map_height, map_width, tile_height, tile_width, tile_scale) = {
+        let (map_height, map_width, tile_height, tile_width) = {
             let config = &world.read_resource::<GameConfig>();
             (
                 config.map_height,
                 config.map_width,
                 config.tile_height,
-                config.tile_width,
-                config.tile_scale
+                config.tile_width
             )
         };
 
-        let map = Map::new(
+        let mut map = Map::new(
             tile_width as f32,
             tile_height as f32,
-            tile_scale
         );
 
         for y in 0..map_height {
@@ -58,13 +54,10 @@ impl Map {
                     sprite_number: ((x + y) % 3) as usize,
                 };
 
-                let mut transform = map.place(x as f32, y as f32, 0.01);
-                transform.set_scale(map.tile_scale, map.tile_scale, map.tile_scale);
-
                 world.create_entity()
                     .with(terrain_render)
                     .with(Floor::default())
-                    .with(transform)
+                    .with(map.place(x as f32, y as f32, 0.0))
                     .with(Transparent)
                     .build();
             }
@@ -75,31 +68,21 @@ impl Map {
             sprite_number: 2,
         };
 
-        let mut transform = map.place(5.0, 5.0, 1.0);
-        transform.set_scale(map.tile_scale, map.tile_scale, map.tile_scale);
-
         world.create_entity()
             .with(object_render.clone())
             .with(Object::default())
-            .with(transform)
+            .with(map.place(5.0, 5.0, 1.0))
             .with(Transparent)
             .build();
 
-        let mut map = Map::new(
-            tile_width as f32,
-            tile_height as f32,
-            tile_scale
-        );
         map.objects.insert((5, 5), 2);
-
         map
     }
 
-    pub fn new(tile_width: f32, tile_height: f32, tile_scale: f32) -> Self {
+    pub fn new(tile_width: f32, tile_height: f32) -> Self {
         Map {
             tile_width,
             tile_height,
-            tile_scale,
             objects: HashMap::new()
         }
     }
@@ -116,17 +99,15 @@ impl Map {
         let (cartx, carty) = iso2cart(x, y);
         // Convert cartesian coordinates to map coordinates.
         (
-            (cartx / (self.tile_width * self.tile_scale)) as i32,
-            (carty / (self.tile_height * self.tile_scale)) as i32
+            (cartx / self.tile_width * 2.0) as i32,
+            (carty / self.tile_height * 2.0) as i32
         )
     }
 
     pub fn place(&self, x: f32, y: f32, zindex: f32) -> Transform {
-        let mut  transform = Transform::default();
+        let mut transform = Transform::default();
 
-        let scaled_width = (self.tile_width * self.tile_scale) / 2.0;
-        let scaled_height = (self.tile_height * self.tile_scale) / 2.0;
-        let (iso_x, iso_y) = cart2iso(x * scaled_width, y * scaled_height);
+        let (iso_x, iso_y) = cart2iso(x * self.tile_width / 2.0, y * self.tile_height / 2.0);
 
         transform.set_xyz(iso_x, iso_y, -(x + y) + zindex);
         transform
