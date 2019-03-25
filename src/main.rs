@@ -68,7 +68,8 @@ fn main() -> amethyst::Result<()> {
         // dependencies for that system.
         .with_bundle(input_bundle)?
         .with(systems::MapMovementSystem, "map_movement", &[])
-        .with(systems::PlayerMovement, "player_movement", &[]);
+        .with(systems::PlayerMovement, "player_movement", &[])
+        .with(systems::NPCMovement, "npc_movement", &[]);
 
     let mut game = Application::build("./", RunningState)?
         .with_resource(game_config.game)
