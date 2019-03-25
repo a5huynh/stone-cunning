@@ -82,7 +82,7 @@ impl Map {
         let (iso_x, iso_y) = cart2iso(cart_x, cart_y);
 
         let mut transform = Transform::default();
-        transform.set_xyz(iso_x, iso_y + 32.0, -9.0);
+        transform.set_xyz(iso_x, iso_y + (5.0 * tile_scale), -9.0);
         transform.set_scale(tile_scale, tile_scale, tile_scale);
         world.create_entity()
             .with(object_render.clone())

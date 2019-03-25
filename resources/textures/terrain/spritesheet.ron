@@ -1,24 +1,24 @@
 (
-    spritesheet_width: 648,
-    spritesheet_height: 85,
+    spritesheet_width: 640,
+    spritesheet_height: 160,
     sprites: [
         (
             x: 0,
             y: 0,
             width: 32,
-            height: 20,
+            height: 32,
         ),
         (
             x: 32,
             y: 0,
             width: 32,
-            height: 20,
+            height: 32,
         ),
         (
             x: 64,
             y: 0,
             width: 32,
-            height: 20,
+            height: 32,
         ),
     ],
 )
