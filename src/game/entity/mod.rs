@@ -1,7 +1,13 @@
 use amethyst::{
     assets::{ Loader },
+    core::transform::Transform,
     ecs::prelude::{Component, DenseVecStorage, Entity},
     prelude::*,
+    renderer::{
+        SpriteSheetHandle,
+        SpriteRender,
+        Transparent,
+    },
     ui::{
         Anchor,
         TtfFormat,
@@ -80,5 +86,27 @@ impl ActivityConsole {
             )).build();
 
         world.add_resource(ActivityConsole { text_handle });
+    }
+}
+
+#[derive(Default)]
+pub struct Cursor;
+impl Component for Cursor {
+    type Storage = DenseVecStorage<Self>;
+}
+
+impl Cursor {
+    pub fn initialize(world: &mut World, sprite_sheet: SpriteSheetHandle) {
+        let sprite_render = SpriteRender {
+            sprite_sheet,
+            sprite_number: 0,
+        };
+
+        world.create_entity()
+            .with(sprite_render)
+            .with(Cursor::default())
+            .with(Transform::default())
+            .with(Transparent)
+            .build();
     }
 }

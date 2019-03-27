@@ -67,6 +67,7 @@ fn main() -> amethyst::Result<()> {
         // Register the systems, give it a name, and specify any
         // dependencies for that system.
         .with_bundle(input_bundle)?
+        .with(systems::CursorSystem, "cursor", &[])
         .with(systems::MapMovementSystem, "map_movement", &[])
         .with(systems::PlayerMovement, "player_movement", &[])
         .with(systems::NPCMovement, "npc_movement", &[]);

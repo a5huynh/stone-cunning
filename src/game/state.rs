@@ -16,6 +16,7 @@ use crate::game::{
     entity::{
         ActivityConsole,
         CameraFollow,
+        Cursor,
         DwarfNPC,
         Floor,
         Object,
@@ -36,6 +37,7 @@ impl SimpleState for RunningState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
+        let cursor_spritesheet_handle = load_sprite_sheet(world, "cursor");
         let object_spritesheet_handle = load_sprite_sheet(world, "objects");
         let terrain_spritesheet_handle = load_sprite_sheet(world, "terrain");
         let player_spritesheet_handle = load_sprite_sheet(world, "player");
@@ -48,6 +50,7 @@ impl SimpleState for RunningState {
         initialize_camera(world);
         // Initialize map terrain & objects.
         let map = Map::initialize(world, terrain_spritesheet_handle, object_spritesheet_handle);
+        Cursor::initialize(world, cursor_spritesheet_handle);
         // Initialize dwarf.
         DwarfNPC::initialize(world, &map, npc_spritesheet_handle);
         // Initialize player.
