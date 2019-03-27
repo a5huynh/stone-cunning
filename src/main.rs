@@ -1,17 +1,25 @@
-use amethyst::core::transform::TransformBundle;
-use amethyst::input::InputBundle;
-use amethyst::prelude::*;
-use amethyst::renderer::{
-    ALPHA,
-    ColorMask,
-    DisplayConfig,
-    DrawFlat2D,
-    Pipeline,
-    RenderBundle,
-    Stage,
+use amethyst::{
+    core::{
+        frame_limiter::FrameRateLimitStrategy,
+        transform::TransformBundle,
+    },
+    input::InputBundle,
+    prelude::*,
+    renderer::{
+        ALPHA,
+        ColorMask,
+        DisplayConfig,
+        DrawFlat2D,
+        Pipeline,
+        RenderBundle,
+        Stage,
+    },
+    ui::{ DrawUi, UiBundle },
+    utils::{
+        application_root_dir,
+        fps_counter::FPSCounterBundle,
+    },
 };
-use amethyst::ui::{ DrawUi, UiBundle };
-use amethyst::utils::application_root_dir;
 
 mod game;
 use game::{
@@ -53,17 +61,19 @@ fn main() -> amethyst::Result<()> {
                 )
                 // Draw mesh without any lighting.
                 // .with_pass(DrawFlat::<PosTex>::new())
+                // Should always be the last pass in the pipeline.
                 .with_pass(DrawUi::new())
         );
 
     let game_data = GameDataBuilder::default()
         .with_bundle(
-            RenderBundle::new(pipe, Some(config))
+            RenderBundle::new(pipe, Some(config.clone()))
                 .with_sprite_sheet_processor()
                 .with_sprite_visibility_sorting(&[]),
         )?
         .with_bundle(TransformBundle::new())?
         .with_bundle(UiBundle::<String, String>::new())?
+        .with_bundle(FPSCounterBundle::default())?
         // Register the systems, give it a name, and specify any
         // dependencies for that system.
         .with_bundle(input_bundle)?
@@ -73,10 +83,10 @@ fn main() -> amethyst::Result<()> {
         .with(systems::NPCMovement, "npc_movement", &[]);
 
     let mut game = Application::build("./", RunningState)?
+        .with_resource(config)
         .with_resource(game_config.game)
         .with_resource(game_config.player)
-        // .with_resource(game_config.enemy)
-        // .with_resource(game_config.game)
+        .with_frame_limit(FrameRateLimitStrategy::Unlimited, 9999)
         .build(game_data)?;
 
     game.run();

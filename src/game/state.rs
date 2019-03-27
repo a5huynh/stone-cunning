@@ -7,6 +7,7 @@ use amethyst::{
     prelude::*,
     renderer::{
         Camera,
+        DisplayConfig,
         Projection,
         VirtualKeyCode,
     }
@@ -25,11 +26,6 @@ use crate::game::{
     map::Map,
     sprite::{ load_sprite_sheet },
 };
-
-pub const MAP_HEIGHT: f32 = 1024.0;
-pub const MAP_WIDTH: f32 = 1024.0;
-pub const FRAC_MAP_HEIGHT_2: f32 = MAP_HEIGHT / 6.0;
-pub const FRAC_MAP_WIDTH_2: f32 = MAP_WIDTH / 6.0;
 
 pub struct RunningState;
 
@@ -74,6 +70,11 @@ impl SimpleState for RunningState {
 }
 
 fn initialize_camera(world: &mut World) {
+    let (window_width, window_height) = {
+        let display = world.read_resource::<DisplayConfig>();
+        display.dimensions.unwrap()
+    };
+
     let mut transform = Transform::default();
     transform.set_z(10.0);
 
@@ -83,12 +84,16 @@ fn initialize_camera(world: &mut World) {
         .with(transform.clone())
         .build();
 
+    let cam_zoom = 3.0;
+    let window_width_half = window_width as f32 / (2.0 * cam_zoom);
+    let window_height_half = window_height as f32 / (2.0 * cam_zoom);
+
     world.create_entity()
         .with(Camera::from(Projection::orthographic(
-            -FRAC_MAP_WIDTH_2,
-            FRAC_MAP_WIDTH_2,
-            -FRAC_MAP_HEIGHT_2,
-            FRAC_MAP_HEIGHT_2,
+            -window_width_half,
+            window_width_half,
+            -window_height_half,
+            window_height_half,
         )))
         .with(Parent { entity })
         .with(transform)
