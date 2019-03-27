@@ -7,9 +7,11 @@ use serde::{
 pub struct GameConfig {
     pub map_height: u32,
     pub map_width: u32,
+    /// Tile width/height differs from the actual sprite width/height.
     pub tile_height: u32,
     pub tile_width: u32,
-    pub tile_scale: f32,
+    pub tile_offset: u32,
+    /// How fast we move the camera around the map.
     pub map_move_speed: f32,
 }
 

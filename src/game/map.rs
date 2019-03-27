@@ -12,7 +12,7 @@ use amethyst::{
 use crate::game::{
     config::GameConfig,
     entity::{ Floor, Object },
-    math::{ cart2iso, iso2cart },
+
 };
 
 /// Map resource used to convert coordinates into map coordinates, check for
@@ -21,6 +21,7 @@ use crate::game::{
 pub struct Map {
     pub tile_width: f32,
     pub tile_height: f32,
+    pub tile_offset: f32,
     // TODO: Support multiple objects per tile.
     // TODO: Support multi-tile objects.
     pub objects: HashMap<(i32, i32), u32>,
@@ -32,19 +33,21 @@ impl Map {
         terrain_sprites: SpriteSheetHandle,
         object_sprites: SpriteSheetHandle
     ) -> Map {
-        let (map_height, map_width, tile_height, tile_width) = {
+        let (map_height, map_width, tile_height, tile_width, tile_offset) = {
             let config = &world.read_resource::<GameConfig>();
             (
                 config.map_height,
                 config.map_width,
                 config.tile_height,
-                config.tile_width
+                config.tile_width,
+                config.tile_offset,
             )
         };
 
         let mut map = Map::new(
             tile_width as f32,
             tile_height as f32,
+            tile_offset as f32,
         );
 
         for y in 0..map_height {
@@ -79,10 +82,11 @@ impl Map {
         map
     }
 
-    pub fn new(tile_width: f32, tile_height: f32) -> Self {
+    pub fn new(tile_width: f32, tile_height: f32, tile_offset: f32) -> Self {
         Map {
             tile_width,
             tile_height,
+            tile_offset,
             objects: HashMap::new()
         }
     }
@@ -96,11 +100,16 @@ impl Map {
     /// Converts some point <x, y> into map coordinates.
     pub fn to_map_coords(&self, x:f32, y: f32) -> (i32, i32) {
         // Convert position to cartesian coordinates
-        let (cartx, carty) = iso2cart(x, y);
+        let tw = self.tile_width;
+        let th = self.tile_height - self.tile_offset;
+
+        let mx = (x / tw) + (y / th);
+        let my = (y / th) - (x / tw);
+
         // Convert cartesian coordinates to map coordinates.
         (
-            (cartx / self.tile_width * 2.0) as i32,
-            (carty / self.tile_height * 2.0) as i32
+            mx.trunc() as i32,
+            my.trunc() as i32
         )
     }
 
@@ -112,13 +121,11 @@ impl Map {
     pub fn place(&self, x: i32, y: i32, zoffset: f32) -> Transform {
         let mut transform = Transform::default();
 
-        let (iso_x, iso_y) = cart2iso(
-            x as f32 * self.tile_width / 2.0,
-            y as f32 * self.tile_height / 2.0
-        );
+        let px = (x - y) as f32 * self.tile_width / 2.0;
+        let py = (x + y) as f32 * (self.tile_height - self.tile_offset) / 2.0;
 
         let z = -(x + y) as f32;
-        transform.set_xyz(iso_x, iso_y, z + zoffset);
+        transform.set_xyz(px, py, z + zoffset);
         transform
     }
 }
