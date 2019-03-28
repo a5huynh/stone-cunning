@@ -1,164 +1,18 @@
 (
-    spritesheet_width: 256,
-    spritesheet_height: 512,
+    spritesheet_width: 32,
+    spritesheet_height: 64,
     sprites: [
         (
             x: 0,
             y: 0,
-            width: 45,
-            height: 64,
-        ),
-        // WEST
-        (
-            x: 45,
-            y: 0,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 90,
-            y: 0,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 135,
-            y: 0,
-            width: 45,
-            height: 64,
-        ),
-        // NORTHWEST
-        (
-            x: 180,
-            y: 0,
-            width: 45,
-            height: 64,
+            width: 32,
+            height: 32,
         ),
         (
             x: 0,
-            y: 64,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 45,
-            y: 64,
-            width: 45,
-            height: 64,
-        ),
-        // NORTH
-        (
-            x: 90,
-            y: 64,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 135,
-            y: 64,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 0,
-            y: 128,
-            width: 45,
-            height: 64,
-        ),
-        // NORTHEAST
-        (
-            x: 45,
-            y: 128,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 90,
-            y: 128,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 135,
-            y: 128,
-            width: 45,
-            height: 64,
-        ),
-        // EAST
-        (
-            x: 180,
-            y: 128,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 0,
-            y: 192,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 45,
-            y: 192,
-            width: 45,
-            height: 64,
-        ),
-        // SOUTHEAST
-        (
-            x: 90,
-            y: 192,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 135,
-            y: 192,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 180,
-            y: 192,
-            width: 45,
-            height: 64,
-        ),
-        // SOUTH
-        (
-            x: 0,
-            y: 256,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 0,
-            y: 0,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 180,
-            y: 64,
-            width: 45,
-            height: 64,
-        ),
-        // SOUTHWEST
-        (
-            x: 0,
-            y: 320,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 0,
-            y: 384,
-            width: 45,
-            height: 64,
-        ),
-        (
-            x: 0,
-            y: 448,
-            width: 45,
-            height: 64,
-        ),
+            y: 32,
+            width: 32,
+            height: 32,
+        )
     ],
 )

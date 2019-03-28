@@ -92,8 +92,7 @@ impl Map {
     }
 
     /// Check to see if there is a collidable object at <x, y>
-    pub fn has_collision(&self, x: f32, y: f32) -> bool {
-        let (map_x, map_y) = self.to_map_coords(x, y);
+    pub fn has_collision(&self, map_x: i32, map_y: i32) -> bool {
         self.objects.contains_key(&(map_x, map_y))
     }
 

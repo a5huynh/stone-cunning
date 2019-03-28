@@ -16,7 +16,7 @@ pub struct Player {
     // Direction the player is facing radians
     pub direction: Direction,
     // Used to keep track of the player's animation frame.
-    pub ticks: f32,
+    pub last_tick: f32,
 }
 
 impl Component for Player {
@@ -27,7 +27,6 @@ impl Player {
     pub fn initialize(world: &mut World, player_sprite: SpriteSheetHandle) {
         let mut player_transform = Transform::default();
         player_transform.set_xyz(0.0, 0.0, 1.0);
-        player_transform.set_scale(0.5, 0.5, 0.5);
 
         let sprite_render = SpriteRender {
             sprite_sheet: player_sprite.clone(),
