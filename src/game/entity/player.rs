@@ -13,8 +13,6 @@ use super::Direction;
 
 #[derive(Default)]
 pub struct Player {
-    // Direction the player is facing radians
-    pub direction: Direction,
     // Used to keep track of the player's animation frame.
     pub last_tick: f32,
 }
@@ -46,18 +44,8 @@ impl Player {
     pub fn calculate_direction(x: f64, y: f64) -> Direction {
 
         if x < 0.0 {
-            if y > 0.0 {
-                return Direction::NORTHWEST;
-            } else if y < 0.0 {
-                return Direction::SOUTHWEST
-            }
             return Direction::WEST;
         } else if x > 0.0 {
-            if y > 0.0 {
-                return Direction::NORTHEAST;
-            } else if y < 0.0 {
-                return Direction::SOUTHEAST;
-            }
             return Direction::EAST;
         } else if x == 0.0 {
             if y > 0.0 {
@@ -67,6 +55,6 @@ impl Player {
             }
         }
 
-        return Direction::IDLE;
+        return Direction::NORTH;
     }
 }

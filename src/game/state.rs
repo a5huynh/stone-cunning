@@ -18,7 +18,6 @@ use amethyst::{
 
 use crate::game::{
     entity::{
-        ActivityConsole,
         CameraFollow,
         Cursor,
         CursorSelected,
@@ -55,9 +54,6 @@ impl SimpleState for RunningState {
         DwarfNPC::initialize(world, &map, npc_spritesheet_handle);
         // Initialize player.
         Player::initialize(world, player_spritesheet_handle);
-        // Setup activity console.
-        ActivityConsole::initialize(world);
-
         // Resources are data that is shared amongst all components
         world.add_resource(map);
         world.add_resource(CursorSelected::default());

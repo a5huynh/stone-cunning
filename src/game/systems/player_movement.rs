@@ -11,12 +11,11 @@ use amethyst::{
         WriteStorage,
     },
     input::InputHandler,
-    ui::UiText,
 };
 
 use crate::game::{
     config::PlayerConfig,
-    entity::{ ActivityConsole, Player },
+    entity::{ Player },
     map::Map,
 };
 
@@ -28,8 +27,6 @@ impl<'s> System<'s> for PlayerMovement {
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<String, String>>,
         Read<'s, Time>,
-        WriteStorage<'s, UiText>,
-        ReadExpect<'s, ActivityConsole>,
         ReadExpect<'s, Map>,
     );
 
@@ -39,8 +36,6 @@ impl<'s> System<'s> for PlayerMovement {
         mut transforms,
         input,
         time,
-        mut ui_text,
-        activity_console,
         map,
     ): Self::SystemData) {
         let x_move = input.axis_value("player_x").unwrap();
@@ -66,10 +61,6 @@ impl<'s> System<'s> for PlayerMovement {
                 transform.set_x(new_transform.translation().x);
                 transform.set_y(new_transform.translation().y);
                 transform.set_z(new_transform.translation().z);
-            }
-
-            if let Some(text) = ui_text.get_mut(activity_console.text_handle) {
-                text.text = format!("Player: ({}, {})", new_x, new_y);
             }
         }
     }
