@@ -10,6 +10,7 @@ use amethyst::{
         ReadStorage,
         System,
         WriteStorage,
+        Write,
     },
     input::InputHandler,
     renderer::{
@@ -19,7 +20,11 @@ use amethyst::{
 };
 
 use crate::game::{
-    entity::{ CameraFollow, Cursor },
+    entity::{
+        CameraFollow,
+        Cursor,
+        CursorSelected,
+    },
     map::Map,
 };
 
@@ -29,6 +34,7 @@ impl<'s> System<'s> for CursorSystem {
     type SystemData = (
         WriteStorage<'s, Cursor>,
         ReadExpect<'s, Map>,
+        Write<'s, CursorSelected>,
         Read<'s, InputHandler<String, String>>,
         WriteStorage<'s, Transform>,
         ReadStorage<'s, Camera>,
@@ -36,7 +42,16 @@ impl<'s> System<'s> for CursorSystem {
         ReadExpect<'s, ScreenDimensions>,
     );
 
-    fn run(&mut self, (mut cursors, map, input, mut transforms, cameras, follow, screen_dim): Self::SystemData) {
+    fn run(&mut self, (
+        mut cursors,
+        map,
+        mut cursor_selected,
+        input,
+        mut transforms,
+        cameras,
+        follow,
+        screen_dim
+    ): Self::SystemData) {
         // render on screen cursor
         let camera_follow = (&transforms, &follow).join()
             .next().or(None).clone();
@@ -81,6 +96,8 @@ impl<'s> System<'s> for CursorSystem {
 
         for (_cursor, transform) in (&mut cursors, &mut transforms).join() {
             let (map_x, map_y) = map.to_map_coords(scene_x, scene_y);
+            cursor_selected.selected = map.whats_at(map_x, map_y);
+
             let new_transform = map.place(map_x, map_y, 0.0);
             transform.set_x(new_transform.translation().x);
             transform.set_y(new_transform.translation().y);

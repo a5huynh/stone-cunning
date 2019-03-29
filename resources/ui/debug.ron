@@ -1,0 +1,65 @@
+#![enable(implicit_some)]
+Container(
+    transform: (
+        id: "background",
+        anchor: TopRight,
+        x: -200.0,
+        y: -200.0,
+        width: 400.0,
+        height: 400.0,
+    ),
+    background: (
+        image: Data(Rgba((1.0, 1.0, 1.0, 0.5), (channel: Srgb))),
+    ),
+    children: [
+        Text(
+            transform: (
+                id: "fps",
+                y: -25,
+                height: 25.,
+                anchor: TopMiddle,
+                stretch: X(x_margin: 0.0),
+                transparent: true,
+            ),
+            text: (
+                text: "",
+                font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
+                font_size: 25.,
+                color: (0.0, 0.0, 0.0, 1.0),
+            )
+        ),
+        Text(
+            transform: (
+                id: "player_info",
+                y: -50,
+                height: 25.,
+                anchor: TopMiddle,
+                stretch: X(x_margin: 0.0),
+                transparent: true,
+            ),
+            text: (
+                text: "",
+                font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
+                font_size: 25.0,
+                color: (0.0, 0.0, 0.0, 1.0),
+            )
+        ),
+        Text(
+            transform: (
+                id: "debug_info",
+                y: -100,
+                height: 100.0,
+                anchor: TopMiddle,
+                stretch: X(x_margin: 0.0),
+                transparent: true,
+            ),
+            text: (
+                text: "Nothing Selected",
+                font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
+                font_size: 25.,
+                line_mode: Wrap,
+                color: (0.0, 0.0, 0.0, 1.0),
+            )
+        ),
+    ],
+)

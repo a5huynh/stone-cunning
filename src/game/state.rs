@@ -1,7 +1,8 @@
 use amethyst::{
     core::{
         Parent,
-        transform::Transform
+        transform::Transform,
+        Time,
     },
     input::{ is_close_requested, is_key_down },
     prelude::*,
@@ -10,7 +11,9 @@ use amethyst::{
         DisplayConfig,
         Projection,
         VirtualKeyCode,
-    }
+    },
+    ui::{ UiCreator, UiFinder, UiText },
+    utils::fps_counter::FPSCounter,
 };
 
 use crate::game::{
@@ -18,6 +21,7 @@ use crate::game::{
         ActivityConsole,
         CameraFollow,
         Cursor,
+        CursorSelected,
         DwarfNPC,
         Floor,
         Object,
@@ -54,7 +58,14 @@ impl SimpleState for RunningState {
         // Setup activity console.
         ActivityConsole::initialize(world);
 
+        // Resources are data that is shared amongst all components
         world.add_resource(map);
+        world.add_resource(CursorSelected::default());
+
+        // Create the ui
+        world.exec(|mut creator: UiCreator<'_>| {
+            creator.create("resources/ui/debug.ron", ());
+        });
     }
 
     fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
@@ -62,6 +73,29 @@ impl SimpleState for RunningState {
             // Exit if the user hits escape
             if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) {
                 return Trans::Quit;
+            }
+        }
+
+        Trans::None
+    }
+
+    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        let StateData { world, .. } = data;
+
+        let mut fps_display = None;
+        world.exec(|finder: UiFinder<'_>| {
+            if let Some(entity) = finder.find("fps") {
+                fps_display = Some(entity);
+            }
+        });
+
+        let mut ui_text = world.write_storage::<UiText>();
+        {
+            if let Some(fps) = fps_display.and_then(|entity| ui_text.get_mut(entity)) {
+                if world.read_resource::<Time>().frame_number() % 20 == 0 {
+                    let fps_samp = world.read_resource::<FPSCounter>().sampled_fps();
+                    fps.text = format!("FPS: {:.*}", 2, fps_samp);
+                }
             }
         }
 

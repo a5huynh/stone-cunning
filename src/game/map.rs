@@ -15,6 +15,22 @@ use crate::game::{
 
 };
 
+// pub const SPRITE_WIDTH: f32 = 32.0;
+// pub const SPRITE_HEIGHT: f32 = 32.0;
+#[derive(Clone, Debug)]
+pub enum Terrain {
+    STONE = 0,
+    MARBLE = 1,
+    GRASS = 2,
+    NONE = -1,
+}
+
+#[derive(Debug)]
+pub struct PickInfo {
+    pub is_terrain: bool,
+    pub description: String,
+}
+
 /// Map resource used to convert coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
 #[derive(Clone, Default)]
@@ -25,6 +41,7 @@ pub struct Map {
     // TODO: Support multiple objects per tile.
     // TODO: Support multi-tile objects.
     pub objects: HashMap<(i32, i32), u32>,
+    pub terrain: HashMap<(i32, i32), Terrain>,
 }
 
 impl Map {
@@ -52,9 +69,17 @@ impl Map {
 
         for y in 0..map_height {
             for x in 0..map_width {
+                let tile = ((x + y) % 3) as usize;
+                let terrain = match tile {
+                    0 => Terrain::STONE,
+                    1 => Terrain::MARBLE,
+                    2 => Terrain::GRASS,
+                    _ => Terrain::NONE,
+                };
+
                 let terrain_render = SpriteRender {
                     sprite_sheet: terrain_sprites.clone(),
-                    sprite_number: ((x + y) % 3) as usize,
+                    sprite_number: tile,
                 };
 
                 world.create_entity()
@@ -63,6 +88,9 @@ impl Map {
                     .with(map.place(x as i32, y as i32, 0.0))
                     .with(Transparent)
                     .build();
+
+                map.terrain.insert((x as i32, y as i32), terrain);
+
             }
         }
 
@@ -87,7 +115,8 @@ impl Map {
             tile_width,
             tile_height,
             tile_offset,
-            objects: HashMap::new()
+            objects: HashMap::new(),
+            terrain: HashMap::new(),
         }
     }
 
@@ -126,5 +155,35 @@ impl Map {
         let z = -(x + y) as f32;
         transform.set_xyz(px, py, z + zoffset);
         transform
+    }
+
+    /// Return information about what's currently at the map coordinates: <x, y>
+    pub fn whats_at(&self, x: i32, y: i32) -> Option<PickInfo> {
+        // Any objects at this location?
+        if self.objects.contains_key(&(x, y)) {
+            return Some(
+                PickInfo {
+                    is_terrain: false,
+                    description: format!(
+                        "{:?}",
+                        self.objects.get(&(x, y))
+                    ),
+                }
+            );
+        }
+
+        if self.terrain.contains_key(&(x, y)) {
+            return Some(
+                PickInfo {
+                    is_terrain: true,
+                    description: format!(
+                        "{:?}",
+                        self.terrain.get(&(x, y))
+                    )
+                }
+            );
+        }
+
+        return None;
     }
 }

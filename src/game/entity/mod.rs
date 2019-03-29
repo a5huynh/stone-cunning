@@ -23,6 +23,8 @@ pub use terrain::*;
 pub use player::*;
 pub use npc::*;
 
+use crate::game::map::PickInfo;
+
 #[derive(Default)]
 /// Used to move the camera and to follow around other entities
 pub struct CameraFollow;
@@ -55,6 +57,7 @@ impl Component for ActivityConsole {
     type Storage = DenseVecStorage<Self>;
 }
 
+// TODO: reimplement as ui widget.
 impl ActivityConsole {
     pub fn initialize(world: &mut World) {
         let font = world.read_resource::<Loader>().load(
@@ -109,4 +112,10 @@ impl Cursor {
             .with(Transparent)
             .build();
     }
+}
+
+/// Represents the currently selected thing (object, terrain, etc.) under the cursor
+#[derive(Default)]
+pub struct CursorSelected {
+    pub selected: Option<PickInfo>,
 }
