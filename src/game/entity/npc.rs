@@ -9,7 +9,7 @@ use amethyst::{
 };
 
 use crate::game::{
-    map::Map,
+    map::MapResource,
 };
 
 // TODO: Make more generalized?
@@ -21,7 +21,7 @@ impl Component for DwarfNPC {
 }
 
 impl DwarfNPC {
-    pub fn initialize(world: &mut World, map: &Map, npc_sprite: SpriteSheetHandle) {
+    pub fn initialize(world: &mut World, map: &MapResource, npc_sprite: SpriteSheetHandle) {
         world.register::<DwarfNPC>();
 
         world.create_entity()

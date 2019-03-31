@@ -13,7 +13,7 @@ use amethyst::{
 
 use crate::game::{
     entity::{ CursorSelected, Player },
-    map::Map,
+    map::MapResource,
 };
 
 pub struct DebugUI;
@@ -24,7 +24,7 @@ impl<'s> System<'s> for DebugUI {
         UiFinder<'s>,
         WriteStorage<'s, UiText>,
         ReadExpect<'s, CursorSelected>,
-        ReadExpect<'s, Map>,
+        ReadExpect<'s, MapResource>,
     );
 
     fn run(&mut self, (
@@ -64,7 +64,7 @@ impl<'s> System<'s> for DebugUI {
                         pick_info.description,
                     );
                 } else {
-                    text.text = String::from("N/A\nN/A");
+                    text.text = "N/A\nN/A".to_string();
                 }
             }
         }

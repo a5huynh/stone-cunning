@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use amethyst::{
     core::{ transform::Transform },
     prelude::*,
@@ -9,21 +8,12 @@ use amethyst::{
     },
 };
 
+use libdwarf::map::{ Terrain, Map, MapObject };
 use crate::game::{
     config::GameConfig,
     entity::{ Floor, Object },
 
 };
-
-// pub const SPRITE_WIDTH: f32 = 32.0;
-// pub const SPRITE_HEIGHT: f32 = 32.0;
-#[derive(Clone, Debug)]
-pub enum Terrain {
-    STONE = 0,
-    MARBLE = 1,
-    GRASS = 2,
-    NONE = -1,
-}
 
 #[derive(Debug)]
 pub struct PickInfo {
@@ -33,23 +23,20 @@ pub struct PickInfo {
 
 /// Map resource used to convert coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
-#[derive(Clone, Default)]
-pub struct Map {
+#[derive(Clone)]
+pub struct MapResource {
     pub tile_width: f32,
     pub tile_height: f32,
     pub tile_offset: f32,
-    // TODO: Support multiple objects per tile.
-    // TODO: Support multi-tile objects.
-    pub objects: HashMap<(i32, i32), u32>,
-    pub terrain: HashMap<(i32, i32), Terrain>,
+    pub map: Map,
 }
 
-impl Map {
+impl MapResource {
     pub fn initialize(
         world: &mut World,
         terrain_sprites: SpriteSheetHandle,
         object_sprites: SpriteSheetHandle
-    ) -> Map {
+    ) -> MapResource {
         let (map_height, map_width, tile_height, tile_width, tile_offset) = {
             let config = &world.read_resource::<GameConfig>();
             (
@@ -61,35 +48,34 @@ impl Map {
             )
         };
 
-        let mut map = Map::new(
-            tile_width as f32,
-            tile_height as f32,
-            tile_offset as f32,
-        );
+        let mut map_resource = MapResource {
+            tile_height: tile_height as f32,
+            tile_offset: tile_offset as f32,
+            tile_width: tile_width as f32,
+            map: Map::new(map_width, map_height)
+        };
 
         for y in 0..map_height {
             for x in 0..map_width {
-                let tile = ((x + y) % 3) as usize;
-                let terrain = match tile {
-                    0 => Terrain::STONE,
-                    1 => Terrain::MARBLE,
-                    2 => Terrain::GRASS,
-                    _ => Terrain::NONE,
+                let terrain = map_resource.map.terrain.get(&(x as i32, y as i32)).unwrap();
+                let sprite_idx = match terrain {
+                    Terrain::STONE => 0,
+                    Terrain::MARBLE => 1,
+                    Terrain::GRASS => 2,
+                    _ => 0,
                 };
 
                 let terrain_render = SpriteRender {
                     sprite_sheet: terrain_sprites.clone(),
-                    sprite_number: tile,
+                    sprite_number: sprite_idx
                 };
 
                 world.create_entity()
                     .with(terrain_render)
                     .with(Floor::default())
-                    .with(map.place(x as i32, y as i32, 0.0))
+                    .with(map_resource.place(x as i32, y as i32, 0.0))
                     .with(Transparent)
                     .build();
-
-                map.terrain.insert((x as i32, y as i32), terrain);
 
             }
         }
@@ -102,27 +88,17 @@ impl Map {
         world.create_entity()
             .with(object_render.clone())
             .with(Object::default())
-            .with(map.place(5, 5, 1.0))
+            .with(map_resource.place(5, 5, 1.0))
             .with(Transparent)
             .build();
 
-        map.objects.insert((5, 5), 2);
-        map
-    }
-
-    pub fn new(tile_width: f32, tile_height: f32, tile_offset: f32) -> Self {
-        Map {
-            tile_width,
-            tile_height,
-            tile_offset,
-            objects: HashMap::new(),
-            terrain: HashMap::new(),
-        }
+        map_resource.map.objects.insert((5, 5), MapObject{ id: 2 });
+        map_resource
     }
 
     /// Check to see if there is a collidable object at <x, y>
     pub fn has_collision(&self, map_x: i32, map_y: i32) -> bool {
-        self.objects.contains_key(&(map_x, map_y))
+        self.map.objects.contains_key(&(map_x, map_y))
     }
 
     /// Converts some point <x, y> into map coordinates.
@@ -160,25 +136,25 @@ impl Map {
     /// Return information about what's currently at the map coordinates: <x, y>
     pub fn whats_at(&self, x: i32, y: i32) -> Option<PickInfo> {
         // Any objects at this location?
-        if self.objects.contains_key(&(x, y)) {
+        if self.map.objects.contains_key(&(x, y)) {
             return Some(
                 PickInfo {
                     is_terrain: false,
                     description: format!(
                         "{:?}",
-                        self.objects.get(&(x, y))
+                        self.map.objects.get(&(x, y))
                     ),
                 }
             );
         }
 
-        if self.terrain.contains_key(&(x, y)) {
+        if self.map.terrain.contains_key(&(x, y)) {
             return Some(
                 PickInfo {
                     is_terrain: true,
                     description: format!(
                         "{:?}",
-                        self.terrain.get(&(x, y))
+                        self.map.terrain.get(&(x, y))
                     )
                 }
             );

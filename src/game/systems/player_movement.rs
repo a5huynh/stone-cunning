@@ -16,7 +16,7 @@ use amethyst::{
 use crate::game::{
     config::PlayerConfig,
     entity::{ Player },
-    map::Map,
+    map::MapResource,
 };
 
 pub struct PlayerMovement;
@@ -27,7 +27,7 @@ impl<'s> System<'s> for PlayerMovement {
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<String, String>>,
         Read<'s, Time>,
-        ReadExpect<'s, Map>,
+        ReadExpect<'s, MapResource>,
     );
 
     fn run(&mut self, (

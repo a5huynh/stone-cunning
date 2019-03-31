@@ -77,6 +77,7 @@ fn main() -> amethyst::Result<()> {
         // Register the systems, give it a name, and specify any
         // dependencies for that system.
         .with_bundle(input_bundle)?
+        // Cursor selection
         .with(systems::CursorSystem, "cursor", &[])
         .with(systems::MapMovementSystem, "map_movement", &[])
         .with(systems::PlayerMovement, "player_movement", &[])
@@ -84,7 +85,7 @@ fn main() -> amethyst::Result<()> {
         // Should always be last so we have the most up-to-date info.
         .with(systems::ui::debug::DebugUI, "debug_ui", &["cursor", "player_movement"]);
 
-    let mut game = Application::build("./", RunningState)?
+    let mut game = Application::build("./", RunningState::default())?
         .with_resource(config)
         .with_resource(game_config.game)
         .with_resource(game_config.player)

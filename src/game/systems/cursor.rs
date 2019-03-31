@@ -25,7 +25,7 @@ use crate::game::{
         Cursor,
         CursorSelected,
     },
-    map::Map,
+    map::MapResource,
 };
 
 pub struct CursorSystem;
@@ -33,7 +33,7 @@ pub struct CursorSystem;
 impl<'s> System<'s> for CursorSystem {
     type SystemData = (
         WriteStorage<'s, Cursor>,
-        ReadExpect<'s, Map>,
+        ReadExpect<'s, MapResource>,
         Write<'s, CursorSelected>,
         Read<'s, InputHandler<String, String>>,
         WriteStorage<'s, Transform>,

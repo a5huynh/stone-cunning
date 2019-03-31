@@ -14,7 +14,7 @@ use amethyst::{
 
 use crate::game::{
     entity::{ DwarfNPC },
-    map::Map,
+    map::MapResource,
 };
 
 pub struct NPCMovement;
@@ -24,7 +24,7 @@ impl<'s> System<'s> for NPCMovement {
         WriteStorage<'s, DwarfNPC>,
         WriteStorage<'s, Transform>,
         Read<'s, Time>,
-        ReadExpect<'s, Map>,
+        ReadExpect<'s, MapResource>,
     );
 
     fn run(&mut self, (mut dwarves, mut transforms, time, map): Self::SystemData) {

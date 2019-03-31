@@ -1345,6 +1345,7 @@ name = "iso-dwarf"
 version = "0.1.0"
 dependencies = [
  "amethyst 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libdwarf 0.1.0",
  "rand 0.6.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.89 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -1421,6 +1422,10 @@ dependencies = [
 name = "libc"
 version = "0.2.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "libdwarf"
+version = "0.1.0"
 
 [[package]]
 name = "libloading"
