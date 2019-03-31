@@ -8,7 +8,7 @@ use amethyst::{
     },
 };
 
-use libdwarf::map::{ Terrain, Map, MapObject };
+use libdwarf::world::{ Terrain, MapObject };
 use crate::game::{
     config::GameConfig,
     entity::{ Floor, Object },
@@ -28,7 +28,7 @@ pub struct MapResource {
     pub tile_width: f32,
     pub tile_height: f32,
     pub tile_offset: f32,
-    pub map: Map,
+    pub world: libdwarf::world::World,
 }
 
 impl MapResource {
@@ -52,12 +52,12 @@ impl MapResource {
             tile_height: tile_height as f32,
             tile_offset: tile_offset as f32,
             tile_width: tile_width as f32,
-            map: Map::new(map_width, map_height)
+            world: libdwarf::world::World::new(map_width, map_height)
         };
 
         for y in 0..map_height {
             for x in 0..map_width {
-                let terrain = map_resource.map.terrain.get(&(x as i32, y as i32)).unwrap();
+                let terrain = map_resource.world.terrain.get(&(x as i32, y as i32)).unwrap();
                 let sprite_idx = match terrain {
                     Terrain::STONE => 0,
                     Terrain::MARBLE => 1,
@@ -92,13 +92,13 @@ impl MapResource {
             .with(Transparent)
             .build();
 
-        map_resource.map.objects.insert((5, 5), MapObject{ id: 2 });
+        map_resource.world.objects.insert((5, 5), MapObject{ id: 2 });
         map_resource
     }
 
     /// Check to see if there is a collidable object at <x, y>
     pub fn has_collision(&self, map_x: i32, map_y: i32) -> bool {
-        self.map.objects.contains_key(&(map_x, map_y))
+        self.world.objects.contains_key(&(map_x, map_y))
     }
 
     /// Converts some point <x, y> into map coordinates.
@@ -136,25 +136,25 @@ impl MapResource {
     /// Return information about what's currently at the map coordinates: <x, y>
     pub fn whats_at(&self, x: i32, y: i32) -> Option<PickInfo> {
         // Any objects at this location?
-        if self.map.objects.contains_key(&(x, y)) {
+        if self.world.objects.contains_key(&(x, y)) {
             return Some(
                 PickInfo {
                     is_terrain: false,
                     description: format!(
                         "{:?}",
-                        self.map.objects.get(&(x, y))
+                        self.world.objects.get(&(x, y))
                     ),
                 }
             );
         }
 
-        if self.map.terrain.contains_key(&(x, y)) {
+        if self.world.terrain.contains_key(&(x, y)) {
             return Some(
                 PickInfo {
                     is_terrain: true,
                     description: format!(
                         "{:?}",
-                        self.map.terrain.get(&(x, y))
+                        self.world.terrain.get(&(x, y))
                     )
                 }
             );

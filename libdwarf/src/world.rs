@@ -15,7 +15,7 @@ pub struct MapObject {
 }
 
 #[derive(Clone)]
-pub struct Map {
+pub struct World {
     // TODO: Support multiple objects per tile.
     // TODO: Support multi-tile objects.
     pub width: u32,
@@ -24,7 +24,7 @@ pub struct Map {
     pub terrain: HashMap<(i32, i32), Terrain>,
 }
 
-impl fmt::Display for Map {
+impl fmt::Display for World {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for y in 0..self.height {
             for x in 0..self.width {
@@ -50,7 +50,7 @@ impl fmt::Display for Map {
     }
 }
 
-impl Map {
+impl World {
     pub fn new(height: u32, width: u32) -> Self {
         let mut map_terrain = HashMap::new();
         // TODO: Actually generate terrain.
@@ -68,7 +68,7 @@ impl Map {
             }
         }
 
-        Map {
+        World {
             height,
             width,
             objects: HashMap::new(),
