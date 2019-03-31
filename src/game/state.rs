@@ -18,6 +18,7 @@ use amethyst::{
 };
 
 use crate::game::{
+    config::GameConfig,
     entity::{
         CameraFollow,
         Cursor,
@@ -28,6 +29,7 @@ use crate::game::{
         Player
     },
     map::MapResource,
+    resources::GameTick,
     sprite::{ load_sprite_sheet },
 };
 
@@ -64,7 +66,13 @@ impl SimpleState for RunningState {
         // Initialize player.
         Player::initialize(world, player_spritesheet_handle);
         // Resources are data that is shared amongst all components
+        let tick_delta = {
+            let config = world.read_resource::<GameConfig>();
+            config.tick_delta
+        };
+
         world.add_resource(map);
+        world.add_resource(GameTick::new(tick_delta));
         world.add_resource(CursorSelected::default());
 
         // Create the ui
@@ -84,6 +92,25 @@ impl SimpleState for RunningState {
         Trans::None
     }
 
+    /// Called at an interval of 1/60th second.
+    fn fixed_update(&mut self, data: StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        let world = data.world;
+        // Update global game tick
+        {
+            let mut tick = world.write_resource::<GameTick>();
+            let time = world.read_resource::<Time>().delta_seconds();
+            if tick.last_tick > 0.0 {
+                tick.last_tick -= time;
+            } else {
+                tick.reset();
+            }
+        }
+
+        Trans::None
+    }
+
+    /// Shadow update is called as often as possibly by the engine on all
+    /// states which are on the stack.
     fn shadow_update(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         let event_channel = world.read_resource::<EventChannel<InputEvent<String>>>();
@@ -96,9 +123,11 @@ impl SimpleState for RunningState {
             }
         }
     }
+
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
         let StateData { world, .. } = data;
 
+        // Update FPS counter
         let mut fps_display = None;
         world.exec(|finder: UiFinder<'_>| {
             if let Some(entity) = finder.find("fps") {

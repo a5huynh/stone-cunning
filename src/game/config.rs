@@ -5,6 +5,9 @@ use serde::{
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct GameConfig {
+    /// Time between each action/event/etc. Used to synchronize things independently
+    /// of frame rate.
+    pub tick_delta: f32,
     pub map_height: u32,
     pub map_width: u32,
     /// Tile width/height differs from the actual sprite width/height.

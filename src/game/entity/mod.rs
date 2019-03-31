@@ -1,19 +1,12 @@
 use amethyst::{
-    assets::{ Loader },
     core::transform::Transform,
-    ecs::prelude::{Component, DenseVecStorage, Entity},
+    ecs::prelude::{Component, DenseVecStorage},
     prelude::*,
     renderer::{
         SpriteSheetHandle,
         SpriteRender,
         Transparent,
     },
-    ui::{
-        Anchor,
-        TtfFormat,
-        UiText,
-        UiTransform,
-    }
 };
 
 mod terrain;

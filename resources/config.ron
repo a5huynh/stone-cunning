@@ -6,6 +6,7 @@
         animation_offsets: (0, 1, 4, 7, 10, 13, 16, 19, 22)
     ),
     game: (
+        tick_delta: 0.1,
         map_height: 25,
         map_width: 25,
 
