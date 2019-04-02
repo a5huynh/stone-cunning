@@ -1426,6 +1426,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "libdwarf"
 version = "0.1.0"
+dependencies = [
+ "termion 1.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "libloading"

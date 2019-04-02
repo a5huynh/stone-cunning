@@ -5,3 +5,4 @@ authors = ["Andrew Huynh <a5thuynh@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+termion = "1.5.1"
