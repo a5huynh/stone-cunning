@@ -20,8 +20,8 @@ pub struct World {
     // TODO: Support multi-tile objects.
     pub width: u32,
     pub height: u32,
-    pub objects: HashMap<(i32, i32), MapObject>,
-    pub terrain: HashMap<(i32, i32), Terrain>,
+    pub objects: HashMap<(u32, u32), MapObject>,
+    pub terrain: HashMap<(u32, u32), Terrain>,
 }
 
 impl fmt::Display for World {
@@ -64,7 +64,7 @@ impl World {
                     _ => Terrain::NONE,
                 };
 
-                map_terrain.insert((x as i32, y as i32), terrain);
+                map_terrain.insert((x as u32, y as u32), terrain);
             }
         }
 
@@ -76,7 +76,7 @@ impl World {
         }
     }
 
-    pub fn add_object(&mut self, x: i32, y: i32, object: MapObject) {
+    pub fn add_object(&mut self, x: u32, y: u32, object: MapObject) {
         self.objects.insert((x, y), object);
     }
 }

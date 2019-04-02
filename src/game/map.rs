@@ -57,7 +57,7 @@ impl MapResource {
 
         for y in 0..map_height {
             for x in 0..map_width {
-                let terrain = map_resource.world.terrain.get(&(x as i32, y as i32)).unwrap();
+                let terrain = map_resource.world.terrain.get(&(x as u32, y as u32)).unwrap();
                 let sprite_idx = match terrain {
                     Terrain::STONE => 0,
                     Terrain::MARBLE => 1,
@@ -98,7 +98,13 @@ impl MapResource {
 
     /// Check to see if there is a collidable object at <x, y>
     pub fn has_collision(&self, map_x: i32, map_y: i32) -> bool {
-        self.world.objects.contains_key(&(map_x, map_y))
+        // Check if coordinates are outside of bounds
+        if map_x < 0 || map_x > self.world.width as i32
+            || map_y < 0 || map_y > self.world.height as i32 {
+            return false;
+        }
+
+        self.world.objects.contains_key(&(map_x as u32, map_y as u32))
     }
 
     /// Converts some point <x, y> into map coordinates.
@@ -135,26 +141,27 @@ impl MapResource {
 
     /// Return information about what's currently at the map coordinates: <x, y>
     pub fn whats_at(&self, x: i32, y: i32) -> Option<PickInfo> {
+        let idx = (x as u32, y as u32);
         // Any objects at this location?
-        if self.world.objects.contains_key(&(x, y)) {
+        if self.world.objects.contains_key(&idx) {
             return Some(
                 PickInfo {
                     is_terrain: false,
                     description: format!(
                         "{:?}",
-                        self.world.objects.get(&(x, y))
+                        self.world.objects.get(&idx)
                     ),
                 }
             );
         }
 
-        if self.world.terrain.contains_key(&(x, y)) {
+        if self.world.terrain.contains_key(&idx) {
             return Some(
                 PickInfo {
                     is_terrain: true,
                     description: format!(
                         "{:?}",
-                        self.world.terrain.get(&(x, y))
+                        self.world.terrain.get(&idx)
                     )
                 }
             );
