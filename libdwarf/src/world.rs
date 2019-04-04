@@ -1,5 +1,9 @@
-use std::collections::HashMap;
+use std::collections::{ HashMap, VecDeque };
 use std::fmt;
+
+use crate::{
+    tasks::{ Action, Tasks }
+};
 
 #[derive(Clone, Debug)]
 pub enum Terrain {
@@ -14,36 +18,96 @@ pub struct MapObject {
     pub id: u32
 }
 
+impl MapObject {
+    pub fn new(id: u32) -> Self {
+        MapObject { id  }
+    }
+}
+
+#[derive(Clone)]
+pub struct Worker {
+    /// Current state
+    pub current_action: Action,
+    /// Queue of actions this worker has. e.g. a queue might look like the
+    /// following for a worker:
+    /// - MoveTo -> x, x
+    /// - PerformAction(Chop) @ x,x
+    ///
+    /// The worker needs to MoveTo some location first before they are able
+    /// to perform an action.
+    pub actions: VecDeque<Action>,
+    pub x: u32,
+    pub y: u32,
+}
+
+impl Worker {
+    /// Mark the current action as finished and pop the next action.
+    pub fn finish_action(&mut self) {
+        if let Some(action) = self.actions.pop_front() {
+            self.current_action = action;
+        } else {
+            self.current_action = Action::Chilling;
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct World {
-    // TODO: Support multiple objects per tile.
     // TODO: Support multi-tile objects.
     pub width: u32,
     pub height: u32,
+    pub tasks: Tasks,
+    pub workers: Vec<Worker>,
+    // TODO: Support multiple objects per tile.
     pub objects: HashMap<(u32, u32), MapObject>,
     pub terrain: HashMap<(u32, u32), Terrain>,
 }
 
 impl fmt::Display for World {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for y in 0..self.height {
+        let mut cells = vec!['?'; (self.width * self.height) as usize];
+        // Render terrain first
+        for y in (0..self.height).rev() {
             for x in 0..self.width {
-                let display_y = self.height - y - 1;
-                let idx = (x as i32, display_y as i32);
+                let idx = (x as u32, y as u32);
                 let terrain = self.terrain.get(&idx);
-                match terrain {
-                    Some(Terrain::GRASS) => write!(f, "G")?,
-                    Some(Terrain::STONE) => write!(f, "S")?,
-                    Some(Terrain::MARBLE) => write!(f, "M")?,
-                    _ => write!(f, "?")?,
+                let tile = match terrain {
+                    Some(Terrain::GRASS) => ',',
+                    Some(Terrain::STONE) => '.',
+                    Some(Terrain::MARBLE) => '.',
+                    _ => '?',
                 };
 
+                cells[(y * self.width + x) as usize] = tile;
+            }
+        }
+
+        // Add objects to cells
+        for (pos, value) in self.objects.iter() {
+            let idx = (pos.1 * self.width + pos.0) as usize;
+            let tile = match value {
+                MapObject { id: 1, .. } => 'T',
+                _ => '?'
+            };
+
+            cells[idx] = tile;
+        }
+
+        // Add workers to cells
+        for worker in self.workers.iter() {
+            let idx = (worker.y * self.width + worker.x) as usize;
+            cells[idx] = 'w';
+        }
+
+        // Output completed cells.
+        for y in (0..self.height).rev() {
+            for x in 0..self.width {
+                write!(f, "{}", cells[(y * self.width + x) as usize])?;
                 if x < self.width - 1 {
-                    write!(f, ".")?;
+                    write!(f, " ")?;
                 }
             }
-
-            write!(f, "\n")?;
+            write!(f, "\n\r")?;
         }
 
         Ok(())
@@ -71,12 +135,26 @@ impl World {
         World {
             height,
             width,
+            tasks: Tasks::default(),
             objects: HashMap::new(),
-            terrain: map_terrain
+            terrain: map_terrain,
+            workers: Vec::new(),
         }
     }
 
     pub fn add_object(&mut self, x: u32, y: u32, object: MapObject) {
         self.objects.insert((x, y), object);
+    }
+
+    pub fn add_task(&mut self, task: Action) {
+        self.tasks.add(task, 0);
+    }
+
+    pub fn add_worker(&mut self, x: u32, y: u32) {
+        self.workers.push(Worker {
+            current_action: Action::Chilling,
+            actions: VecDeque::new(),
+            x, y
+        });
     }
 }
