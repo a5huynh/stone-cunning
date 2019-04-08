@@ -1,19 +1,20 @@
 use std::collections::VecDeque;
 
 /// Specific actions for the "PerformAction" task.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ActionType {
     HarvestResource(String),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Action {
     /// Idle dwarf
     Chilling,
+    /// Performs <ActionType> on MapObject w/ id.
     /// e.g., Chopping wood
-    PerformAction(ActionType),
+    PerformAction(ActionType, u32),
     /// Move to some location.
-    MoveTo((u32, u32)),
+    MoveTo(u32, u32),
 }
 
 #[derive(Debug, Clone)]

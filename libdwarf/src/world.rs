@@ -2,6 +2,8 @@ use std::collections::{ HashMap, VecDeque };
 use std::fmt;
 
 use crate::{
+    actors::{ Actor, Worker },
+    objects::{ MapObject, ResourceType },
     tasks::{ Action, Tasks }
 };
 
@@ -13,45 +15,6 @@ pub enum Terrain {
     NONE = -1,
 }
 
-#[derive(Clone, Debug)]
-pub struct MapObject {
-    pub id: u32
-}
-
-impl MapObject {
-    pub fn new(id: u32) -> Self {
-        MapObject { id  }
-    }
-}
-
-#[derive(Clone)]
-pub struct Worker {
-    /// Current state
-    pub current_action: Action,
-    /// Queue of actions this worker has. e.g. a queue might look like the
-    /// following for a worker:
-    /// - MoveTo -> x, x
-    /// - PerformAction(Chop) @ x,x
-    ///
-    /// The worker needs to MoveTo some location first before they are able
-    /// to perform an action.
-    pub actions: VecDeque<Action>,
-    pub x: u32,
-    pub y: u32,
-}
-
-impl Worker {
-    /// Mark the current action as finished and pop the next action.
-    pub fn finish_action(&mut self) {
-        if let Some(action) = self.actions.pop_front() {
-            self.current_action = action;
-        } else {
-            self.current_action = Action::Chilling;
-        }
-    }
-}
-
-#[derive(Clone)]
 pub struct World {
     // TODO: Support multi-tile objects.
     pub width: u32,
@@ -61,6 +24,8 @@ pub struct World {
     // TODO: Support multiple objects per tile.
     pub objects: HashMap<(u32, u32), MapObject>,
     pub terrain: HashMap<(u32, u32), Terrain>,
+
+    resource_map: HashMap<String, ResourceType>,
 }
 
 impl fmt::Display for World {
@@ -139,6 +104,7 @@ impl World {
             objects: HashMap::new(),
             terrain: map_terrain,
             workers: Vec::new(),
+            resource_map: HashMap::new(),
         }
     }
 
@@ -156,5 +122,22 @@ impl World {
             actions: VecDeque::new(),
             x, y
         });
+    }
+
+    pub fn tick(&mut self) {
+
+        let workers = &mut self.workers;
+        let tasks = &mut self.tasks;
+
+        // Handle assign any queued tasks to idle workers
+        for worker in workers.iter_mut() {
+            if worker.current_action == Action::Chilling {
+                if let Some(new_task) = tasks.next() {
+                    worker.queue_task(new_task);
+                }
+            }
+
+            worker.tick();
+        }
     }
 }
