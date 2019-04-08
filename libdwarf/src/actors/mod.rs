@@ -1,17 +1,21 @@
 use std::collections::VecDeque;
 
 use crate::{
-    tasks::{ Action, Task }
+    tasks::{ Action },
+    world::WorldUpdate,
 };
 
 pub trait Actor {
-    fn tick(&mut self);
+    /// Actor ID, used to receive messages and identify this actor.
+    fn id(&self) -> u32;
+    /// Queue up actions.
+    fn queue(&mut self, action: &Action);
+    /// Process all pending actions.
+    fn tick(&mut self) -> Option<WorldUpdate>;
 }
 
 #[derive(Clone)]
 pub struct Worker {
-    /// Current state
-    pub current_action: Action,
     /// Queue of actions this worker has. e.g. a queue might look like the
     /// following for a worker:
     /// - MoveTo -> x, x
@@ -22,56 +26,56 @@ pub struct Worker {
     pub actions: VecDeque<Action>,
     pub x: u32,
     pub y: u32,
-}
-
-impl Worker {
-    pub fn queue_task(&mut self, task: Task) {
-        if let Some((x, y)) = task.target {
-            self.actions.push_back(Action::MoveTo(x, y));
-        }
-
-        self.actions.push_back(task.action);
-    }
-
-    /// Mark the current action as finished and pop the next action.
-    pub fn finish_action(&mut self) {
-        if let Some(action) = self.actions.pop_front() {
-            self.current_action = action;
-        } else {
-            self.current_action = Action::Chilling;
-        }
-    }
+    pub id: u32,
 }
 
 impl Actor for Worker {
-    fn tick(&mut self) {
-        if self.current_action == Action::Chilling {
-            if let Some(action) = self.actions.pop_front() {
-                self.current_action = action;
+    fn id(&self) -> u32 { self.id }
+
+    fn queue(&mut self, action: &Action) {
+        self.actions.push_back(action.clone());
+    }
+
+    fn tick(&mut self) -> Option<WorldUpdate> {
+        println!("W({}): tick", self.id);
+
+        let mut new_queue = VecDeque::new();
+        while let Some(action) = self.actions.pop_front() {
+            match action {
+                // Route worker towards a target
+                Action::MoveTo(target_x, target_y) => {
+                    self.x = target_x;
+                    self.y = target_y;
+                },
+                // Perform an action.
+                Action::HarvestResource(pos, resource_type, object_id) => {
+                    let (target_x, target_y) = pos;
+                    // Are we next to this resource? Move closer to it
+                    let dist_x = (target_x as i32 - self.x as i32).abs() as u32;
+                    let dist_y = (target_y as i32 - self.y as i32).abs() as u32;
+
+                    if dist_x + dist_y <= 1 {
+                        // Harvest
+                        new_queue.push_back(Action::HarvestResource(pos, resource_type.clone(), object_id));
+                    } else {
+                        // Move closer
+                        let mut new_x = self.x;
+                        let mut new_y = self.y;
+                        if dist_x > dist_y {
+                            new_x += 1;
+                        } else {
+                            new_y += 1;
+                        }
+
+                        new_queue.push_back(Action::MoveTo(new_x, new_y));
+                        new_queue.push_back(Action::HarvestResource(pos, resource_type.clone(), object_id));
+                    }
+                },
+                _ => {}
             }
         }
 
-        match &self.current_action {
-            // Route worker towards a target
-            Action::MoveTo(target_x, target_y) => {
-                // Move closer to target
-                let (dist_x, dist_y) = (target_x - self.x, target_y - self.y);
-                if dist_x > dist_y {
-                    self.x += 1;
-                } else {
-                    self.y += 1;
-                }
-
-                // Mark action as finished if the next position hits the target.
-                if self.x == *target_x && self.y == *target_y {
-                    self.finish_action();
-                }
-            },
-            // Perform an action.
-            Action::PerformAction(action_type, object_id) => {
-                self.finish_action();
-            },
-            _ => {}
-        }
+        self.actions.append(&mut new_queue);
+        None
     }
 }

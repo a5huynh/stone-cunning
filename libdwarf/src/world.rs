@@ -4,7 +4,7 @@ use std::fmt;
 use crate::{
     actors::{ Actor, Worker },
     objects::{ MapObject, ResourceType },
-    tasks::{ Action, Tasks }
+    tasks::{ Action }
 };
 
 #[derive(Clone, Debug)]
@@ -15,11 +15,17 @@ pub enum Terrain {
     NONE = -1,
 }
 
+pub struct WorldUpdate {
+    pub sender: u32,
+    pub receiver: u32,
+    pub action: Action,
+}
+
 pub struct World {
     // TODO: Support multi-tile objects.
     pub width: u32,
     pub height: u32,
-    pub tasks: Tasks,
+    pub tasks: VecDeque<Action>,
     pub workers: Vec<Worker>,
     // TODO: Support multiple objects per tile.
     pub objects: HashMap<(u32, u32), MapObject>,
@@ -100,7 +106,7 @@ impl World {
         World {
             height,
             width,
-            tasks: Tasks::default(),
+            tasks: VecDeque::new(),
             objects: HashMap::new(),
             terrain: map_terrain,
             workers: Vec::new(),
@@ -113,31 +119,54 @@ impl World {
     }
 
     pub fn add_task(&mut self, task: Action) {
-        self.tasks.add(task, 0);
+        self.tasks.push_back(task);
     }
 
     pub fn add_worker(&mut self, x: u32, y: u32) {
         self.workers.push(Worker {
-            current_action: Action::Chilling,
+            id: 0,
             actions: VecDeque::new(),
             x, y
         });
     }
 
-    pub fn tick(&mut self) {
+    pub fn run_update(&mut self, update: &WorldUpdate) {
+        // find receiver
+        let object = self.objects
+            .iter_mut()
+            .find(|(_, object)| object.id == update.receiver);
+        if let Some((_, receiver)) = object {
+            receiver.queue(&update.action);
+        }
+    }
 
+    pub fn tick(&mut self) {
+        println!("World tick");
         let workers = &mut self.workers;
         let tasks = &mut self.tasks;
-
         // Handle assign any queued tasks to idle workers
+        let mut updates = VecDeque::new();
+
         for worker in workers.iter_mut() {
-            if worker.current_action == Action::Chilling {
-                if let Some(new_task) = tasks.next() {
-                    worker.queue_task(new_task);
+            if worker.actions.is_empty() {
+                if let Some(new_task) = tasks.pop_front() {
+                    worker.queue(&new_task);
                 }
             }
 
-            worker.tick();
+            if let Some(update) = worker.tick() {
+                updates.push_back(update);
+            };
+        }
+
+        // Process worker updates
+        for update in updates.iter_mut() {
+            println!("updating object");
+            self.run_update(update);
+        }
+
+        for (_, object) in self.objects.iter_mut() {
+            object.tick();
         }
     }
 }
