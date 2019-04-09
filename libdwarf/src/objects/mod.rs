@@ -1,23 +1,57 @@
+use std::collections::VecDeque;
+
 mod resource;
 pub use resource::*;
 
 use crate::{
-    actors::Actor
+    actors::Actor,
+    tasks::Action,
+    world::{ World, WorldUpdate },
 };
 
 #[derive(Clone, Debug)]
 pub struct MapObject {
-    pub id: u32
+    pub id: u32,
+    pub health: i32,
+    pub actions: VecDeque<Action>,
+    // Position on map.
+    pub x: u32,
+    pub y: u32,
 }
 
 impl MapObject {
-    pub fn new(id: u32) -> Self {
-        MapObject { id }
+    pub fn new(id: u32, x: u32, y: u32) -> Self {
+        MapObject {
+            id, x, y,
+            actions: VecDeque::new(),
+            health: 10,
+        }
     }
 }
 
 impl Actor for MapObject {
-    fn tick(&mut self) {
+    fn id(&self) -> u32 { self.id }
 
+    fn tick(&mut self) -> Option<WorldUpdate> {
+        println!("M({}): tick", self.id);
+
+        let mut update = None;
+        while let Some(action) = self.actions.pop_front() {
+            match action {
+                Action::DealDamage(_) => {
+                    update = Some(WorldUpdate {
+                        target: World::id(),
+                        action: Action::Destroy(self.id)
+                    });
+                },
+                _ => {}
+            }
+        }
+
+        update
+    }
+
+    fn queue(&mut self, action: &Action) {
+        self.actions.push_back(action.clone());
     }
 }

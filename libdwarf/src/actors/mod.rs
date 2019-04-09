@@ -37,9 +37,11 @@ impl Actor for Worker {
     }
 
     fn tick(&mut self) -> Option<WorldUpdate> {
-        println!("W({}): tick", self.id);
-
+        // queue actions for the new tick.
         let mut new_queue = VecDeque::new();
+        // updates to broadcast to the world.
+        let mut update = None;
+
         while let Some(action) = self.actions.pop_front() {
             match action {
                 // Route worker towards a target
@@ -55,8 +57,13 @@ impl Actor for Worker {
                     let dist_y = (target_y as i32 - self.y as i32).abs() as u32;
 
                     if dist_x + dist_y <= 1 {
-                        // Harvest
+                        // Is the resource available nearby?
+                        // Try to harvest.
                         new_queue.push_back(Action::HarvestResource(pos, resource_type.clone(), object_id));
+                        update = Some(WorldUpdate {
+                            target: object_id,
+                            action: Action::DealDamage(10),
+                        });
                     } else {
                         // Move closer
                         let mut new_x = self.x;
@@ -76,6 +83,6 @@ impl Actor for Worker {
         }
 
         self.actions.append(&mut new_queue);
-        None
+        update
     }
 }

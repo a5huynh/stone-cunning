@@ -3,7 +3,7 @@ use std::fmt;
 
 use crate::{
     actors::{ Actor, Worker },
-    objects::{ MapObject, ResourceType },
+    objects::{ MapObject },
     tasks::{ Action }
 };
 
@@ -15,23 +15,21 @@ pub enum Terrain {
     NONE = -1,
 }
 
-pub struct WorldUpdate {
-    pub sender: u32,
-    pub receiver: u32,
-    pub action: Action,
-}
-
 pub struct World {
     // TODO: Support multi-tile objects.
     pub width: u32,
     pub height: u32,
     pub tasks: VecDeque<Action>,
     pub workers: Vec<Worker>,
+    pub objects: HashMap<u32, MapObject>,
     // TODO: Support multiple objects per tile.
-    pub objects: HashMap<(u32, u32), MapObject>,
+    pub collision_map: HashMap<(u32, u32), MapObject>,
     pub terrain: HashMap<(u32, u32), Terrain>,
+}
 
-    resource_map: HashMap<String, ResourceType>,
+pub struct WorldUpdate {
+    pub target: u32,
+    pub action: Action
 }
 
 impl fmt::Display for World {
@@ -54,10 +52,11 @@ impl fmt::Display for World {
         }
 
         // Add objects to cells
-        for (pos, value) in self.objects.iter() {
-            let idx = (pos.1 * self.width + pos.0) as usize;
-            let tile = match value {
+        for (_, object) in self.objects.iter() {
+            let idx = (object.y * self.width + object.x) as usize;
+            let tile = match object {
                 MapObject { id: 1, .. } => 'T',
+                MapObject { id: 10, .. } => 'w',
                 _ => '?'
             };
 
@@ -86,6 +85,8 @@ impl fmt::Display for World {
 }
 
 impl World {
+    pub fn id() -> u32 { 0 }
+
     pub fn new(height: u32, width: u32) -> Self {
         let mut map_terrain = HashMap::new();
         // TODO: Actually generate terrain.
@@ -106,16 +107,27 @@ impl World {
         World {
             height,
             width,
-            tasks: VecDeque::new(),
+            collision_map: HashMap::new(),
             objects: HashMap::new(),
+            tasks: VecDeque::new(),
             terrain: map_terrain,
             workers: Vec::new(),
-            resource_map: HashMap::new(),
         }
     }
 
-    pub fn add_object(&mut self, x: u32, y: u32, object: MapObject) {
-        self.objects.insert((x, y), object);
+    pub fn add_object(&mut self, object: MapObject) {
+        self.objects.insert(object.id, object.clone());
+        self.collision_map.insert((object.x, object.y), object);
+    }
+
+    pub fn remove_object(&mut self, oid: u32) -> Option<MapObject> {
+        let result = self.objects.remove(&oid);
+        if let Some(object) = result {
+            self.collision_map.remove(&(object.x, object.y));
+            return Some(object);
+        }
+
+        return None;
     }
 
     pub fn add_task(&mut self, task: Action) {
@@ -131,42 +143,64 @@ impl World {
     }
 
     pub fn run_update(&mut self, update: &WorldUpdate) {
-        // find receiver
-        let object = self.objects
-            .iter_mut()
-            .find(|(_, object)| object.id == update.receiver);
-        if let Some((_, receiver)) = object {
-            receiver.queue(&update.action);
+        let objects = &mut self.objects;
+
+        // Route action to the correct place.
+        if update.target == World::id() {
+            // Update the world.
+            match update.action {
+                // Destroy an object.
+                Action::Destroy(object_id) => {
+                    // Remove object from entities and remove from collision map.
+                    let object = self.remove_object(object_id);
+                    // Add any materials from this object to map
+                    if let Some(object) = object {
+                        self.add_object(MapObject::new(10, object.x, object.y));
+                    }
+                },
+                _ => {}
+            }
+        } else {
+            let object = objects.get_mut(&update.target);
+            if let Some(receiver) = object {
+                receiver.queue(&update.action);
+            }
         }
     }
 
     pub fn tick(&mut self) {
-        println!("World tick");
+        let objects = &mut self.objects;
         let workers = &mut self.workers;
         let tasks = &mut self.tasks;
-        // Handle assign any queued tasks to idle workers
-        let mut updates = VecDeque::new();
 
+        // Assign tasks to idle workers
         for worker in workers.iter_mut() {
             if worker.actions.is_empty() {
                 if let Some(new_task) = tasks.pop_front() {
                     worker.queue(&new_task);
                 }
             }
-
-            if let Some(update) = worker.tick() {
-                updates.push_back(update);
-            };
         }
 
-        // Process worker updates
+        let mut updates = Vec::new();
+        for worker in workers.iter_mut() {
+            if !worker.actions.is_empty() {
+                if let Some(update) = worker.tick() {
+                    updates.push(update);
+                };
+            }
+        }
+
+        for (_, object) in objects.iter_mut() {
+            if !object.actions.is_empty() {
+                if let Some(update) = object.tick() {
+                    updates.push(update);
+                }
+            }
+        }
+
         for update in updates.iter_mut() {
-            println!("updating object");
             self.run_update(update);
-        }
-
-        for (_, object) in self.objects.iter_mut() {
-            object.tick();
         }
     }
 }
