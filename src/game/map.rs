@@ -8,7 +8,10 @@ use amethyst::{
     },
 };
 
-use libdwarf::world::{ Terrain, MapObject };
+use libdwarf::{
+    objects::MapObject,
+    world::{ Terrain },
+};
 use crate::game::{
     config::GameConfig,
     entity::{ Floor, Object },
@@ -85,14 +88,14 @@ impl MapResource {
             sprite_number: 2,
         };
 
-        world.create_entity()
+        let entity = world.create_entity()
             .with(object_render.clone())
             .with(Object::default())
             .with(map_resource.place(5, 5, 1.0))
             .with(Transparent)
             .build();
 
-        map_resource.world.objects.insert((5, 5), MapObject{ id: 2 });
+        map_resource.world.add_object(MapObject::new(entity.id(), 5, 5));
         map_resource
     }
 
@@ -104,7 +107,7 @@ impl MapResource {
             return false;
         }
 
-        self.world.objects.contains_key(&(map_x as u32, map_y as u32))
+        self.world.has_collision(map_x as u32, map_y as u32)
     }
 
     /// Converts some point <x, y> into map coordinates.
@@ -141,27 +144,27 @@ impl MapResource {
 
     /// Return information about what's currently at the map coordinates: <x, y>
     pub fn whats_at(&self, x: i32, y: i32) -> Option<PickInfo> {
-        let idx = (x as u32, y as u32);
+        let key = (x as u32, y as u32);
         // Any objects at this location?
-        if self.world.objects.contains_key(&idx) {
+        if self.world.has_collision(x as u32, y as u32) {
             return Some(
                 PickInfo {
                     is_terrain: false,
                     description: format!(
                         "{:?}",
-                        self.world.objects.get(&idx)
+                        self.world.objects_at(x as u32, y as u32)
                     ),
                 }
             );
         }
 
-        if self.world.terrain.contains_key(&idx) {
+        if self.world.terrain.contains_key(&key) {
             return Some(
                 PickInfo {
                     is_terrain: true,
                     description: format!(
                         "{:?}",
-                        self.world.terrain.get(&idx)
+                        self.world.terrain.get(&key)
                     )
                 }
             );
