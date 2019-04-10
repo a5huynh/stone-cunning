@@ -32,7 +32,7 @@ impl MapObject {
 impl Actor for MapObject {
     fn id(&self) -> u32 { self.id }
 
-    fn tick(&mut self) -> Option<WorldUpdate> {
+    fn tick(&mut self, neighbors: Vec<Option<&MapObject>>) -> Option<WorldUpdate> {
         println!("M({}): tick", self.id);
 
         let mut update = None;

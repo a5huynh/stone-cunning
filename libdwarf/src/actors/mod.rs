@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{
+    objects::MapObject,
     tasks::{ Action },
     world::WorldUpdate,
 };
@@ -11,7 +12,7 @@ pub trait Actor {
     /// Queue up actions.
     fn queue(&mut self, action: &Action);
     /// Process all pending actions.
-    fn tick(&mut self) -> Option<WorldUpdate>;
+    fn tick(&mut self, neighbors: Vec<Option<&MapObject>>) -> Option<WorldUpdate>;
 }
 
 #[derive(Clone)]
@@ -36,7 +37,7 @@ impl Actor for Worker {
         self.actions.push_back(action.clone());
     }
 
-    fn tick(&mut self) -> Option<WorldUpdate> {
+    fn tick(&mut self, neighbors: Vec<Option<&MapObject>>) -> Option<WorldUpdate> {
         // queue actions for the new tick.
         let mut new_queue = VecDeque::new();
         // updates to broadcast to the world.

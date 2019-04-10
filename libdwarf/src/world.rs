@@ -15,6 +15,7 @@ pub enum Terrain {
     NONE = -1,
 }
 
+#[derive(Clone)]
 pub struct World {
     // TODO: Support multi-tile objects.
     pub width: u32,
@@ -30,6 +31,26 @@ pub struct World {
 pub struct WorldUpdate {
     pub target: u32,
     pub action: Action
+}
+
+fn find_neighbors<'a>(map: &'a mut HashMap<(u32, u32), MapObject>, x: u32, y: u32) -> Vec<Option<&'a MapObject>> {
+    // Generate the coordinates for the neighbors
+    let mut neighbor_idx = Vec::with_capacity(4);
+    neighbor_idx.push((x, y + 1));
+    neighbor_idx.push((x + 1, y));
+    if y > 0 {
+        neighbor_idx.push((x, y - 1));
+    }
+    if x > 0 {
+        neighbor_idx.push((x - 1, y));
+    }
+
+    // Find the neighbors and return the results
+    let mut results = Vec::new();
+    for idx in neighbor_idx.iter() {
+        results.push(map.get(idx));
+    }
+    results
 }
 
 impl fmt::Display for World {
@@ -115,11 +136,17 @@ impl World {
         }
     }
 
+    pub fn has_collision(&self, x: u32, y: u32) -> bool {
+        self.collision_map.contains_key(&(x, y))
+    }
+
+    /// Add object to map
     pub fn add_object(&mut self, object: MapObject) {
         self.objects.insert(object.id, object.clone());
         self.collision_map.insert((object.x, object.y), object);
     }
 
+    /// Remove object from map
     pub fn remove_object(&mut self, oid: u32) -> Option<MapObject> {
         let result = self.objects.remove(&oid);
         if let Some(object) = result {
@@ -128,6 +155,10 @@ impl World {
         }
 
         return None;
+    }
+
+    pub fn objects_at(&self, x: u32, y: u32) -> Option<&MapObject> {
+        self.collision_map.get(&(x, y))
     }
 
     pub fn add_task(&mut self, task: Action) {
@@ -169,6 +200,7 @@ impl World {
     }
 
     pub fn tick(&mut self) {
+        let map = &mut self.collision_map;
         let objects = &mut self.objects;
         let workers = &mut self.workers;
         let tasks = &mut self.tasks;
@@ -185,7 +217,8 @@ impl World {
         let mut updates = Vec::new();
         for worker in workers.iter_mut() {
             if !worker.actions.is_empty() {
-                if let Some(update) = worker.tick() {
+                let neighbors = find_neighbors(map, worker.x, worker.y);
+                if let Some(update) = worker.tick(neighbors) {
                     updates.push(update);
                 };
             }
@@ -193,7 +226,8 @@ impl World {
 
         for (_, object) in objects.iter_mut() {
             if !object.actions.is_empty() {
-                if let Some(update) = object.tick() {
+                let neighbors = find_neighbors(map, object.x, object.y);
+                if let Some(update) = object.tick(neighbors) {
                     updates.push(update);
                 }
             }
