@@ -112,12 +112,22 @@ impl World {
         self.tasks.push_back(task);
     }
 
-    pub fn add_worker(&mut self, x: u32, y: u32) {
+    pub fn add_worker(&mut self, id: u32, x: u32, y: u32) {
         self.workers.push(Worker {
-            id: 0,
+            id, x, y,
             actions: VecDeque::new(),
-            x, y
         });
+    }
+
+    /// Get a reference to the worker sim
+    pub fn get_worker(&self, id: u32) -> Option<&Worker> {
+        for worker in self.workers.iter() {
+            if worker.id == id {
+                return Some(worker);
+            }
+        }
+
+        return None;
     }
 
     pub fn run_update(&mut self, update: &WorldUpdate) {

@@ -99,6 +99,10 @@ impl MapResource {
         map_resource
     }
 
+    pub fn add_npc(&mut self, entity_id: u32, x: u32, y: u32) {
+        self.world.add_worker(entity_id, x, y);
+    }
+
     /// Check to see if there is a collidable object at <x, y>
     pub fn has_collision(&self, map_x: i32, map_y: i32) -> bool {
         // Check if coordinates are outside of bounds

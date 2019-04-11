@@ -59,10 +59,10 @@ impl SimpleState for RunningState {
 
         initialize_camera(world);
         // Initialize map terrain & objects.
-        let map = MapResource::initialize(world, terrain_spritesheet_handle, object_spritesheet_handle);
+        let mut map = MapResource::initialize(world, terrain_spritesheet_handle, object_spritesheet_handle);
         Cursor::initialize(world, cursor_spritesheet_handle);
         // Initialize dwarf.
-        DwarfNPC::initialize(world, &map, npc_spritesheet_handle);
+        DwarfNPC::initialize(world, &mut map, npc_spritesheet_handle);
         // Initialize player.
         Player::initialize(world, player_spritesheet_handle);
         // Resources are data that is shared amongst all components

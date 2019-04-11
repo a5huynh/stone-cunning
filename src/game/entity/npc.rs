@@ -15,16 +15,15 @@ use crate::game::{
 // TODO: Make more generalized?
 #[derive(Default)]
 pub struct DwarfNPC;
-
 impl Component for DwarfNPC {
     type Storage = DenseVecStorage<Self>;
 }
 
 impl DwarfNPC {
-    pub fn initialize(world: &mut World, map: &MapResource, npc_sprite: SpriteSheetHandle) {
+    pub fn initialize(world: &mut World, map: &mut MapResource, npc_sprite: SpriteSheetHandle) {
         world.register::<DwarfNPC>();
 
-        world.create_entity()
+        let entity = world.create_entity()
             .with(SpriteRender {
                 sprite_sheet: npc_sprite.clone(),
                 sprite_number: 0,
@@ -33,5 +32,8 @@ impl DwarfNPC {
             .with(map.place(2, 2, 1.0))
             .with(Transparent)
             .build();
+
+        map.add_npc(entity.id(), 2, 2);
+
     }
 }

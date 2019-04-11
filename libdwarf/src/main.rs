@@ -70,7 +70,7 @@ fn main() {
     let tree = MapObject::new(1, 9, 9);
     world.add_object(tree.clone());
     // Add a worker to the world
-    world.add_worker(0, 0);
+    world.add_worker(0, 0, 0);
     // Add a job
     world.add_task(
         Action::HarvestResource(
