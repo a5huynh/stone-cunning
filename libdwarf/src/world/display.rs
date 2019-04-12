@@ -1,7 +1,7 @@
 /// Mostly used for debugging outside of a rendering context.
 use std::fmt;
 
-impl fmt::Display for World {
+impl fmt::Display for WorldSim {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut cells = vec!['?'; (self.width * self.height) as usize];
         // Render terrain first

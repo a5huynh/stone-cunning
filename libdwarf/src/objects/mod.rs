@@ -6,7 +6,7 @@ pub use resource::*;
 use crate::{
     actors::Actor,
     tasks::Action,
-    world::{ World, WorldUpdate },
+    world::{ WorldSim, WorldUpdate },
 };
 
 #[derive(Clone, Debug)]
@@ -40,7 +40,7 @@ impl Actor for MapObject {
             match action {
                 Action::DealDamage(_) => {
                     update = Some(WorldUpdate {
-                        target: World::id(),
+                        target: WorldSim::id(),
                         action: Action::Destroy(self.id)
                     });
                 },

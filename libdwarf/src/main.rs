@@ -5,7 +5,7 @@ use std::io::{self, Write, Read};
 use libdwarf::{
     objects::{ MapObject },
     tasks::Action,
-    world::{ World }
+    world::{ WorldSim }
 };
 
 
@@ -24,7 +24,7 @@ impl<R: Read, W: Write> AsciiRenderer<R, W> {
         }
     }
 
-    pub fn render(&mut self, world: &World) {
+    pub fn render(&mut self, world: &WorldSim) {
         write!(self.stdout, "{}{}", clear::All, cursor::Goto(1, 1)).unwrap();
         write!(self.stdout, "num ticks: {}\n\r", self.num_ticks).unwrap();
         // Render world.
@@ -65,7 +65,7 @@ fn main() {
 
     let mut renderer = AsciiRenderer::new(stdin.lock(), stdout.lock());
 
-    let mut world = World::new(10, 10);
+    let mut world = WorldSim::new(10, 10);
     // Add a tree to the world
     let tree = MapObject::new(1, 9, 9);
     world.add_object(tree.clone());

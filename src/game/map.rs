@@ -10,7 +10,8 @@ use amethyst::{
 
 use libdwarf::{
     objects::MapObject,
-    world::{ Terrain },
+    tasks::Action,
+    world::{ Terrain, WorldSim },
 };
 use crate::game::{
     config::GameConfig,
@@ -31,7 +32,7 @@ pub struct MapResource {
     pub tile_width: f32,
     pub tile_height: f32,
     pub tile_offset: f32,
-    pub world: libdwarf::world::World,
+    pub world: WorldSim,
 }
 
 impl MapResource {
@@ -55,7 +56,7 @@ impl MapResource {
             tile_height: tile_height as f32,
             tile_offset: tile_offset as f32,
             tile_width: tile_width as f32,
-            world: libdwarf::world::World::new(map_width, map_height)
+            world: WorldSim::new(map_width, map_height)
         };
 
         for y in 0..map_height {
@@ -96,6 +97,11 @@ impl MapResource {
             .build();
 
         map_resource.world.add_object(MapObject::new(entity.id(), 5, 5));
+        map_resource.world.add_task(Action::HarvestResource(
+            (5, 5),
+            "wood".to_string(),
+            entity.id()
+        ));
         map_resource
     }
 

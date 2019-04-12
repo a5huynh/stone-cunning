@@ -15,7 +15,7 @@ pub enum Terrain {
 }
 
 #[derive(Clone)]
-pub struct World {
+pub struct WorldSim {
     // TODO: Support multi-tile objects.
     pub width: u32,
     pub height: u32,
@@ -52,7 +52,7 @@ fn find_neighbors<'a>(map: &'a mut HashMap<(u32, u32), MapObject>, x: u32, y: u3
     results
 }
 
-impl World {
+impl WorldSim {
     pub fn id() -> u32 { 0 }
 
     pub fn new(height: u32, width: u32) -> Self {
@@ -72,7 +72,7 @@ impl World {
             }
         }
 
-        World {
+        WorldSim {
             height,
             width,
             collision_map: HashMap::new(),
@@ -134,7 +134,7 @@ impl World {
         let objects = &mut self.objects;
 
         // Route action to the correct place.
-        if update.target == World::id() {
+        if update.target == WorldSim::id() {
             // Update the world.
             match update.action {
                 // Destroy an object.
