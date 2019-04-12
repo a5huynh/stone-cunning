@@ -84,6 +84,7 @@ fn main() -> amethyst::Result<()> {
         // Handles syncing rendering front-end w/ simulation
         // TODO: Combine into a single system?
         .with(systems::NPCSim, "npc_sim", &[])
+        .with(systems::ObjectSim, "object_sim", &[])
         // Should always be last so we have the most up-to-date info.
         .with(systems::ui::debug::DebugUI, "debug_ui", &["cursor", "player_movement"]);
 
