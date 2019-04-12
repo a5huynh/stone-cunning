@@ -81,7 +81,9 @@ fn main() -> amethyst::Result<()> {
         .with(systems::CursorSystem, "cursor", &[])
         .with(systems::MapMovementSystem, "map_movement", &[])
         .with(systems::PlayerMovement, "player_movement", &[])
-        .with(systems::NPCMovement, "npc_movement", &[])
+        // Handles syncing rendering front-end w/ simulation
+        // TODO: Combine into a single system?
+        .with(systems::NPCSim, "npc_sim", &[])
         // Should always be last so we have the most up-to-date info.
         .with(systems::ui::debug::DebugUI, "debug_ui", &["cursor", "player_movement"]);
 

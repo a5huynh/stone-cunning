@@ -14,9 +14,9 @@ use crate::game::{
     map::MapResource
 };
 
-pub struct NPCMovement;
+pub struct NPCSim;
 
-impl<'s> System<'s> for NPCMovement {
+impl<'s> System<'s> for NPCSim {
     type SystemData = (
         Entities<'s>,
         WriteStorage<'s, DwarfNPC>,
