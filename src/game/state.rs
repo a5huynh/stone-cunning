@@ -95,6 +95,11 @@ impl SimpleState for RunningState {
     /// Called at an interval of 1/60th second.
     fn fixed_update(&mut self, data: StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
         let world = data.world;
+        let mut map = {
+            let mut map = world.write_resource::<MapResource>();
+            map
+        };
+
         // Update global game tick
         {
             let mut tick = world.write_resource::<GameTick>();
@@ -102,6 +107,8 @@ impl SimpleState for RunningState {
             if tick.last_tick > 0.0 {
                 tick.last_tick -= time;
             } else {
+                // Tick simulation
+                map.world.tick();
                 tick.reset();
             }
         }
