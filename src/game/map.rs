@@ -9,8 +9,8 @@ use amethyst::{
 };
 
 use libdwarf::{
+    actions::Action,
     objects::MapObject,
-    tasks::Action,
     world::{ Terrain, WorldSim },
 };
 use crate::game::{

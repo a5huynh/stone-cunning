@@ -3,9 +3,9 @@ use termion::raw::{IntoRawMode, RawTerminal};
 use std::io::{self, Write, Read};
 
 use libdwarf::{
-    objects::{ MapObject },
-    tasks::Action,
-    world::{ WorldSim }
+    actions::Action,
+    objects::MapObject,
+    world::WorldSim,
 };
 
 

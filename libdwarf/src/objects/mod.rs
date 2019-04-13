@@ -5,7 +5,7 @@ pub use resource::*;
 
 use crate::{
     actors::Actor,
-    tasks::Action,
+    actions::Action,
     world::{ WorldSim, WorldUpdate },
 };
 

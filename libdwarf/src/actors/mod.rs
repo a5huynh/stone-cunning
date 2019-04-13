@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
 
 use crate::{
+    actions::Action,
     objects::MapObject,
-    tasks::{ Action },
     world::WorldUpdate,
 };
 

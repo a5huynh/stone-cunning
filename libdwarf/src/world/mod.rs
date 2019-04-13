@@ -2,8 +2,8 @@ use std::collections::{ HashMap, VecDeque };
 
 use crate::{
     actors::{ Actor, Worker },
-    objects::{ MapObject },
-    tasks::{ Action }
+    actions::Action,
+    objects::MapObject,
 };
 
 #[derive(Clone, Debug)]
@@ -32,7 +32,12 @@ pub struct WorldUpdate {
     pub action: Action
 }
 
-fn find_neighbors<'a>(map: &'a mut HashMap<(u32, u32), MapObject>, x: u32, y: u32) -> Vec<Option<&'a MapObject>> {
+/// Find the north, east, south, west neighboring objects for some
+/// point <x, y>.
+fn find_neighbors<'a>(
+    map: &'a mut HashMap<(u32, u32), MapObject>,
+    x: u32, y: u32
+) -> Vec<Option<&'a MapObject>> {
     // Generate the coordinates for the neighbors
     let mut neighbor_idx = Vec::with_capacity(4);
     neighbor_idx.push((x, y + 1));
