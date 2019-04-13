@@ -35,9 +35,7 @@ impl<'s> System<'s> for NPCSim {
             if let Some(worker) = map.world.get_worker(entity.id()) {
                 // Update location
                 let new_transform = map.place(worker.x as i32, worker.y as i32, 1.0);
-                transform.set_x(new_transform.translation().x);
-                transform.set_y(new_transform.translation().y);
-                transform.set_z(new_transform.translation().z);
+                *transform = new_transform;
             }
         }
     }

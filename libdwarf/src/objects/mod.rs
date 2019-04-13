@@ -33,8 +33,6 @@ impl Actor for MapObject {
     fn id(&self) -> u32 { self.id }
 
     fn tick(&mut self, neighbors: Vec<Option<&MapObject>>) -> Option<WorldUpdate> {
-        println!("M({}): tick", self.id);
-
         let mut update = None;
         while let Some(action) = self.actions.pop_front() {
             match action {
