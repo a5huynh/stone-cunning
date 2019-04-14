@@ -5,4 +5,9 @@ authors = ["Andrew Huynh <a5thuynh@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+ron = "0.5.1"
+serde = "1.0.90"
+shrev = "1.0.1"
+specs = "0.14.3"
+specs-derive = "0.4.0"
 termion = "1.5.1"

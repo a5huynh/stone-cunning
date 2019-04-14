@@ -10,7 +10,7 @@ use amethyst::{
 
 use libdwarf::{
     actions::Action,
-    objects::MapObject,
+    entities::MapObject,
     world::{ Terrain, WorldSim },
 };
 use crate::game::{
@@ -27,7 +27,6 @@ pub struct PickInfo {
 
 /// Map resource used to convert coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
-#[derive(Clone)]
 pub struct MapResource {
     pub tile_width: f32,
     pub tile_height: f32,

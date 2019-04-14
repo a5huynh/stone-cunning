@@ -1,0 +1,15 @@
+(
+    resources: [
+        ResourceType(
+            name: "wood",
+            attributes: [],
+        ),
+        ResourceType(
+            name: "tree",
+            attributes: [
+                Health(10),
+                Drops("wood", 3),
+            ]
+        )
+    ]
+)

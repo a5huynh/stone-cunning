@@ -4,7 +4,7 @@ use std::io::{self, Write, Read};
 
 use libdwarf::{
     actions::Action,
-    objects::MapObject,
+    entities::MapObject,
     world::WorldSim,
 };
 

@@ -1,7 +1,6 @@
 use std::collections::VecDeque;
-
-mod resource;
-pub use resource::*;
+use specs_derive::*;
+use specs::{ Component, VecStorage };
 
 use crate::{
     actors::Actor,
@@ -9,7 +8,8 @@ use crate::{
     world::{ WorldSim, WorldUpdate },
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Component, Debug)]
+#[storage(VecStorage)]
 pub struct MapObject {
     pub id: u32,
     pub health: i32,
@@ -20,9 +20,10 @@ pub struct MapObject {
 }
 
 impl MapObject {
-    pub fn new(id: u32, x: u32, y: u32) -> Self {
+    pub fn new(x: u32, y: u32) -> Self {
         MapObject {
-            id, x, y,
+            id: Default::default(),
+            x, y,
             actions: VecDeque::new(),
             health: 10,
         }
@@ -32,7 +33,7 @@ impl MapObject {
 impl Actor for MapObject {
     fn id(&self) -> u32 { self.id }
 
-    fn tick(&mut self, neighbors: Vec<Option<&MapObject>>) -> Option<WorldUpdate> {
+    fn tick(&mut self, _neighbors: Vec<Option<&MapObject>>) -> Option<WorldUpdate> {
         let mut update = None;
         while let Some(action) = self.actions.pop_front() {
             match action {

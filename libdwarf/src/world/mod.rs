@@ -1,9 +1,14 @@
-use std::collections::{ HashMap, VecDeque };
+use std::{
+    collections::{ HashMap, VecDeque },
+    fs::File,
+};
 
+use ron::de::from_reader;
 use crate::{
-    actors::{ Actor, Worker },
+    actors::{ Actor },
     actions::Action,
-    objects::MapObject,
+    config::WorldConfig,
+    entities::{ MapObject, Worker },
 };
 
 #[derive(Clone, Debug)]
@@ -14,11 +19,11 @@ pub enum Terrain {
     NONE = -1,
 }
 
-#[derive(Clone)]
 pub struct WorldSim {
     // TODO: Support multi-tile objects.
     pub width: u32,
     pub height: u32,
+    pub config: WorldConfig,
     pub tasks: VecDeque<Action>,
     pub workers: Vec<Worker>,
     pub objects: HashMap<u32, MapObject>,
@@ -77,14 +82,23 @@ impl WorldSim {
             }
         }
 
+        let input_path = format!("./resources/data/resources.ron");
+        let f = File::open(&input_path).expect("Failed opening file");
+        let config: WorldConfig = match from_reader(f) {
+            Ok(x) => x,
+            Err(e) => {
+                println!("Failed to load config: {}", e);
+                std::process::exit(1);
+            }
+        };
+
         WorldSim {
-            height,
-            width,
+            height, width, config,
             collision_map: HashMap::new(),
             objects: HashMap::new(),
             tasks: VecDeque::new(),
             terrain: map_terrain,
-            workers: Vec::new()
+            workers: Vec::new(),
         }
     }
 
