@@ -84,7 +84,7 @@ impl WorldSim {
             objects: HashMap::new(),
             tasks: VecDeque::new(),
             terrain: map_terrain,
-            workers: Vec::new(),
+            workers: Vec::new()
         }
     }
 
@@ -137,18 +137,23 @@ impl WorldSim {
 
     pub fn run_update(&mut self, update: &WorldUpdate) {
         let objects = &mut self.objects;
-
         // Route action to the correct place.
         if update.target == WorldSim::id() {
             // Update the world.
             match update.action {
                 // Destroy an object.
+                Action::Add(map_position, object_id) => {
+                    println!("Adding object {} to sim @ {:?}", object_id, map_position);
+                },
                 Action::Destroy(object_id) => {
+                    println!("Removing object from sim: {}", object_id);
                     // Remove object from entities and remove from collision map.
                     let object = self.remove_object(object_id);
                     // Add any materials from this object to map
                     if let Some(object) = object {
-                        self.add_object(MapObject::new(10, object.x, object.y));
+                        // Tell the renderer to add the object to the screen.
+                        let new_obj = MapObject::new(object.x, object.y);
+                        self.add_object(new_obj);
                     }
                 },
                 _ => {}

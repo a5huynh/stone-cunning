@@ -92,13 +92,15 @@ impl MapResource {
         let entity = world.create_entity()
             .with(object_render.clone())
             .with(Object::default())
-            .with(map_resource.place(5, 5, 1.0))
+            .with(map_resource.place(10, 5, 1.0))
             .with(Transparent)
             .build();
 
-        map_resource.world.add_object(MapObject::new(entity.id(), 5, 5));
+        let mut map_object = MapObject::new(10, 10);
+        map_object.id = entity.id();
+        map_resource.world.add_object(map_object);
         map_resource.world.add_task(Action::HarvestResource(
-            (5, 5),
+            (10, 10),
             "wood".to_string(),
             entity.id()
         ));
