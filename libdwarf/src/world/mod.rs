@@ -17,7 +17,7 @@ use crate::{
 #[derive(Default)]
 pub struct WorldSim;
 impl WorldSim {
-    pub fn new(world: &mut World, height: u32, width: u32) -> Self {
+    pub fn new(world: &mut World, width: u32, height: u32) -> Self {
         world.register::<MapObject>();
         world.register::<Worker>();
         // Initialize map.

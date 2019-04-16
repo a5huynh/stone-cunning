@@ -3,7 +3,6 @@ use amethyst::{
     ecs::prelude::{Component, DenseVecStorage},
     prelude::*,
     renderer::{
-        SpriteSheetHandle,
         SpriteRender,
         Transparent,
     },
@@ -11,12 +10,12 @@ use amethyst::{
 
 mod terrain;
 mod player;
-mod npc;
 pub use terrain::*;
 pub use player::*;
-pub use npc::*;
 
-use crate::game::map::PickInfo;
+use crate::game::{
+    sprite::SpriteSheetStorage,
+};
 
 #[derive(Default)]
 /// Used to move the camera and to follow around other entities
@@ -33,6 +32,12 @@ pub enum Direction {
     SOUTH,
 }
 
+#[derive(Debug)]
+pub struct PickInfo {
+    pub is_terrain: bool,
+    pub description: String,
+}
+
 #[derive(Default)]
 pub struct Cursor;
 impl Component for Cursor {
@@ -40,9 +45,14 @@ impl Component for Cursor {
 }
 
 impl Cursor {
-    pub fn initialize(world: &mut World, sprite_sheet: SpriteSheetHandle) {
+    pub fn initialize(world: &mut World) {
+        let cursor = {
+            let sheets = world.read_resource::<SpriteSheetStorage>();
+            sheets.cursor.clone()
+        };
+
         let sprite_render = SpriteRender {
-            sprite_sheet,
+            sprite_sheet: cursor,
             sprite_number: 0,
         };
 

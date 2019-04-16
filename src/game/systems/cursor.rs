@@ -19,13 +19,15 @@ use amethyst::{
     }
 };
 
+use libdwarf::resources::Map;
 use crate::game::{
     entity::{
         CameraFollow,
         Cursor,
+        PickInfo,
         CursorSelected,
     },
-    map::MapResource,
+    render::MapRenderer,
 };
 
 pub struct CursorSystem;
@@ -33,24 +35,26 @@ pub struct CursorSystem;
 impl<'s> System<'s> for CursorSystem {
     type SystemData = (
         WriteStorage<'s, Cursor>,
-        ReadExpect<'s, MapResource>,
         Write<'s, CursorSelected>,
         Read<'s, InputHandler<String, String>>,
         WriteStorage<'s, Transform>,
         ReadStorage<'s, Camera>,
         ReadStorage<'s, CameraFollow>,
         ReadExpect<'s, ScreenDimensions>,
+        ReadExpect<'s, Map>,
+        ReadExpect<'s, MapRenderer>,
     );
 
     fn run(&mut self, (
         mut cursors,
-        map,
         mut cursor_selected,
         input,
         mut transforms,
         cameras,
         follow,
-        screen_dim
+        screen_dim,
+        map,
+        map_render,
     ): Self::SystemData) {
         // render on screen cursor
         let camera_follow = (&transforms, &follow).join()
@@ -95,10 +99,24 @@ impl<'s> System<'s> for CursorSystem {
         };
 
         for (_cursor, transform) in (&mut cursors, &mut transforms).join() {
-            let (map_x, map_y) = map.to_map_coords(scene_x, scene_y);
-            cursor_selected.selected = map.whats_at(map_x, map_y);
+            let (map_x, map_y) = map_render.to_map_coords(scene_x, scene_y);
+            // If there are objects at this location, show debug info about those
+            if let Some(object) = map.objects_at(map_x, map_y) {
+                cursor_selected.selected = Some(PickInfo {
+                    is_terrain: false,
+                    description: format!("{:?}", object)
+                });
+            // Otherwise, get the terrain at this location.
+            } else if let Some(terrain) = map.terrain_at(map_x, map_y) {
+                cursor_selected.selected = Some(PickInfo {
+                    is_terrain: true,
+                    description: format!("{:?}", terrain)
+                });
+            } else {
+                cursor_selected.selected = None
+            }
 
-            let new_transform = map.place(map_x, map_y, 0.0);
+            let new_transform = map_render.place(map_x, map_y, 0.0);
             transform.set_x(new_transform.translation().x);
             transform.set_y(new_transform.translation().y);
         }

@@ -3,13 +3,13 @@ use amethyst::{
     ecs::prelude::{Component, DenseVecStorage},
     prelude::*,
     renderer::{
-        SpriteSheetHandle,
         SpriteRender,
         Transparent,
     },
 };
 
 use super::Direction;
+use crate::game::sprite::SpriteSheetStorage;
 
 #[derive(Default)]
 pub struct Player {
@@ -22,12 +22,17 @@ impl Component for Player {
 }
 
 impl Player {
-    pub fn initialize(world: &mut World, player_sprite: SpriteSheetHandle) {
+    pub fn initialize(world: &mut World) {
+        let sprite_sheet = {
+            let sheets = world.read_resource::<SpriteSheetStorage>();
+            sheets.player.clone()
+        };
+
         let mut player_transform = Transform::default();
         player_transform.set_xyz(0.0, 0.0, 1.0);
 
         let sprite_render = SpriteRender {
-            sprite_sheet: player_sprite.clone(),
+            sprite_sheet,
             sprite_number: 0,
         };
 

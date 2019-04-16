@@ -14,7 +14,6 @@ use amethyst::{
         RenderBundle,
         Stage,
     },
-    shrev::EventChannel,
     ui::{ DrawUi, UiBundle },
     utils::{
         application_root_dir,
@@ -22,16 +21,18 @@ use amethyst::{
     },
 };
 
-use libdwarf::{
-    actions::RenderUpdate,
-    world::WorldSim,
-};
+use libdwarf::systems;
 
 mod game;
 use game::{
     config::DwarfConfig,
     state::RunningState,
-    systems,
+    systems::{
+        CursorSystem,
+        MapMovementSystem,
+        PlayerMovement,
+        ui::debug::DebugUI,
+    }
 };
 
 fn main() -> amethyst::Result<()> {
@@ -71,11 +72,6 @@ fn main() -> amethyst::Result<()> {
                 .with_pass(DrawUi::new())
         );
 
-    let world_sim = WorldSim::new(
-        game_config.game.map_height,
-        game_config.game.map_width
-    );
-
     let game_data = GameDataBuilder::default()
         .with_bundle(
             RenderBundle::new(pipe, Some(config.clone()))
@@ -88,27 +84,23 @@ fn main() -> amethyst::Result<()> {
         // Register the systems, give it a name, and specify any
         // dependencies for that system.
         .with_bundle(input_bundle)?
+        // Simulation systems.
+        .with(systems::AssignTaskSystem, "assign_task", &[])
+        .with(systems::WorkerSystem, "worker_sim", &["assign_task"])
+        .with(systems::ObjectSystem, "object_sim", &[])
+        .with(systems::WorldUpdateSystem::default(), "world_updates", &["worker_sim", "object_sim"])
         // Cursor selection
-        .with(systems::CursorSystem, "cursor", &[])
-        .with(systems::MapMovementSystem, "map_movement", &[])
-        .with(systems::PlayerMovement, "player_movement", &[])
-        // Handles syncing rendering front-end w/ simulation
-        // TODO: Combine into a single system?
-        .with(systems::NPCSim::default(), "npc_sim", &[])
-        .with(systems::ObjectSim, "object_sim", &[])
+        .with(CursorSystem, "cursor", &[])
+        // Moving around the map
+        .with(MapMovementSystem, "map_movement", &[])
+        .with(PlayerMovement, "player_movement", &[])
         // Should always be last so we have the most up-to-date info.
-        .with(systems::ui::debug::DebugUI, "debug_ui", &["cursor", "player_movement"]);
+        .with(DebugUI, "debug_ui", &["cursor", "player_movement"]);
 
-    let state = RunningState {
-        sim_updates: None,
-        world_sim,
-    };
-
-    let mut game = Application::build("./", state)?
+    let mut game = Application::build("./", RunningState)?
         .with_resource(config)
         .with_resource(game_config.game)
         .with_resource(game_config.player)
-        .with_resource(EventChannel::<RenderUpdate>::new())
         .with_frame_limit(FrameRateLimitStrategy::Unlimited, 9999)
         .build(game_data)?;
 

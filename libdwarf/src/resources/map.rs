@@ -42,6 +42,11 @@ impl Map {
         }
     }
 
+    pub fn is_inside_map(&self, x: i32, y: i32) -> bool {
+        x >= 0 && x < self.width as i32 &&
+        y >= 0 && y < self.height as i32
+    }
+
     /// Find the north, east, south, west neighboring objects for some
     /// point <x, y>.
     pub fn find_neighbors(&self, x: u32, y: u32) -> Vec<&u32> {
@@ -66,13 +71,29 @@ impl Map {
         results
     }
 
-    pub fn has_collision(&self, x: u32, y: u32) -> bool {
-        self.collision_map.contains_key(&(x, y))
+    pub fn has_collision(&self, x: i32, y: i32) -> bool {
+        if self.is_inside_map(x, y) {
+            return self.collision_map.contains_key(&(x as u32, y as u32));
+        }
+
+        false
     }
 
-    pub fn objects_at(&self, x: u32, y: u32) -> Option<u32> {
-        if let Some(id) = self.collision_map.get(&(x, y)) {
-            return Some(*id);
+    pub fn objects_at(&self, x: i32, y: i32) -> Option<u32> {
+        if self.is_inside_map(x, y) {
+            if let Some(id) = self.collision_map.get(&(x as u32, y as u32)) {
+                return Some(*id);
+            }
+        }
+
+        None
+    }
+
+    pub fn terrain_at(&self, x: i32, y: i32) -> Option<Terrain> {
+        if self.is_inside_map(x, y) {
+            if let Some(terrain) = self.terrain.get(&(x as u32, y as u32)) {
+                return Some(terrain.clone());
+            }
         }
 
         None
