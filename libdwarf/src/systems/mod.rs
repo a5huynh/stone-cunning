@@ -1,9 +1,9 @@
 mod assign_task;
-mod object;
-mod worker;
-mod world;
+mod object_sim;
+mod worker_sim;
+mod world_sim;
 
 pub use assign_task::*;
-pub use object::*;
-pub use worker::*;
-pub use world::*;
+pub use object_sim::*;
+pub use worker_sim::*;
+pub use world_sim::*;

@@ -32,6 +32,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
             match event {
                 // Add an object to the map.
                 Action::Add((x, y), name) => {
+                    println!("Adding object '{}' @ ({}, {})", name, x, y);
                     let resource = resources.map.get(&name).unwrap().clone();
                     let new_entity = entities.create();
                     objects.insert(new_entity, MapObject::new(&resource)).unwrap();
@@ -42,6 +43,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     // println!("WUS: Adding worker @ {}, {}", x, y);
                     let entity = entities.create();
                     workers.insert(entity, Worker::new(x, y)).unwrap();
+                    positions.insert(entity, MapPosition { x, y }).unwrap();
                 },
                 // Deal damage to a particular object
                 Action::DealDamage(id, damage) => {

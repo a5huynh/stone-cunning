@@ -36,15 +36,21 @@ impl<'a> System<'a> for WorkerSystem {
             let mut new_queue = VecDeque::new();
             // Handle actions for worker
             while let Some(action) = worker.actions.pop_front() {
-                // println!("Worker({}) - Processing action {:?}", entity.id(), action);
+                if worker.energy <= 0.0 {
+                    break;
+                }
+
+                println!("Worker({}) - Processing action {:?}", entity.id(), action);
                 match action {
                     // Route worker towards a target
                     Action::MoveTo(target_x, target_y) => {
                         worker.x = target_x;
                         worker.y = target_y;
+                        worker.energy -= 1.0;
                     },
                     // Perform an action.
                     Action::HarvestResource(pos, target, harvest) => {
+                        worker.energy -= 1.0;
                         let (target_x, target_y) = pos;
                         // Are we next to this resource? Move closer to it
                         let dist_x = (target_x as i32 - worker.x as i32).abs() as u32;
