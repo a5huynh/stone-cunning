@@ -11,6 +11,7 @@ use crate::{
     resources::{
         Map,
         TaskQueue,
+        time,
     }
 };
 
@@ -24,8 +25,11 @@ impl WorldSim {
         world.add_resource(Map::initialize(width, height));
         // Initialize task queue.
         world.add_resource(TaskQueue::default());
+        // Add time tracking resources
+        world.add_resource(time::Time::default());
+        world.add_resource(time::Stopwatch::default());
 
-        let input_path = format!("../resources/data/resources.ron");
+        let input_path = format!("./resources/data/resources.ron");
         let f = File::open(&input_path).expect("Failed opening file");
         let config: WorldConfig = match from_reader(f) {
             Ok(x) => x,
