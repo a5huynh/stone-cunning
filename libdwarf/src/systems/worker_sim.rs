@@ -12,7 +12,11 @@ use specs::{
 use crate::{
     actions::Action,
     entities::{ MapObject, Worker },
-    resources::{ Map, TaskQueue },
+    resources::{
+        Map,
+        TaskQueue,
+        time::Time
+    },
 };
 
 pub struct WorkerSystem;
@@ -23,6 +27,7 @@ impl<'a> System<'a> for WorkerSystem {
         ReadStorage<'a, MapObject>,
         ReadExpect<'a, Map>,
         Write<'a, TaskQueue>,
+        ReadExpect<'a, Time>,
     );
 
     fn run (&mut self, (
@@ -31,15 +36,18 @@ impl<'a> System<'a> for WorkerSystem {
         objects,
         map,
         mut tasks,
+        time,
     ): Self::SystemData) {
         for (entity, worker) in (&*entities, &mut workers).join() {
-            let mut new_queue = VecDeque::new();
-            // Handle actions for worker
-            while let Some(action) = worker.actions.pop_front() {
-                if worker.energy <= 0.0 {
-                    break;
-                }
+            // Regen worker energy.
+            worker.energy += 2.0 * time.delta_seconds();
+            if worker.energy < 1.0 {
+                continue;
+            }
 
+            // Handle actions for worker
+            let mut new_queue = VecDeque::new();
+            while let Some(action) = worker.actions.pop_front() {
                 println!("Worker({}) - Processing action {:?}", entity.id(), action);
                 match action {
                     // Route worker towards a target
@@ -50,7 +58,6 @@ impl<'a> System<'a> for WorkerSystem {
                     },
                     // Perform an action.
                     Action::HarvestResource(pos, target, harvest) => {
-                        worker.energy -= 1.0;
                         let (target_x, target_y) = pos;
                         // Are we next to this resource? Move closer to it
                         let dist_x = (target_x as i32 - worker.x as i32).abs() as u32;
@@ -83,10 +90,12 @@ impl<'a> System<'a> for WorkerSystem {
                             // If the harvest resource is on the ground nearby,
                             // add it to inventory.
                             if let Some(id) = harvest_resource {
+                                worker.energy -= 1.0;
                                 tasks.add_world(Action::Take { target: **id, owner: entity.id() });
                             // Otherwise, try and harvest from a nearby target.
                             } else if let Some(id) = target_resource {
                                 // Harvest by dealing damage to item.
+                                worker.energy -= 1.0;
                                 new_queue.push_back(Action::HarvestResource(pos, target.clone(), harvest.clone()));
                                 tasks.add_world(Action::DealDamage(**id, 10));
                             }

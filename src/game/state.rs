@@ -34,7 +34,6 @@ use crate::game::{
         Player
     },
     render::MapRenderer,
-    resources::GameTick,
     sprite::SpriteSheetStorage,
 };
 
@@ -66,13 +65,6 @@ impl SimpleState for RunningState {
         // Initialize player.
         Player::initialize(world);
 
-        // Resources are data that is shared amongst all components
-        let tick_delta = {
-            let config = world.read_resource::<GameConfig>();
-            config.tick_delta
-        };
-
-        world.add_resource(GameTick::new(tick_delta));
         world.add_resource(CursorSelected::default());
 
         // Create the ui
@@ -102,24 +94,6 @@ impl SimpleState for RunningState {
             // Exit if the user hits escape
             if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) {
                 return Trans::Quit;
-            }
-        }
-
-        Trans::None
-    }
-
-    /// Called at an interval of 1/60th second.
-    fn fixed_update(&mut self, data: StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
-        let world = data.world;
-        // Update global game tick
-        {
-            let mut tick = world.write_resource::<GameTick>();
-            let time = world.read_resource::<Time>().delta_seconds();
-            if tick.last_tick > 0.0 {
-                tick.last_tick -= time;
-            } else {
-                // Tick simulation
-                tick.reset();
             }
         }
 
