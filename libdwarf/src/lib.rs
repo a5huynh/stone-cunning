@@ -1,4 +1,6 @@
-pub mod actors;
-pub mod objects;
+pub mod actions;
+pub mod config;
+pub mod entities;
+pub mod resources;
+pub mod systems;
 pub mod world;
-pub mod tasks;

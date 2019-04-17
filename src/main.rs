@@ -21,11 +21,20 @@ use amethyst::{
     },
 };
 
+use libdwarf::systems;
+
 mod game;
 use game::{
     config::DwarfConfig,
     state::RunningState,
-    systems,
+    systems::{
+        CursorSystem,
+        RenderObjectSystem,
+        RenderNPCSystem,
+        MapMovementSystem,
+        PlayerMovement,
+        ui::debug::DebugUI,
+    }
 };
 
 fn main() -> amethyst::Result<()> {
@@ -77,15 +86,24 @@ fn main() -> amethyst::Result<()> {
         // Register the systems, give it a name, and specify any
         // dependencies for that system.
         .with_bundle(input_bundle)?
+        // Simulation systems.
+        .with(systems::AssignTaskSystem, "assign_task", &[])
+        .with(systems::WorkerSystem, "worker_sim", &["assign_task"])
+        .with(systems::ObjectSystem, "object_sim", &[])
+        .with(systems::WorldUpdateSystem::default(), "world_updates", &["worker_sim", "object_sim"])
+        // Render systems. Takes entities from the simulations and assigns sprites
+        // to them as they get added.
+        .with(RenderObjectSystem, "render_obj_system", &["world_updates"])
+        .with(RenderNPCSystem, "render_npc_system", &["world_updates"])
         // Cursor selection
-        .with(systems::CursorSystem, "cursor", &[])
-        .with(systems::MapMovementSystem, "map_movement", &[])
-        .with(systems::PlayerMovement, "player_movement", &[])
-        .with(systems::NPCMovement, "npc_movement", &[])
+        .with(CursorSystem, "cursor", &[])
+        // Moving around the map
+        .with(MapMovementSystem, "map_movement", &[])
+        .with(PlayerMovement, "player_movement", &[])
         // Should always be last so we have the most up-to-date info.
-        .with(systems::ui::debug::DebugUI, "debug_ui", &["cursor", "player_movement"]);
+        .with(DebugUI, "debug_ui", &["cursor", "player_movement"]);
 
-    let mut game = Application::build("./", RunningState::default())?
+    let mut game = Application::build("./", RunningState)?
         .with_resource(config)
         .with_resource(game_config.game)
         .with_resource(game_config.player)

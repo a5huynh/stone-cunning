@@ -13,10 +13,11 @@ use amethyst::{
     input::InputHandler,
 };
 
+use libdwarf::resources::Map;
 use crate::game::{
     config::PlayerConfig,
     entity::{ Player },
-    map::MapResource,
+    render::MapRenderer,
 };
 
 pub struct PlayerMovement;
@@ -27,7 +28,8 @@ impl<'s> System<'s> for PlayerMovement {
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<String, String>>,
         Read<'s, Time>,
-        ReadExpect<'s, MapResource>,
+        ReadExpect<'s, Map>,
+        ReadExpect<'s, MapRenderer>,
     );
 
     fn run(&mut self, (
@@ -37,6 +39,7 @@ impl<'s> System<'s> for PlayerMovement {
         input,
         time,
         map,
+        map_render,
     ): Self::SystemData) {
         let x_move = input.axis_value("player_x").unwrap();
         let y_move = input.axis_value("player_y").unwrap();
@@ -52,12 +55,12 @@ impl<'s> System<'s> for PlayerMovement {
             let player_y = transform.translation().y;
             // Convert player position into map coordinates and bump to new location.
             let (new_x, new_y) = {
-                let (map_x, map_y) = map.to_map_coords(player_x, player_y);
+                let (map_x, map_y) = map_render.to_map_coords(player_x, player_y);
                 (map_x + x_move as i32, map_y + y_move as i32)
             };
 
             if !map.has_collision(new_x, new_y) {
-                let new_transform = map.place(new_x, new_y, 1.0);
+                let new_transform = map_render.place(new_x, new_y, 1.0);
                 transform.set_x(new_transform.translation().x);
                 transform.set_y(new_transform.translation().y);
                 transform.set_z(new_transform.translation().z);

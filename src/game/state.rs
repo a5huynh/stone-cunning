@@ -4,7 +4,8 @@ use amethyst::{
         transform::Transform,
         Time,
     },
-    input::{ InputEvent, is_close_requested, is_key_down },
+    ecs::Write,
+    input::{ is_close_requested, is_key_down },
     prelude::*,
     renderer::{
         Camera,
@@ -12,9 +13,14 @@ use amethyst::{
         Projection,
         VirtualKeyCode,
     },
-    shrev::{ EventChannel, ReaderId },
     ui::{ UiCreator, UiFinder, UiText },
     utils::fps_counter::FPSCounter,
+};
+
+use libdwarf::{
+    actions::Action,
+    resources::TaskQueue,
+    world::WorldSim,
 };
 
 use crate::game::{
@@ -23,55 +29,49 @@ use crate::game::{
         CameraFollow,
         Cursor,
         CursorSelected,
-        DwarfNPC,
         Floor,
         Object,
         Player
     },
-    map::MapResource,
+    render::MapRenderer,
     resources::GameTick,
-    sprite::{ load_sprite_sheet },
+    sprite::SpriteSheetStorage,
 };
 
-#[derive(Default)]
-pub struct RunningState {
-    event_reader: Option<ReaderId<InputEvent<String>>>,
-}
-
+pub struct RunningState;
 impl SimpleState for RunningState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
-
-        self.event_reader = {
-            let mut channel = world.write_resource::<EventChannel<InputEvent<String>>>();
-            Some(channel.register_reader())
-        };
-
-        let cursor_spritesheet_handle = load_sprite_sheet(world, "cursor");
-        let object_spritesheet_handle = load_sprite_sheet(world, "objects");
-        let terrain_spritesheet_handle = load_sprite_sheet(world, "terrain");
-        let player_spritesheet_handle = load_sprite_sheet(world, "player");
-        let npc_spritesheet_handle = load_sprite_sheet(world, "npc");
-
         world.register::<Floor>();
         world.register::<Object>();
         world.register::<Player>();
 
+        let storage = SpriteSheetStorage::new(world);
+        world.add_resource(storage);
+
+        // Initialize simulation;
+        let (map_height, map_width) = {
+            let config = &world.read_resource::<GameConfig>();
+            (config.map_height, config.map_width)
+        };
+
         initialize_camera(world);
-        // Initialize map terrain & objects.
-        let map = MapResource::initialize(world, terrain_spritesheet_handle, object_spritesheet_handle);
-        Cursor::initialize(world, cursor_spritesheet_handle);
-        // Initialize dwarf.
-        DwarfNPC::initialize(world, &map, npc_spritesheet_handle);
+        // Initialize simulation
+        WorldSim::new(world, map_width, map_height);
+        // Render map
+        let map_render = MapRenderer::initialize(world);
+        world.add_resource(map_render);
+        // Initialize cursor sprite.
+        Cursor::initialize(world);
         // Initialize player.
-        Player::initialize(world, player_spritesheet_handle);
+        Player::initialize(world);
+
         // Resources are data that is shared amongst all components
         let tick_delta = {
             let config = world.read_resource::<GameConfig>();
             config.tick_delta
         };
 
-        world.add_resource(map);
         world.add_resource(GameTick::new(tick_delta));
         world.add_resource(CursorSelected::default());
 
@@ -79,6 +79,22 @@ impl SimpleState for RunningState {
         world.exec(|mut creator: UiCreator<'_>| {
             creator.create("resources/ui/debug.ron", ());
         });
+
+        // Setup scene
+        // Add entities to the world
+        world.exec(|(mut queue,): (Write<TaskQueue>,)| {
+            queue.add_world(Action::AddWorker((1, 1)));
+            queue.add_world(Action::Add((9, 9), String::from("tree")));
+        });
+        // Add a task to the task queue.
+        world.exec(|(mut queue,): (Write<TaskQueue>,)| {
+            queue.add(Action::HarvestResource(
+                (9, 9),
+                String::from("tree"),
+                String::from("wood"),
+            ));
+        });
+
     }
 
     fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
@@ -102,26 +118,12 @@ impl SimpleState for RunningState {
             if tick.last_tick > 0.0 {
                 tick.last_tick -= time;
             } else {
+                // Tick simulation
                 tick.reset();
             }
         }
 
         Trans::None
-    }
-
-    /// Shadow update is called as often as possibly by the engine on all
-    /// states which are on the stack.
-    fn shadow_update(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-        let world = data.world;
-        let event_channel = world.read_resource::<EventChannel<InputEvent<String>>>();
-        for event in event_channel.read(self.event_reader.as_mut().unwrap()) {
-            if let InputEvent::ActionPressed(action) = event {
-                match &**action {
-                    "menu" => println!("ACTION!"),
-                    _ => {},
-                }
-            }
-        }
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {

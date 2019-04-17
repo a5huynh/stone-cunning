@@ -11,6 +11,26 @@ use amethyst::{
     }
 };
 
+pub struct SpriteSheetStorage {
+    pub cursor: SpriteSheetHandle,
+    pub object: SpriteSheetHandle,
+    pub terrain: SpriteSheetHandle,
+    pub player: SpriteSheetHandle,
+    pub npc: SpriteSheetHandle,
+}
+
+impl SpriteSheetStorage {
+    pub fn new(world: &mut World) -> Self {
+        SpriteSheetStorage {
+            cursor: load_sprite_sheet(world, "cursor"),
+            object: load_sprite_sheet(world, "objects"),
+            terrain: load_sprite_sheet(world, "terrain"),
+            player: load_sprite_sheet(world, "player"),
+            npc: load_sprite_sheet(world, "npc"),
+        }
+    }
+}
+
 pub fn load_sprite_sheet(world: &mut World, name: &str) -> SpriteSheetHandle {
     let texture_handle = {
         let loader = world.read_resource::<Loader>();

@@ -13,7 +13,7 @@ use amethyst::{
 
 use crate::game::{
     entity::{ CursorSelected, Player },
-    map::MapResource,
+    render::MapRenderer,
 };
 
 pub struct DebugUI;
@@ -24,7 +24,7 @@ impl<'s> System<'s> for DebugUI {
         UiFinder<'s>,
         WriteStorage<'s, UiText>,
         ReadExpect<'s, CursorSelected>,
-        ReadExpect<'s, MapResource>,
+        ReadExpect<'s, MapRenderer>,
     );
 
     fn run(&mut self, (
@@ -33,7 +33,7 @@ impl<'s> System<'s> for DebugUI {
         finder,
         mut ui_text,
         cursor_selected,
-        map,
+        map_render,
     ): Self::SystemData) {
 
         let player_loc = (&mut players, &mut transforms).join()
@@ -44,7 +44,7 @@ impl<'s> System<'s> for DebugUI {
             let player_x = transform.translation().x;
             let player_y = transform.translation().y;
             // Convert player position into map coordinates and bump to new location.
-            let (map_x, map_y) = map.to_map_coords(player_x, player_y);
+            let (map_x, map_y) = map_render.to_map_coords(player_x, player_y);
 
             if let Some(entity) = finder.find("player_info") {
                 if let Some(text) = ui_text.get_mut(entity) {
