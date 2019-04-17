@@ -17,6 +17,8 @@ use amethyst::{
     utils::fps_counter::FPSCounter,
 };
 
+use libdwarf::world::WorldSim;
+
 use crate::game::{
     config::GameConfig,
     entity::{
@@ -33,14 +35,15 @@ use crate::game::{
     sprite::{ load_sprite_sheet },
 };
 
-#[derive(Default)]
-pub struct RunningState {
-    event_reader: Option<ReaderId<InputEvent<String>>>,
+pub struct RunningState<'a, 'b> {
+    pub event_reader: Option<ReaderId<InputEvent<String>>>,
+    pub world_sim: WorldSim<'a, 'b>,
 }
 
-impl SimpleState for RunningState {
+impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
+        let mut world_sim = &mut self.world_sim;
 
         self.event_reader = {
             let mut channel = world.write_resource::<EventChannel<InputEvent<String>>>();
@@ -59,10 +62,15 @@ impl SimpleState for RunningState {
 
         initialize_camera(world);
         // Initialize map terrain & objects.
-        let mut map = MapResource::initialize(world, terrain_spritesheet_handle, object_spritesheet_handle);
+        let mut map = MapResource::initialize(
+            world,
+            &mut world_sim,
+            terrain_spritesheet_handle,
+            object_spritesheet_handle
+        );
         Cursor::initialize(world, cursor_spritesheet_handle);
         // Initialize dwarf.
-        DwarfNPC::initialize(world, &mut map, npc_spritesheet_handle);
+        DwarfNPC::initialize(world, &mut world_sim, &mut map, npc_spritesheet_handle);
         // Initialize player.
         Player::initialize(world, player_spritesheet_handle);
         // Resources are data that is shared amongst all components
@@ -95,10 +103,7 @@ impl SimpleState for RunningState {
     /// Called at an interval of 1/60th second.
     fn fixed_update(&mut self, data: StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
         let world = data.world;
-        let mut map = {
-            let mut map = world.write_resource::<MapResource>();
-            map
-        };
+        let world_sim = &mut self.world_sim;
 
         // Update global game tick
         {
@@ -108,7 +113,7 @@ impl SimpleState for RunningState {
                 tick.last_tick -= time;
             } else {
                 // Tick simulation
-                map.world.tick();
+                world_sim.tick();
                 tick.reset();
             }
         }

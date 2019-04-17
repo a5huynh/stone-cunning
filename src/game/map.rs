@@ -7,12 +7,10 @@ use amethyst::{
         Transparent,
     },
 };
-
 use libdwarf::{
-    actions::Action,
-    entities::MapObject,
     world::{ Terrain, WorldSim },
 };
+
 use crate::game::{
     config::GameConfig,
     entity::{ Floor, Object },
@@ -28,15 +26,17 @@ pub struct PickInfo {
 /// Map resource used to convert coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
 pub struct MapResource {
+    pub map_height: u32,
+    pub map_width: u32,
     pub tile_width: f32,
     pub tile_height: f32,
     pub tile_offset: f32,
-    pub world: WorldSim,
 }
 
 impl MapResource {
     pub fn initialize(
         world: &mut World,
+        sim: &mut WorldSim,
         terrain_sprites: SpriteSheetHandle,
         object_sprites: SpriteSheetHandle
     ) -> MapResource {
@@ -52,15 +52,16 @@ impl MapResource {
         };
 
         let mut map_resource = MapResource {
+            map_height, map_width,
             tile_height: tile_height as f32,
             tile_offset: tile_offset as f32,
             tile_width: tile_width as f32,
-            world: WorldSim::new(map_width, map_height)
         };
 
+        let terrain_map = sim.terrain();
         for y in 0..map_height {
             for x in 0..map_width {
-                let terrain = map_resource.world.terrain.get(&(x as u32, y as u32)).unwrap();
+                let terrain = terrain_map.get(&(x as u32, y as u32)).unwrap();
                 let sprite_idx = match terrain {
                     Terrain::STONE => 0,
                     Terrain::MARBLE => 1,
@@ -91,34 +92,23 @@ impl MapResource {
         let entity = world.create_entity()
             .with(object_render.clone())
             .with(Object::default())
-            .with(map_resource.place(10, 5, 1.0))
+            .with(map_resource.place(10, 10, 1.0))
             .with(Transparent)
             .build();
 
-        let mut map_object = MapObject::new(10, 10);
-        map_object.id = entity.id();
-        map_resource.world.add_object(map_object);
-        map_resource.world.add_task(Action::HarvestResource(
-            (10, 10),
-            "wood".to_string(),
-            entity.id()
-        ));
         map_resource
-    }
-
-    pub fn add_npc(&mut self, entity_id: u32, x: u32, y: u32) {
-        self.world.add_worker(entity_id, x, y);
     }
 
     /// Check to see if there is a collidable object at <x, y>
     pub fn has_collision(&self, map_x: i32, map_y: i32) -> bool {
         // Check if coordinates are outside of bounds
-        if map_x < 0 || map_x > self.world.width as i32
-            || map_y < 0 || map_y > self.world.height as i32 {
+        if map_x < 0 || map_x > self.map_width as i32
+            || map_y < 0 || map_y > self.map_height as i32 {
             return false;
         }
 
-        self.world.has_collision(map_x as u32, map_y as u32)
+        // self.world.has_collision(map_x as u32, map_y as u32)
+        false
     }
 
     /// Converts some point <x, y> into map coordinates.
@@ -156,30 +146,30 @@ impl MapResource {
     /// Return information about what's currently at the map coordinates: <x, y>
     pub fn whats_at(&self, x: i32, y: i32) -> Option<PickInfo> {
         let key = (x as u32, y as u32);
-        // Any objects at this location?
-        if self.world.has_collision(x as u32, y as u32) {
-            return Some(
-                PickInfo {
-                    is_terrain: false,
-                    description: format!(
-                        "{:?}",
-                        self.world.objects_at(x as u32, y as u32)
-                    ),
-                }
-            );
-        }
+        // // Any objects at this location?
+        // if self.world.has_collision(x as u32, y as u32) {
+        //     return Some(
+        //         PickInfo {
+        //             is_terrain: false,
+        //             description: format!(
+        //                 "{:?}",
+        //                 self.world.objects_at(x as u32, y as u32)
+        //             ),
+        //         }
+        //     );
+        // }
 
-        if self.world.terrain.contains_key(&key) {
-            return Some(
-                PickInfo {
-                    is_terrain: true,
-                    description: format!(
-                        "{:?}",
-                        self.world.terrain.get(&key)
-                    )
-                }
-            );
-        }
+        // if self.world.terrain.contains_key(&key) {
+        //     return Some(
+        //         PickInfo {
+        //             is_terrain: true,
+        //             description: format!(
+        //                 "{:?}",
+        //                 self.world.terrain.get(&key)
+        //             )
+        //         }
+        //     );
+        // }
 
         return None;
     }

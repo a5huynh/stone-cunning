@@ -30,13 +30,10 @@ impl<'s> System<'s> for NPCSim {
         mut transforms,
         map
     ): Self::SystemData) {
-        for (entity, _, transform) in (&*entities, &mut dwarves, &mut transforms).join() {
-            // Get worker reference from sim
-            if let Some(worker) = map.world.get_worker(entity.id()) {
-                // Update location
-                let new_transform = map.place(worker.x as i32, worker.y as i32, 1.0);
-                *transform = new_transform;
-            }
-        }
+        // for (entity, _, transform) in (&*entities, &mut dwarves, &mut transforms).join() {
+        //     // Update location
+        //     let new_transform = map.place(worker.x as i32, worker.y as i32, 1.0);
+        //     *transform = new_transform;
+        // }
     }
 }

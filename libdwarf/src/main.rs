@@ -1,10 +1,22 @@
 use termion::{clear, style, cursor};
 use termion::raw::{IntoRawMode, RawTerminal};
 use std::io::{self, Write, Read};
+use specs::{
+    self,
+    prelude::*,
+    Join,
+    World,
+};
 
 use libdwarf::{
     actions::Action,
-    entities::MapObject,
+    entities::{
+        MapObject,
+        MapPosition,
+        Worker
+    },
+    resources::{ Map, Terrain, TaskQueue },
+    systems,
     world::WorldSim,
 };
 
@@ -24,15 +36,85 @@ impl<R: Read, W: Write> AsciiRenderer<R, W> {
         }
     }
 
-    pub fn render(&mut self, world: &WorldSim) {
+    // Add objects to cells
+    pub fn render_objects(&mut self, world: &World, cells: &mut Vec<char>) {
+        let map = world.read_resource::<Map>();
+        let entities = world.entities();
+        let objects = world.read_storage::<MapObject>();
+        let positions = world.read_storage::<MapPosition>();
+        for (_, object, pos) in (&entities, &objects, &positions).join() {
+            let idx = (pos.y * map.width + pos.x) as usize;
+            let tile = match object.resource_type.name.as_ref() {
+                "tree" => 'T',
+                "wood" => 'l',
+                _ => '?'
+            };
+
+            cells[idx] = tile;
+        }
+    }
+
+    pub fn render_terrain(&mut self, world: &World, cells: &mut Vec<char>) {
+        let map = world.read_resource::<Map>();
+        for y in (0..map.height).rev() {
+            for x in 0..map.width {
+                let idx = (x as u32, y as u32);
+                let terrain = map.terrain.get(&idx);
+                let tile = match terrain {
+                    Some(Terrain::GRASS) => ',',
+                    Some(Terrain::STONE) => '.',
+                    Some(Terrain::MARBLE) => '.',
+                    _ => '?',
+                };
+
+                cells[(y * map.width + x) as usize] = tile;
+            }
+        }
+    }
+
+    // Add workers to cells
+    pub fn render_workers(&mut self, world: &World, cells: &mut Vec<char>) {
+        let map = world.read_resource::<Map>();
+        let entities = world.entities();
+        let workers = world.read_storage::<Worker>();
+        for (_, worker) in (&entities, &workers).join() {
+            let idx = (worker.y * map.width + worker.x) as usize;
+            cells[idx] = 'w';
+        }
+    }
+
+    pub fn render(&mut self, world: &World) {
         write!(self.stdout, "{}{}", clear::All, cursor::Goto(1, 1)).unwrap();
         write!(self.stdout, "num ticks: {}\n\r", self.num_ticks).unwrap();
+
         // Render world.
-        write!(self.stdout, "{}", world).unwrap();
+        let map = world.read_resource::<Map>();
+        let mut cells = vec!['?'; (map.width * map.height) as usize];
+        self.render_terrain(world, &mut cells);
+        self.render_objects(world, &mut cells);
+        self.render_workers(world, &mut cells);
+        for y in (0..map.height).rev() {
+            for x in 0..map.width {
+                write!(self.stdout, "{}", cells[(y * map.width + x) as usize]).unwrap();
+                if x < map.width - 1 {
+                    write!(self.stdout, " ").unwrap();
+                }
+            }
+            write!(self.stdout, "\n\r").unwrap();
+        }
 
         // Render workers & worker status
+        write!(self.stdout, "{}", cursor::Goto(1, 12)).unwrap();
         write!(self.stdout, "\n\rWorkers\n\r--------------\n\r").unwrap();
-        for worker in world.workers.iter() {
+        let entities = world.entities();
+        let workers = world.read_storage::<Worker>();
+        for (_, worker) in (&entities, &workers).join() {
+            write!(self.stdout, "[Inventory]\n\r").unwrap();
+            for obj in worker.inventory.iter() {
+                write!(self.stdout, "- {:?}\n\r", obj).unwrap();
+            }
+
+            write!(self.stdout, "[Task Queue]\n\r").unwrap();
             for action in worker.actions.iter() {
                 write!(self.stdout, "- {:?}\n\r", action).unwrap();
             }
@@ -40,8 +122,10 @@ impl<R: Read, W: Write> AsciiRenderer<R, W> {
 
         // Render objects & object queue
         write!(self.stdout, "\n\rObjects\n\r--------------\n\r").unwrap();
-        for (pos, object) in world.objects.iter() {
-            write!(self.stdout, "{:?} {}\n\r", pos, object.id).unwrap();
+        let objects = world.read_storage::<MapObject>();
+        let positions = world.read_storage::<MapPosition>();
+        for (entity, object, pos) in (&entities, &objects, &positions).join() {
+            write!(self.stdout, "{:?} {}\n\r", (pos.x, pos.y), entity.id()).unwrap();
             for action in object.actions.iter() {
                 write!(self.stdout, "- {:?}\n\r", action).unwrap();
             }
@@ -60,25 +144,34 @@ impl<R, W: Write> Drop for AsciiRenderer<R, W> {
 }
 
 fn main() {
+    // Setup ascii renderer
     let stdin = io::stdin();
     let stdout = io::stdout();
-
     let mut renderer = AsciiRenderer::new(stdin.lock(), stdout.lock());
 
-    let mut world = WorldSim::new(10, 10);
-    // Add a tree to the world
-    let tree = MapObject::new(1, 9, 9);
-    world.add_object(tree.clone());
-    // Add a worker to the world
-    world.add_worker(0, 0, 0);
-    // Add a job
-    world.add_task(
-        Action::HarvestResource(
+    let mut world = World::new();
+    WorldSim::new(&mut world, 10, 10);
+
+    let mut dispatcher = DispatcherBuilder::new()
+        .with(systems::AssignTaskSystem, "assign_task", &[])
+        .with(systems::WorkerSystem, "worker_sim", &["assign_task"])
+        .with(systems::ObjectSystem, "object_sim", &[])
+        .with(systems::WorldUpdateSystem::default(), "world_updates", &["worker_sim", "object_sim"])
+        .build();
+    dispatcher.setup(&mut world.res);
+    // Add entities to the world
+    world.exec(|(mut queue,): (specs::Write<TaskQueue>,)| {
+        queue.add_world(Action::AddWorker((0, 0)));
+        queue.add_world(Action::Add((9, 9), String::from("tree")));
+    });
+    // Add a task to the task queue.
+    world.exec(|(mut queue,): (specs::Write<TaskQueue>,)| {
+        queue.add(Action::HarvestResource(
             (9, 9),
-            "wood".to_string(),
-            tree.id
-        ),
-    );
+            String::from("tree"),
+            String::from("wood"),
+        ));
+    });
 
     loop {
         // Render map
@@ -93,7 +186,8 @@ fn main() {
             b'.' => {
                 renderer.num_ticks += 1;
                 // Tick map
-                world.tick();
+                dispatcher.dispatch(&mut world.res);
+                world.maintain();
             },
             _ => {}
         }

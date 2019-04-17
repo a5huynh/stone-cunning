@@ -1,56 +1,47 @@
 use std::collections::VecDeque;
 use specs_derive::*;
-use specs::{ Component, VecStorage };
+use specs::{
+    Component,
+    VecStorage,
+};
 
 use crate::{
-    actors::Actor,
     actions::Action,
-    world::{ WorldSim, WorldUpdate },
+    entities::{ ResourceAttribute, ResourceType },
 };
 
 #[derive(Clone, Component, Debug)]
 #[storage(VecStorage)]
 pub struct MapObject {
-    pub id: u32,
     pub health: i32,
+    pub resource_type: ResourceType,
     pub actions: VecDeque<Action>,
-    // Position on map.
-    pub x: u32,
-    pub y: u32,
 }
 
 impl MapObject {
-    pub fn new(x: u32, y: u32) -> Self {
-        MapObject {
-            id: Default::default(),
-            x, y,
-            actions: VecDeque::new(),
-            health: 10,
-        }
-    }
-}
-
-impl Actor for MapObject {
-    fn id(&self) -> u32 { self.id }
-
-    fn tick(&mut self, _neighbors: Vec<Option<&MapObject>>) -> Option<WorldUpdate> {
-        let mut update = None;
-        while let Some(action) = self.actions.pop_front() {
-            match action {
-                Action::DealDamage(_) => {
-                    update = Some(WorldUpdate {
-                        target: WorldSim::id(),
-                        action: Action::Destroy(self.id)
-                    });
+    /// Build a new map object positioned at (x, y).
+    pub fn new(resource_type: &ResourceType) -> Self {
+        let mut default_health = 1;
+        for attribute in resource_type.attributes.iter() {
+            match attribute {
+                ResourceAttribute::Health(health) => {
+                    default_health = *health as i32;
                 },
                 _ => {}
             }
         }
 
-        update
+        MapObject {
+            resource_type: resource_type.clone(),
+            actions: VecDeque::new(),
+            health: default_health,
+        }
     }
 
-    fn queue(&mut self, action: &Action) {
-        self.actions.push_back(action.clone());
+    pub fn drop_table(&self) -> Vec<&ResourceAttribute> {
+        self.resource_type.attributes
+            .iter()
+            .filter(|x| x.is_drop())
+            .collect()
     }
 }

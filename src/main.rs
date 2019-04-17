@@ -14,11 +14,17 @@ use amethyst::{
         RenderBundle,
         Stage,
     },
+    shrev::EventChannel,
     ui::{ DrawUi, UiBundle },
     utils::{
         application_root_dir,
         fps_counter::FPSCounterBundle,
     },
+};
+
+use libdwarf::{
+    actions::RenderUpdate,
+    world::WorldSim,
 };
 
 mod game;
@@ -65,6 +71,11 @@ fn main() -> amethyst::Result<()> {
                 .with_pass(DrawUi::new())
         );
 
+    let world_sim = WorldSim::new(
+        game_config.game.map_height,
+        game_config.game.map_width
+    );
+
     let game_data = GameDataBuilder::default()
         .with_bundle(
             RenderBundle::new(pipe, Some(config.clone()))
@@ -83,15 +94,21 @@ fn main() -> amethyst::Result<()> {
         .with(systems::PlayerMovement, "player_movement", &[])
         // Handles syncing rendering front-end w/ simulation
         // TODO: Combine into a single system?
-        .with(systems::NPCSim, "npc_sim", &[])
+        .with(systems::NPCSim::default(), "npc_sim", &[])
         .with(systems::ObjectSim, "object_sim", &[])
         // Should always be last so we have the most up-to-date info.
         .with(systems::ui::debug::DebugUI, "debug_ui", &["cursor", "player_movement"]);
 
-    let mut game = Application::build("./", RunningState::default())?
+    let state = RunningState {
+        sim_updates: None,
+        world_sim,
+    };
+
+    let mut game = Application::build("./", state)?
         .with_resource(config)
         .with_resource(game_config.game)
         .with_resource(game_config.player)
+        .with_resource(EventChannel::<RenderUpdate>::new())
         .with_frame_limit(FrameRateLimitStrategy::Unlimited, 9999)
         .build(game_data)?;
 

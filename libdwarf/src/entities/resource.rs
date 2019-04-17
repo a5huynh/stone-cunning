@@ -10,24 +10,33 @@ use serde::Deserialize;
 /// - ResourceTypes can drop other types when destroyed. For example, a tree should
 ///   drop wood.
 ///
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub enum ResourceAttribute {
     Health(u32),
     Drops(String, u32),
 }
 
+impl ResourceAttribute {
+    pub fn is_drop(&self) -> bool {
+        match self {
+            ResourceAttribute::Drops(_, _) => true,
+            _ => false,
+        }
+    }
+}
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct ResourceType {
     /// Name of this generic resource type
-    name: String,
+    pub name: String,
     /// Attributes
-    attributes: Vec<ResourceAttribute>
+    pub attributes: Vec<ResourceAttribute>,
 }
 
 #[cfg(test)]
 mod test {
     use super::{ ResourceType, ResourceAttribute };
+    use std::collections::HashMap;
 
     #[test]
     fn test_resource_creation() {
@@ -35,7 +44,9 @@ mod test {
             name: String::from("tree"),
             attributes: vec![
                 ResourceAttribute::Health(10),
-                ResourceAttribute::Drops(String::from("wood"), 10)
+                // Can have multiple drops
+                ResourceAttribute::Drops(String::from("wood"), 3),
+                ResourceAttribute::Drops(String::from("acorn"), 10),
             ]
         };
 
