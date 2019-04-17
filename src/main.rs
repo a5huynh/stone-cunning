@@ -29,6 +29,8 @@ use game::{
     state::RunningState,
     systems::{
         CursorSystem,
+        RenderObjectSystem,
+        RenderNPCSystem,
         MapMovementSystem,
         PlayerMovement,
         ui::debug::DebugUI,
@@ -89,6 +91,10 @@ fn main() -> amethyst::Result<()> {
         .with(systems::WorkerSystem, "worker_sim", &["assign_task"])
         .with(systems::ObjectSystem, "object_sim", &[])
         .with(systems::WorldUpdateSystem::default(), "world_updates", &["worker_sim", "object_sim"])
+        // Render systems. Takes entities from the simulations and assigns sprites
+        // to them as they get added.
+        .with(RenderObjectSystem, "render_obj_system", &["world_updates"])
+        .with(RenderNPCSystem, "render_npc_system", &["world_updates"])
         // Cursor selection
         .with(CursorSystem, "cursor", &[])
         // Moving around the map

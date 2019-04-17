@@ -4,6 +4,7 @@ use amethyst::{
         transform::Transform,
         Time,
     },
+    ecs::Write,
     input::{ is_close_requested, is_key_down },
     prelude::*,
     renderer::{
@@ -16,7 +17,11 @@ use amethyst::{
     utils::fps_counter::FPSCounter,
 };
 
-use libdwarf::world::WorldSim;
+use libdwarf::{
+    actions::Action,
+    resources::TaskQueue,
+    world::WorldSim,
+};
 
 use crate::game::{
     config::GameConfig,
@@ -49,17 +54,17 @@ impl SimpleState for RunningState {
             let config = &world.read_resource::<GameConfig>();
             (config.map_height, config.map_width)
         };
-        let world_sim = WorldSim::new(world, map_width, map_height);
-        world.add_resource(world_sim);
 
         initialize_camera(world);
-        Cursor::initialize(world);
-        // Initialize player.
-        Player::initialize(world);
-
+        // Initialize simulation
+        WorldSim::new(world, map_width, map_height);
         // Render map
         let map_render = MapRenderer::initialize(world);
         world.add_resource(map_render);
+        // Initialize cursor sprite.
+        Cursor::initialize(world);
+        // Initialize player.
+        Player::initialize(world);
 
         // Resources are data that is shared amongst all components
         let tick_delta = {
@@ -74,6 +79,22 @@ impl SimpleState for RunningState {
         world.exec(|mut creator: UiCreator<'_>| {
             creator.create("resources/ui/debug.ron", ());
         });
+
+        // Setup scene
+        // Add entities to the world
+        world.exec(|(mut queue,): (Write<TaskQueue>,)| {
+            queue.add_world(Action::AddWorker((1, 1)));
+            queue.add_world(Action::Add((9, 9), String::from("tree")));
+        });
+        // Add a task to the task queue.
+        world.exec(|(mut queue,): (Write<TaskQueue>,)| {
+            queue.add(Action::HarvestResource(
+                (9, 9),
+                String::from("tree"),
+                String::from("wood"),
+            ));
+        });
+
     }
 
     fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
