@@ -81,7 +81,11 @@ fn main() -> amethyst::Result<()> {
         .with(MapMovementSystem, "map_movement", &[])
         .with(PlayerMovement, "player_movement", &[])
         // Should always be last so we have the most up-to-date info.
-        .with(DebugUI, "debug_ui", &["cursor", "player_movement"]);
+        .with(
+            DebugUI::default(),
+            "debug_ui",
+            &["cursor", "player_movement"],
+        );
 
     let mut game = Application::build("./", RunningState)?
         .with_resource(config)

@@ -40,7 +40,6 @@ impl<'a> System<'a> for RenderNPCSystem {
                 .join()
                 .collect();
         for (entity, _, pos, _) in invisible {
-            println!("Found worker w/ no sprite");
             // Appply transformation
             transforms
                 .insert(entity, map_render.place(pos.x as i32, pos.y as i32, 1.0))

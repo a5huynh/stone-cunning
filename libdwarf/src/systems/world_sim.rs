@@ -29,7 +29,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
             match event {
                 // Add an object to the map.
                 Action::Add((x, y), name) => {
-                    println!("Adding object '{}' @ ({}, {})", name, x, y);
+                    println!("[WUS] Adding object '{}' @ ({}, {})", name, x, y);
                     let resource = resources.map.get(&name).unwrap().clone();
                     let new_entity = entities.create();
                     objects
@@ -39,7 +39,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     map.collision_map.insert((x, y), new_entity.id());
                 }
                 Action::AddWorker((x, y)) => {
-                    // println!("WUS: Adding worker @ {}, {}", x, y);
+                    println!("[WUS] Adding worker @ {}, {}", x, y);
                     let entity = entities.create();
                     workers.insert(entity, Worker::new()).unwrap();
                     positions.insert(entity, MapPosition { x, y }).unwrap();
