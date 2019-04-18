@@ -41,7 +41,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                 Action::AddWorker((x, y)) => {
                     // println!("WUS: Adding worker @ {}, {}", x, y);
                     let entity = entities.create();
-                    workers.insert(entity, Worker::new(x, y)).unwrap();
+                    workers.insert(entity, Worker::new()).unwrap();
                     positions.insert(entity, MapPosition { x, y }).unwrap();
                 }
                 // Deal damage to a particular object

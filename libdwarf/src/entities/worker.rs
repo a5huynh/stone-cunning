@@ -19,15 +19,11 @@ pub struct Worker {
     /// to perform an action.
     pub actions: VecDeque<Action>,
     pub inventory: Vec<u32>,
-    pub x: u32,
-    pub y: u32,
 }
 
 impl Worker {
-    pub fn new(x: u32, y: u32) -> Self {
+    pub fn new() -> Self {
         Worker {
-            x,
-            y,
             energy: 1.0,
             actions: Default::default(),
             inventory: Default::default(),
