@@ -11,6 +11,7 @@ use specs::{
 
 use crate::{
     actions::Action,
+    config::WorldConfig,
     entities::{ MapObject, Worker },
     resources::{
         Map,
@@ -28,6 +29,7 @@ impl<'a> System<'a> for WorkerSystem {
         ReadExpect<'a, Map>,
         Write<'a, TaskQueue>,
         ReadExpect<'a, Time>,
+        ReadExpect<'a, WorldConfig>,
     );
 
     fn run (&mut self, (
@@ -37,11 +39,12 @@ impl<'a> System<'a> for WorkerSystem {
         map,
         mut tasks,
         time,
+        config,
     ): Self::SystemData) {
         for (entity, worker) in (&*entities, &mut workers).join() {
             // Regen worker energy.
-            worker.energy += 2.0 * time.delta_seconds();
-            if worker.energy < 1.0 {
+            worker.energy += config.worker_stamina * time.delta_seconds();
+            if worker.energy < config.action_cost {
                 continue;
             }
 
@@ -54,7 +57,7 @@ impl<'a> System<'a> for WorkerSystem {
                     Action::MoveTo(target_x, target_y) => {
                         worker.x = target_x;
                         worker.y = target_y;
-                        worker.energy -= 1.0;
+                        worker.energy -= config.action_cost;
                     },
                     // Perform an action.
                     Action::HarvestResource(pos, target, harvest) => {
@@ -90,12 +93,12 @@ impl<'a> System<'a> for WorkerSystem {
                             // If the harvest resource is on the ground nearby,
                             // add it to inventory.
                             if let Some(id) = harvest_resource {
-                                worker.energy -= 1.0;
+                                worker.energy -= config.action_cost;
                                 tasks.add_world(Action::Take { target: **id, owner: entity.id() });
                             // Otherwise, try and harvest from a nearby target.
                             } else if let Some(id) = target_resource {
                                 // Harvest by dealing damage to item.
-                                worker.energy -= 1.0;
+                                worker.energy -= config.action_cost;
                                 new_queue.push_back(Action::HarvestResource(pos, target.clone(), harvest.clone()));
                                 tasks.add_world(Action::DealDamage(**id, 10));
                             }
