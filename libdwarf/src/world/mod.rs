@@ -1,9 +1,7 @@
-use ron::de::from_reader;
 use specs::{ World };
-use std::fs::File;
 
 use crate::{
-    config::WorldConfig,
+    config::{ ResourceConfig, WorldConfig },
     entities::{
         MapObject,
         Worker,
@@ -29,16 +27,11 @@ impl WorldSim {
         world.add_resource(time::Time::default());
         world.add_resource(time::Stopwatch::default());
 
-        let input_path = format!("./resources/data/resources.ron");
-        let f = File::open(&input_path).expect("Failed opening file");
-        let config: WorldConfig = match from_reader(f) {
-            Ok(x) => x,
-            Err(e) => {
-                println!("Failed to load config: {}", e);
-                std::process::exit(1);
-            }
-        };
-        world.add_resource(config.resources.clone());
+        let resources = ResourceConfig::load("./resources/data/resources.ron");
+        world.add_resource(resources);
+
+        let world_config = WorldConfig::load("./resources/sim_config.ron");
+        world.add_resource(world_config);
 
         Default::default()
     }

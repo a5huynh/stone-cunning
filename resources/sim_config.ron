@@ -1,0 +1,6 @@
+(
+    /// How much energy each action takes.
+    action_cost: 1.0,
+    /// How fast workers regain energy. This is per second.
+    worker_stamina: 3.0,
+)

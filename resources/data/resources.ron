@@ -1,17 +1,15 @@
-(
-    resources: ResourceConfig(
-        map: {
-            "wood": ResourceType(
-                name: "wood",
-                attributes: [],
-            ),
-            "tree": ResourceType(
-                name: "tree",
-                attributes: [
-                    Health(10),
-                    Drops("wood", 3),
-                ]
-            )
-        }
-    )
+ResourceConfig(
+    map: {
+        "wood": ResourceType(
+            name: "wood",
+            attributes: [],
+        ),
+        "tree": ResourceType(
+            name: "tree",
+            attributes: [
+                Health(10),
+                Drops("wood", 3),
+            ]
+        )
+    }
 )
