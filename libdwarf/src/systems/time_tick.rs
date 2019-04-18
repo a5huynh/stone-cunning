@@ -1,11 +1,6 @@
-use specs::{
-    System,
-    WriteExpect,
-};
+use specs::{System, WriteExpect};
 
-use crate::{
-    resources::time,
-};
+use crate::resources::time;
 
 pub struct TimeTickSystem;
 impl<'a> System<'a> for TimeTickSystem {

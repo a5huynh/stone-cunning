@@ -1,24 +1,10 @@
 use amethyst::{
-    core::{
-        frame_limiter::FrameRateLimitStrategy,
-        transform::TransformBundle,
-    },
+    core::{frame_limiter::FrameRateLimitStrategy, transform::TransformBundle},
     input::InputBundle,
     prelude::*,
-    renderer::{
-        ALPHA,
-        ColorMask,
-        DisplayConfig,
-        DrawFlat2D,
-        Pipeline,
-        RenderBundle,
-        Stage,
-    },
-    ui::{ DrawUi, UiBundle },
-    utils::{
-        application_root_dir,
-        fps_counter::FPSCounterBundle,
-    },
+    renderer::{ColorMask, DisplayConfig, DrawFlat2D, Pipeline, RenderBundle, Stage, ALPHA},
+    ui::{DrawUi, UiBundle},
+    utils::{application_root_dir, fps_counter::FPSCounterBundle},
 };
 
 use libdwarf::systems;
@@ -28,13 +14,9 @@ use game::{
     config::DwarfConfig,
     state::RunningState,
     systems::{
-        CursorSystem,
+        ui::debug::DebugUI, CursorSystem, MapMovementSystem, PlayerMovement, RenderNPCSystem,
         RenderObjectSystem,
-        RenderNPCSystem,
-        MapMovementSystem,
-        PlayerMovement,
-        ui::debug::DebugUI,
-    }
+    },
 };
 
 fn main() -> amethyst::Result<()> {
@@ -42,7 +24,7 @@ fn main() -> amethyst::Result<()> {
         stdout: amethyst::StdoutLog::Colored,
         level_filter: amethyst::LogLevelFilter::Error,
         log_file: None,
-        allow_env_override: true
+        allow_env_override: true,
     });
 
     let resource_root = format!("{}/resources", application_root_dir());
@@ -52,27 +34,20 @@ fn main() -> amethyst::Result<()> {
 
     let config = DisplayConfig::load(&path);
     let game_config = DwarfConfig::load(&config_path);
-    let input_bundle = InputBundle::<String, String>::new()
-        .with_bindings_from_file(binding_path)?;
+    let input_bundle =
+        InputBundle::<String, String>::new().with_bindings_from_file(binding_path)?;
 
     // Setup the rendering pipeline
-    let pipe = Pipeline::build()
-        .with_stage(
-            Stage::with_backbuffer()
-                .clear_target([0.0, 0.0, 0.0, 0.0], 1.0)
-                // Draw sprites on a 2D quad.
-                .with_pass(DrawFlat2D::new()
-                    .with_transparency(
-                        ColorMask::all(),
-                        ALPHA,
-                        None
-                    )
-                )
-                // Draw mesh without any lighting.
-                // .with_pass(DrawFlat::<PosTex>::new())
-                // Should always be the last pass in the pipeline.
-                .with_pass(DrawUi::new())
-        );
+    let pipe = Pipeline::build().with_stage(
+        Stage::with_backbuffer()
+            .clear_target([0.0, 0.0, 0.0, 0.0], 1.0)
+            // Draw sprites on a 2D quad.
+            .with_pass(DrawFlat2D::new().with_transparency(ColorMask::all(), ALPHA, None))
+            // Draw mesh without any lighting.
+            // .with_pass(DrawFlat::<PosTex>::new())
+            // Should always be the last pass in the pipeline.
+            .with_pass(DrawUi::new()),
+    );
 
     let game_data = GameDataBuilder::default()
         .with_bundle(
@@ -90,7 +65,11 @@ fn main() -> amethyst::Result<()> {
         .with(systems::AssignTaskSystem, "assign_task", &[])
         .with(systems::WorkerSystem, "worker_sim", &["assign_task"])
         .with(systems::ObjectSystem, "object_sim", &[])
-        .with(systems::WorldUpdateSystem::default(), "world_updates", &["worker_sim", "object_sim"])
+        .with(
+            systems::WorldUpdateSystem::default(),
+            "world_updates",
+            &["worker_sim", "object_sim"],
+        )
         .with(systems::TimeTickSystem, "game_tick", &["world_updates"])
         // Render systems. Takes entities from the simulations and assigns sprites
         // to them as they get added.

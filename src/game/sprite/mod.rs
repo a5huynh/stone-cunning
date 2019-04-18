@@ -1,14 +1,9 @@
 use amethyst::{
-    assets::{ AssetStorage, Loader },
+    assets::{AssetStorage, Loader},
     prelude::*,
     renderer::{
-        PngFormat,
-        SpriteSheet,
-        SpriteSheetFormat,
-        SpriteSheetHandle,
-        Texture,
-        TextureMetadata,
-    }
+        PngFormat, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle, Texture, TextureMetadata,
+    },
 };
 
 pub struct SpriteSheetStorage {
@@ -40,7 +35,7 @@ pub fn load_sprite_sheet(world: &mut World, name: &str) -> SpriteSheetHandle {
             PngFormat,
             TextureMetadata::srgb_scale(),
             (),
-            &texture_storage
+            &texture_storage,
         )
     };
 
@@ -51,6 +46,6 @@ pub fn load_sprite_sheet(world: &mut World, name: &str) -> SpriteSheetHandle {
         SpriteSheetFormat,
         texture_handle,
         (),
-        &sprite_sheet_store
+        &sprite_sheet_store,
     )
 }

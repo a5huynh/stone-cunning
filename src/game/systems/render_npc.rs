@@ -1,28 +1,12 @@
 use amethyst::{
-    core::{ transform::Transform },
-    ecs::{
-        Entity,
-        Entities,
-        Join,
-        System,
-        ReadExpect,
-        ReadStorage,
-        WriteStorage,
-    },
-    renderer::{
-        SpriteRender,
-        Transparent,
-    },
+    core::transform::Transform,
+    ecs::{Entities, Entity, Join, ReadExpect, ReadStorage, System, WriteStorage},
+    renderer::{SpriteRender, Transparent},
 };
 
-use libdwarf::{
-    entities::{ MapPosition, Worker }
-};
+use libdwarf::entities::{MapPosition, Worker};
 
-use crate::game::{
-    sprite::SpriteSheetStorage,
-    render::MapRenderer,
-};
+use crate::game::{render::MapRenderer, sprite::SpriteSheetStorage};
 
 pub struct RenderNPCSystem;
 impl<'a> System<'a> for RenderNPCSystem {
@@ -37,27 +21,40 @@ impl<'a> System<'a> for RenderNPCSystem {
         ReadExpect<'a, SpriteSheetStorage>,
     );
 
-    fn run(&mut self, (
-        entities,
-        mut workers,
-        positions,
-        mut transforms,
-        mut sprites,
-        mut transparents,
-        map_render,
-        sheets,
-    ): Self::SystemData) {
+    fn run(
+        &mut self,
+        (
+            entities,
+            mut workers,
+            positions,
+            mut transforms,
+            mut sprites,
+            mut transparents,
+            map_render,
+            sheets,
+        ): Self::SystemData,
+    ) {
         // Find objects that don't have a sprite and give it one.
-        let invisible: Vec<(Entity, &mut Worker, &MapPosition, ())> = (&*entities, &mut workers, &positions, !&sprites).join().collect();
+        let invisible: Vec<(Entity, &mut Worker, &MapPosition, ())> =
+            (&*entities, &mut workers, &positions, !&sprites)
+                .join()
+                .collect();
         for (entity, _, pos, _) in invisible {
             println!("Found worker w/ no sprite");
             // Appply transformation
-            transforms.insert(entity, map_render.place(pos.x as i32, pos.y as i32, 1.0)).unwrap();
+            transforms
+                .insert(entity, map_render.place(pos.x as i32, pos.y as i32, 1.0))
+                .unwrap();
             // Assign sprite to entity
-            sprites.insert(entity, SpriteRender {
-                sprite_sheet: sheets.npc.clone(),
-                sprite_number: 0
-            }).unwrap();
+            sprites
+                .insert(
+                    entity,
+                    SpriteRender {
+                        sprite_sheet: sheets.npc.clone(),
+                        sprite_number: 0,
+                    },
+                )
+                .unwrap();
             transparents.insert(entity, Transparent).unwrap();
         }
 

@@ -1,38 +1,18 @@
 use amethyst::{
-    core::{
-        Parent,
-        transform::Transform,
-        Time,
-    },
+    core::{transform::Transform, Parent, Time},
     ecs::Write,
-    input::{ is_close_requested, is_key_down },
+    input::{is_close_requested, is_key_down},
     prelude::*,
-    renderer::{
-        Camera,
-        DisplayConfig,
-        Projection,
-        VirtualKeyCode,
-    },
-    ui::{ UiCreator, UiFinder, UiText },
+    renderer::{Camera, DisplayConfig, Projection, VirtualKeyCode},
+    ui::{UiCreator, UiFinder, UiText},
     utils::fps_counter::FPSCounter,
 };
 
-use libdwarf::{
-    actions::Action,
-    resources::TaskQueue,
-    world::WorldSim,
-};
+use libdwarf::{actions::Action, resources::TaskQueue, world::WorldSim};
 
 use crate::game::{
     config::GameConfig,
-    entity::{
-        CameraFollow,
-        Cursor,
-        CursorSelected,
-        Floor,
-        Object,
-        Player
-    },
+    entity::{CameraFollow, Cursor, CursorSelected, Floor, Object, Player},
     render::MapRenderer,
     sprite::SpriteSheetStorage,
 };
@@ -86,10 +66,13 @@ impl SimpleState for RunningState {
                 String::from("wood"),
             ));
         });
-
     }
 
-    fn handle_event(&mut self, _: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
+    fn handle_event(
+        &mut self,
+        _: StateData<'_, GameData<'_, '_>>,
+        event: StateEvent,
+    ) -> SimpleTrans {
         if let StateEvent::Window(event) = &event {
             // Exit if the user hits escape
             if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) {
@@ -135,7 +118,8 @@ fn initialize_camera(world: &mut World) {
     transform.set_z(10.0);
 
     // Add an entity we can use to move around the camera.
-    let entity = world.create_entity()
+    let entity = world
+        .create_entity()
         .with(CameraFollow::default())
         .with(transform.clone())
         .build();
@@ -144,7 +128,8 @@ fn initialize_camera(world: &mut World) {
     let window_width_half = window_width as f32 / (2.0 * cam_zoom);
     let window_height_half = window_height as f32 / (2.0 * cam_zoom);
 
-    world.create_entity()
+    world
+        .create_entity()
         .with(Camera::from(Projection::orthographic(
             -window_width_half,
             window_width_half,

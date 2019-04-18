@@ -1,25 +1,15 @@
-use termion::{clear, style, cursor};
+use specs::{self, prelude::*, Join, World};
+use std::io::{self, Read, Write};
 use termion::raw::{IntoRawMode, RawTerminal};
-use std::io::{self, Write, Read};
-use specs::{
-    self,
-    prelude::*,
-    Join,
-    World,
-};
+use termion::{clear, cursor, style};
 
 use libdwarf::{
     actions::Action,
-    entities::{
-        MapObject,
-        MapPosition,
-        Worker
-    },
-    resources::{ Map, Terrain, TaskQueue },
+    entities::{MapObject, MapPosition, Worker},
+    resources::{Map, TaskQueue, Terrain},
     systems,
     world::WorldSim,
 };
-
 
 struct AsciiRenderer<R, W: Write> {
     stdout: W,
@@ -47,7 +37,7 @@ impl<R: Read, W: Write> AsciiRenderer<R, W> {
             let tile = match object.resource_type.name.as_ref() {
                 "tree" => 'T',
                 "wood" => 'l',
-                _ => '?'
+                _ => '?',
             };
 
             cells[idx] = tile;
@@ -139,7 +129,14 @@ impl<R: Read, W: Write> AsciiRenderer<R, W> {
 
 impl<R, W: Write> Drop for AsciiRenderer<R, W> {
     fn drop(&mut self) {
-        write!(self.stdout, "{}{}{}", clear::All, style::Reset, cursor::Goto(1, 1)).unwrap();
+        write!(
+            self.stdout,
+            "{}{}{}",
+            clear::All,
+            style::Reset,
+            cursor::Goto(1, 1)
+        )
+        .unwrap();
     }
 }
 
@@ -156,7 +153,11 @@ fn main() {
         .with(systems::AssignTaskSystem, "assign_task", &[])
         .with(systems::WorkerSystem, "worker_sim", &["assign_task"])
         .with(systems::ObjectSystem, "object_sim", &[])
-        .with(systems::WorldUpdateSystem::default(), "world_updates", &["worker_sim", "object_sim"])
+        .with(
+            systems::WorldUpdateSystem::default(),
+            "world_updates",
+            &["worker_sim", "object_sim"],
+        )
         .build();
     dispatcher.setup(&mut world.res);
     // Add entities to the world
@@ -188,7 +189,7 @@ fn main() {
                 // Tick map
                 dispatcher.dispatch(&mut world.res);
                 world.maintain();
-            },
+            }
             _ => {}
         }
 

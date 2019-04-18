@@ -1,18 +1,11 @@
 use amethyst::{
-    core::{
-        transform::Transform,
-    },
-    ecs::{
-        Join,
-        ReadExpect,
-        System,
-        WriteStorage,
-    },
-    ui::{ UiFinder, UiText },
+    core::transform::Transform,
+    ecs::{Join, ReadExpect, System, WriteStorage},
+    ui::{UiFinder, UiText},
 };
 
 use crate::game::{
-    entity::{ CursorSelected, Player },
+    entity::{CursorSelected, Player},
     render::MapRenderer,
 };
 
@@ -27,17 +20,18 @@ impl<'s> System<'s> for DebugUI {
         ReadExpect<'s, MapRenderer>,
     );
 
-    fn run(&mut self, (
+    fn run(
+        &mut self,
+        (
         mut players,
         mut transforms,
         finder,
         mut ui_text,
         cursor_selected,
         map_render,
-    ): Self::SystemData) {
-
-        let player_loc = (&mut players, &mut transforms).join()
-            .next().or(None);
+    ): Self::SystemData,
+    ) {
+        let player_loc = (&mut players, &mut transforms).join().next().or(None);
 
         // Render current player map location
         if let Some((_player, transform)) = player_loc {
@@ -60,8 +54,7 @@ impl<'s> System<'s> for DebugUI {
                 if let Some(pick_info) = selected {
                     text.text = format!(
                         "terrain: {}\ndesc: {}",
-                        pick_info.is_terrain,
-                        pick_info.description,
+                        pick_info.is_terrain, pick_info.description,
                     );
                 } else {
                     text.text = "N/A\nN/A".to_string();

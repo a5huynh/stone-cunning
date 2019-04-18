@@ -1,17 +1,12 @@
 use ron::de::from_reader;
 use serde::Deserialize;
-use std::{
-    collections::HashMap,
-    fs::File
-};
+use std::{collections::HashMap, fs::File};
 
-use crate::{
-    entities::ResourceType,
-};
+use crate::entities::ResourceType;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct ResourceConfig {
-    pub map: HashMap<String, ResourceType>
+    pub map: HashMap<String, ResourceType>,
 }
 
 impl ResourceConfig {

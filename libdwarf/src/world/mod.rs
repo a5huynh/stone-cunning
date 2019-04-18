@@ -1,16 +1,9 @@
-use specs::{ World };
+use specs::World;
 
 use crate::{
-    config::{ ResourceConfig, WorldConfig },
-    entities::{
-        MapObject,
-        Worker,
-    },
-    resources::{
-        Map,
-        TaskQueue,
-        time,
-    }
+    config::{ResourceConfig, WorldConfig},
+    entities::{MapObject, Worker},
+    resources::{time, Map, TaskQueue},
 };
 
 #[derive(Default)]

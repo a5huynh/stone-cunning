@@ -1,8 +1,5 @@
+use specs::{Component, VecStorage};
 use specs_derive::*;
-use specs::{
-    Component,
-    VecStorage,
-};
 
 mod object;
 mod resource;

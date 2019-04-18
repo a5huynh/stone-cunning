@@ -1,13 +1,10 @@
-use std::collections::VecDeque;
+use specs::{Component, VecStorage};
 use specs_derive::*;
-use specs::{
-    Component,
-    VecStorage,
-};
+use std::collections::VecDeque;
 
 use crate::{
     actions::Action,
-    entities::{ ResourceAttribute, ResourceType },
+    entities::{ResourceAttribute, ResourceType},
 };
 
 #[derive(Clone, Component, Debug)]
@@ -26,7 +23,7 @@ impl MapObject {
             match attribute {
                 ResourceAttribute::Health(health) => {
                     default_health = *health as i32;
-                },
+                }
                 _ => {}
             }
         }
@@ -39,7 +36,8 @@ impl MapObject {
     }
 
     pub fn drop_table(&self) -> Vec<&ResourceAttribute> {
-        self.resource_type.attributes
+        self.resource_type
+            .attributes
             .iter()
             .filter(|x| x.is_drop())
             .collect()

@@ -1,6 +1,6 @@
 /// Basically a copy of amethyst_core::timing::time, but separated so we can
 /// use the same resource outside of a amethyst rendering environment.
-use std::time::{ Duration, Instant };
+use std::time::{Duration, Instant};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Time {

@@ -1,20 +1,10 @@
 use amethyst::{
     core::transform::Transform,
-    ecs::{
-        Join,
-        Read,
-        ReadExpect,
-        ReadStorage,
-        System,
-        WriteStorage,
-    },
+    ecs::{Join, Read, ReadExpect, ReadStorage, System, WriteStorage},
     input::InputHandler,
 };
 
-use super::super::{
-    config::GameConfig,
-    entity::CameraFollow
-};
+use super::super::{config::GameConfig, entity::CameraFollow};
 
 pub struct MapMovementSystem;
 

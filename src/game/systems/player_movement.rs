@@ -1,24 +1,11 @@
 use amethyst::{
-    core::{
-        timing::Time,
-        transform::Transform,
-    },
-    ecs::{
-        Join,
-        Read,
-        ReadExpect,
-        System,
-        WriteStorage,
-    },
+    core::{timing::Time, transform::Transform},
+    ecs::{Join, Read, ReadExpect, System, WriteStorage},
     input::InputHandler,
 };
 
+use crate::game::{config::PlayerConfig, entity::Player, render::MapRenderer};
 use libdwarf::resources::Map;
-use crate::game::{
-    config::PlayerConfig,
-    entity::{ Player },
-    render::MapRenderer,
-};
 
 pub struct PlayerMovement;
 impl<'s> System<'s> for PlayerMovement {
@@ -32,7 +19,9 @@ impl<'s> System<'s> for PlayerMovement {
         ReadExpect<'s, MapRenderer>,
     );
 
-    fn run(&mut self, (
+    fn run(
+        &mut self,
+        (
         mut players,
         player_config,
         mut transforms,
@@ -40,7 +29,8 @@ impl<'s> System<'s> for PlayerMovement {
         time,
         map,
         map_render,
-    ): Self::SystemData) {
+    ): Self::SystemData,
+    ) {
         let x_move = input.axis_value("player_x").unwrap();
         let y_move = input.axis_value("player_y").unwrap();
 

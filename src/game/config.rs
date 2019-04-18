@@ -1,7 +1,4 @@
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct GameConfig {
@@ -30,7 +27,6 @@ pub struct PlayerConfig {
     // 1-8: player movement
     pub animation_offsets: [u32; 9],
 }
-
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct DwarfConfig {

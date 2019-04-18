@@ -17,7 +17,10 @@ pub enum Action {
     HarvestResource(MapPosition, String, String),
     /// Take an object and place into inventory.
     /// NOTE: No checks are made to see if the entity is actually nearby or not.
-    Take { target: EntityId, owner: EntityId },
+    Take {
+        target: EntityId,
+        owner: EntityId,
+    },
     /// Move to some location.
-    MoveTo(u32, u32)
+    MoveTo(u32, u32),
 }

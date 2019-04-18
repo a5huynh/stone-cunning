@@ -35,7 +35,7 @@ pub struct ResourceType {
 
 #[cfg(test)]
 mod test {
-    use super::{ ResourceType, ResourceAttribute };
+    use super::{ResourceAttribute, ResourceType};
     use std::collections::HashMap;
 
     #[test]
@@ -47,7 +47,7 @@ mod test {
                 // Can have multiple drops
                 ResourceAttribute::Drops(String::from("wood"), 3),
                 ResourceAttribute::Drops(String::from("acorn"), 10),
-            ]
+            ],
         };
 
         assert_eq!(tree.name, String::from("tree"));

@@ -2,10 +2,7 @@ use amethyst::{
     core::transform::Transform,
     ecs::prelude::{Component, DenseVecStorage},
     prelude::*,
-    renderer::{
-        SpriteRender,
-        Transparent,
-    },
+    renderer::{SpriteRender, Transparent},
 };
 
 use super::Direction;
@@ -36,7 +33,8 @@ impl Player {
             sprite_number: 0,
         };
 
-        world.create_entity()
+        world
+            .create_entity()
             .with(sprite_render.clone())
             .with(Player::default())
             .with(player_transform)
@@ -47,7 +45,6 @@ impl Player {
     /// Determine which way the player is facing based on the last
     /// movement transform.
     pub fn calculate_direction(x: f64, y: f64) -> Direction {
-
         if x < 0.0 {
             return Direction::WEST;
         } else if x > 0.0 {

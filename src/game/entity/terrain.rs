@@ -1,6 +1,4 @@
-use amethyst::{
-    ecs::prelude::{Component, DenseVecStorage},
-};
+use amethyst::ecs::prelude::{Component, DenseVecStorage};
 
 #[derive(Default)]
 pub struct Floor;

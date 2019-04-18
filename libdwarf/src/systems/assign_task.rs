@@ -1,25 +1,12 @@
-use specs::{
-    Entities,
-    Join,
-    System,
-    Write,
-    WriteStorage,
-};
+use specs::{Entities, Join, System, Write, WriteStorage};
 
-use crate::{
-    entities::{ Worker },
-    resources::{ TaskQueue },
-};
+use crate::{entities::Worker, resources::TaskQueue};
 
 /// Assign tasks to idle workers.
 pub struct AssignTaskSystem;
 
 impl<'a> System<'a> for AssignTaskSystem {
-    type SystemData = (
-        Entities<'a>,
-        WriteStorage<'a, Worker>,
-        Write<'a, TaskQueue>,
-    );
+    type SystemData = (Entities<'a>, WriteStorage<'a, Worker>, Write<'a, TaskQueue>);
 
     fn run(&mut self, (entities, mut workers, mut queue): Self::SystemData) {
         for (_, worker) in (&entities, &mut workers).join() {

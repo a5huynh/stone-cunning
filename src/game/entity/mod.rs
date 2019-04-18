@@ -2,20 +2,15 @@ use amethyst::{
     core::transform::Transform,
     ecs::prelude::{Component, DenseVecStorage},
     prelude::*,
-    renderer::{
-        SpriteRender,
-        Transparent,
-    },
+    renderer::{SpriteRender, Transparent},
 };
 
-mod terrain;
 mod player;
-pub use terrain::*;
+mod terrain;
 pub use player::*;
+pub use terrain::*;
 
-use crate::game::{
-    sprite::SpriteSheetStorage,
-};
+use crate::game::sprite::SpriteSheetStorage;
 
 #[derive(Default)]
 /// Used to move the camera and to follow around other entities
@@ -56,7 +51,8 @@ impl Cursor {
             sprite_number: 0,
         };
 
-        world.create_entity()
+        world
+            .create_entity()
             .with(sprite_render)
             .with(Cursor::default())
             .with(Transform::default())

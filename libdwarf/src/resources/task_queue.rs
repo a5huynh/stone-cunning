@@ -1,5 +1,5 @@
-use std::collections::VecDeque;
 use crate::actions::Action;
+use std::collections::VecDeque;
 
 #[derive(Default)]
 pub struct TaskQueue {

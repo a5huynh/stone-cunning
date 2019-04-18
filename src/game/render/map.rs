@@ -1,20 +1,11 @@
 use amethyst::{
-    core::{ transform::Transform },
+    core::transform::Transform,
     prelude::*,
-    renderer::{
-        SpriteRender,
-        Transparent,
-    },
+    renderer::{SpriteRender, Transparent},
 };
-use libdwarf::{
-    resources::{ Map, Terrain },
-};
+use libdwarf::resources::{Map, Terrain};
 
-use crate::game::{
-    config::GameConfig,
-    entity::{ Floor },
-    sprite::SpriteSheetStorage,
-};
+use crate::game::{config::GameConfig, entity::Floor, sprite::SpriteSheetStorage};
 
 /// Map resource used to convert coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
@@ -28,11 +19,7 @@ impl MapRenderer {
     pub fn initialize(world: &mut World) -> Self {
         let (tile_height, tile_width, tile_offset) = {
             let config = &world.read_resource::<GameConfig>();
-            (
-                config.tile_height,
-                config.tile_width,
-                config.tile_offset,
-            )
+            (config.tile_height, config.tile_width, config.tile_offset)
         };
 
         let map_render = MapRenderer {
@@ -63,16 +50,16 @@ impl MapRenderer {
 
                 let terrain_render = SpriteRender {
                     sprite_sheet: sprite_sheet.clone(),
-                    sprite_number: sprite_idx
+                    sprite_number: sprite_idx,
                 };
 
-                world.create_entity()
+                world
+                    .create_entity()
                     .with(terrain_render)
                     .with(Floor::default())
                     .with(map_render.place(x as i32, y as i32, 0.0))
                     .with(Transparent)
                     .build();
-
             }
         }
 
@@ -80,7 +67,7 @@ impl MapRenderer {
     }
 
     /// Converts some point <x, y> into map coordinates.
-    pub fn to_map_coords(&self, x:f32, y: f32) -> (i32, i32) {
+    pub fn to_map_coords(&self, x: f32, y: f32) -> (i32, i32) {
         // Convert position to cartesian coordinates
         let tw = self.tile_width;
         let th = self.tile_height - self.tile_offset;
@@ -89,10 +76,7 @@ impl MapRenderer {
         let my = (y / th) - (x / tw);
 
         // Convert cartesian coordinates to map coordinates.
-        (
-            mx.trunc() as i32,
-            my.trunc() as i32
-        )
+        (mx.trunc() as i32, my.trunc() as i32)
     }
 
     /// Creates a transform that would place an object on the map using

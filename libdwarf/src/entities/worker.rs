@@ -1,13 +1,8 @@
-use std::collections::VecDeque;
+use specs::{Component, VecStorage};
 use specs_derive::*;
-use specs::{
-    Component,
-    VecStorage,
-};
+use std::collections::VecDeque;
 
-use crate::{
-    actions::Action,
-};
+use crate::actions::Action;
 
 #[derive(Clone, Component, Debug)]
 #[storage(VecStorage)]
@@ -31,7 +26,8 @@ pub struct Worker {
 impl Worker {
     pub fn new(x: u32, y: u32) -> Self {
         Worker {
-            x, y,
+            x,
+            y,
             energy: 1.0,
             actions: Default::default(),
             inventory: Default::default(),

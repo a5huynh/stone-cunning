@@ -43,8 +43,7 @@ impl Map {
     }
 
     pub fn is_inside_map(&self, x: i32, y: i32) -> bool {
-        x >= 0 && x < self.width as i32 &&
-        y >= 0 && y < self.height as i32
+        x >= 0 && x < self.width as i32 && y >= 0 && y < self.height as i32
     }
 
     /// Find the north, east, south, west neighboring objects for some
