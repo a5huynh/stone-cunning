@@ -18,6 +18,7 @@ pub struct Worker {
     /// The worker needs to MoveTo some location first before they are able
     /// to perform an action.
     pub actions: VecDeque<Action>,
+    /// Worker's inventory.
     pub inventory: Vec<u32>,
 }
 

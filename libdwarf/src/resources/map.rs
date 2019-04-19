@@ -102,6 +102,16 @@ impl Map {
         None
     }
 
+    pub fn worker_at(&self, x: i32, y: i32) -> Option<u32> {
+        if self.is_inside_map(x, y) {
+            if let Some(id) = self.worker_map.get(&(x as u32, y as u32)) {
+                return Some(*id);
+            }
+        }
+
+        None
+    }
+
     pub fn move_worker(&mut self, entity: u32, old_x: u32, old_y: u32, new_x: u32, new_y: u32) {
         self.worker_map.remove(&(old_x, old_y));
         self.track_worker(entity, new_x, new_y);

@@ -89,15 +89,15 @@ impl<'s> System<'s> for CursorSystem {
             cursor_transform.set_y(new_transform.translation().y);
 
             // If the cursor is outside of the map, don't show any debug info.
-            if map_x < 0 || map_x >= map.width as i32
-                || map_y < 0 || map_y >= map.height as i32 {
+            if !map.is_inside_map(map_x, map_y) {
                 cursor_selected.hover_selected = None;
                 return;
             }
 
-
             let mut pick_info = PickInfo::default();
-            // If there are objects at this location, show debug info about those
+            // If there are worker/objects at this location, show debug info about
+            // those
+            pick_info.worker = map.worker_at(map_x, map_y);
             pick_info.object = map.objects_at(map_x, map_y);
             pick_info.terrain = map.terrain_at(map_x, map_y);
             cursor_selected.hover_selected = Some(pick_info);
