@@ -45,18 +45,12 @@ impl<'a> System<'a> for RenderObjectSystem {
                 .insert(entity, map_render.place(pos.x as i32, pos.y as i32, 1.0))
                 .unwrap();
             // Assign sprite to entity
-            // TODO: Make a mapping to make this an easy lookup
-            let sprite = match object.resource_type.name.as_str() {
-                "wood" => 1,
-                "tree" => 2,
-                _ => 2,
-            };
             sprites
                 .insert(
                     entity,
                     SpriteRender {
                         sprite_sheet: sheets.object.clone(),
-                        sprite_number: sprite,
+                        sprite_number: object.resource_type.sprite,
                     },
                 )
                 .unwrap();
