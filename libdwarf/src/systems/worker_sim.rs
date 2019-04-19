@@ -4,7 +4,7 @@ use std::collections::VecDeque;
 use crate::{
     actions::Action,
     config::WorldConfig,
-    entities::{MapObject, Worker},
+    entities::{MapObject, MapPosition, Worker},
     resources::{time::Time, Map, TaskQueue},
 };
 
@@ -14,6 +14,7 @@ impl<'a> System<'a> for WorkerSystem {
         Entities<'a>,
         WriteStorage<'a, Worker>,
         ReadStorage<'a, MapObject>,
+        WriteStorage<'a, MapPosition>,
         ReadExpect<'a, Map>,
         Write<'a, TaskQueue>,
         ReadExpect<'a, Time>,
@@ -22,9 +23,9 @@ impl<'a> System<'a> for WorkerSystem {
 
     fn run(
         &mut self,
-        (entities, mut workers, objects, map, mut tasks, time, config): Self::SystemData,
+        (entities, mut workers, objects, mut positions, map, mut tasks, time, config): Self::SystemData,
     ) {
-        for (entity, worker) in (&*entities, &mut workers).join() {
+        for (entity, worker, position) in (&*entities, &mut workers, &mut positions).join() {
             // Regen worker energy.
             worker.energy += config.worker_stamina * time.delta_seconds();
             if worker.energy < config.action_cost {
@@ -38,20 +39,20 @@ impl<'a> System<'a> for WorkerSystem {
                 match action {
                     // Route worker towards a target
                     Action::MoveTo(target_x, target_y) => {
-                        worker.x = target_x;
-                        worker.y = target_y;
+                        position.x = target_x;
+                        position.y = target_y;
                         worker.energy -= config.action_cost;
                     }
                     // Perform an action.
                     Action::HarvestResource(pos, target, harvest) => {
                         let (target_x, target_y) = pos;
                         // Are we next to this resource? Move closer to it
-                        let dist_x = (target_x as i32 - worker.x as i32).abs() as u32;
-                        let dist_y = (target_y as i32 - worker.y as i32).abs() as u32;
+                        let dist_x = (target_x as i32 - position.x as i32).abs() as u32;
+                        let dist_y = (target_y as i32 - position.y as i32).abs() as u32;
 
                         if dist_x + dist_y <= 1 {
                             // Is the resource available nearby?
-                            let neighbors = map.find_neighbors(worker.x, worker.y);
+                            let neighbors = map.find_neighbors(position.x, position.y);
 
                             let harvest_resource = neighbors.iter().find(|&&&neighbor| {
                                 let entity = entities.entity(neighbor);
@@ -92,8 +93,8 @@ impl<'a> System<'a> for WorkerSystem {
                             }
                         } else {
                             // Move closer
-                            let mut new_x = worker.x;
-                            let mut new_y = worker.y;
+                            let mut new_x = position.x;
+                            let mut new_y = position.y;
                             if dist_x > dist_y {
                                 new_x += 1;
                             } else {

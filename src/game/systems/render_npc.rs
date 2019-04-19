@@ -59,8 +59,8 @@ impl<'a> System<'a> for RenderNPCSystem {
         }
 
         // Update object positions
-        for (worker, transform) in (&mut workers, &mut transforms).join() {
-            let new_transform = map_render.place(worker.x as i32, worker.y as i32, 1.0);
+        for (_, pos, transform) in (&mut workers, &positions, &mut transforms).join() {
+            let new_transform = map_render.place(pos.x as i32, pos.y as i32, 1.0);
             *transform = new_transform;
         }
     }
