@@ -10,7 +10,9 @@ pub enum Terrain {
 
 pub struct Map {
     // TODO: Support multiple objects per tile.
-    pub collision_map: HashMap<(u32, u32), u32>,
+    pub object_map: HashMap<(u32, u32), u32>,
+    /// Location map of all the workers.
+    pub worker_map: HashMap<(u32, u32), u32>,
     pub terrain: HashMap<(u32, u32), Terrain>,
     // World dimensions
     pub width: u32,
@@ -35,7 +37,8 @@ impl Map {
         }
 
         Map {
-            collision_map: HashMap::new(),
+            object_map: HashMap::new(),
+            worker_map: HashMap::new(),
             terrain,
             width,
             height,
@@ -63,7 +66,7 @@ impl Map {
         // Find the neighbors and return the results
         let mut results = Vec::new();
         for idx in neighbor_idx.iter() {
-            if let Some(oid) = self.collision_map.get(idx) {
+            if let Some(oid) = self.object_map.get(idx) {
                 results.push(oid);
             }
         }
@@ -72,7 +75,8 @@ impl Map {
 
     pub fn has_collision(&self, x: i32, y: i32) -> bool {
         if self.is_inside_map(x, y) {
-            return self.collision_map.contains_key(&(x as u32, y as u32));
+            return self.object_map.contains_key(&(x as u32, y as u32))
+                || self.worker_map.contains_key(&(x as u32, y as u32));
         }
 
         false
@@ -80,7 +84,7 @@ impl Map {
 
     pub fn objects_at(&self, x: i32, y: i32) -> Option<u32> {
         if self.is_inside_map(x, y) {
-            if let Some(id) = self.collision_map.get(&(x as u32, y as u32)) {
+            if let Some(id) = self.object_map.get(&(x as u32, y as u32)) {
                 return Some(*id);
             }
         }
@@ -96,5 +100,22 @@ impl Map {
         }
 
         None
+    }
+
+    pub fn move_worker(&mut self, entity: u32, old_x: u32, old_y: u32, new_x: u32, new_y: u32) {
+        self.worker_map.remove(&(old_x, old_y));
+        self.track_worker(entity, new_x, new_y);
+    }
+
+    pub fn remove_object(&mut self, _entity: u32, x: u32, y: u32) {
+        self.object_map.remove(&(x, y));
+    }
+
+    pub fn track_object(&mut self, entity: u32, x: u32, y: u32) {
+        self.object_map.insert((x, y), entity);
+    }
+
+    pub fn track_worker(&mut self, entity: u32, x: u32, y: u32) {
+        self.worker_map.insert((x, y), entity);
     }
 }

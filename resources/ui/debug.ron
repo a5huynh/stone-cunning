@@ -91,10 +91,41 @@ Container(
         ),
         Container(
             transform: (
+                id: "game_info",
+                anchor: TopRight,
+                x: -100.0,
+                y: -16.0,
+                width: 200.0,
+                height: 32.0
+            ),
+            background: (
+                image: Data(Rgba((1.0, 1.0, 1.0, 0.5), (channel: Srgb))),
+            ),
+            children: [
+                Text(
+                    transform: (
+                        id: "fps",
+                        y: -16.0,
+                        height: 32.,
+                        anchor: TopMiddle,
+                        stretch: X(x_margin: 0.0),
+                        transparent: true,
+                    ),
+                    text: (
+                        text: "",
+                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
+                        font_size: 24.,
+                        color: (0.0, 0.0, 0.0, 1.0),
+                    )
+                ),
+            ]
+        ),
+        Container(
+            transform: (
                 id: "debug_panel",
                 anchor: TopRight,
                 x: -200.0,
-                y: -200.0,
+                y: -264.0,
                 width: 400.0,
                 height: 400.0,
             ),
@@ -104,50 +135,19 @@ Container(
             children: [
                 Text(
                     transform: (
-                        id: "fps",
-                        y: -25,
-                        height: 25.,
-                        anchor: TopMiddle,
-                        stretch: X(x_margin: 0.0),
-                        transparent: true,
-                    ),
-                    text: (
-                        text: "",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
-                        font_size: 25.,
-                        color: (0.0, 0.0, 0.0, 1.0),
-                    )
-                ),
-                Text(
-                    transform: (
-                        id: "player_info",
-                        y: -50,
-                        height: 25.,
-                        anchor: TopMiddle,
-                        stretch: X(x_margin: 0.0),
-                        transparent: true,
-                    ),
-                    text: (
-                        text: "",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
-                        font_size: 25.0,
-                        color: (0.0, 0.0, 0.0, 1.0),
-                    )
-                ),
-                Text(
-                    transform: (
                         id: "debug_info",
-                        y: -100,
-                        height: 100.0,
-                        anchor: TopMiddle,
-                        stretch: X(x_margin: 0.0),
+                        x: 216.0,
+                        y: -40.,
+                        anchor: TopLeft,
+                        stretch: XY(x_margin: 0., y_margin: 0., keep_aspect_ratio: false),
                         transparent: true,
                     ),
                     text: (
                         text: "Nothing Selected",
                         font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
-                        font_size: 25.,
+                        font_size: 24.,
                         line_mode: Wrap,
+                        align: MiddleLeft,
                         color: (0.0, 0.0, 0.0, 1.0),
                     )
                 ),

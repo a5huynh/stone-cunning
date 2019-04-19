@@ -10,6 +10,7 @@ mod terrain;
 pub use player::*;
 pub use terrain::*;
 
+use libdwarf::resources::Terrain;
 use crate::game::sprite::SpriteSheetStorage;
 
 #[derive(Default)]
@@ -27,10 +28,11 @@ pub enum Direction {
     SOUTH,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct PickInfo {
-    pub is_terrain: bool,
-    pub description: String,
+    pub worker: Option<u32>,
+    pub object: Option<u32>,
+    pub terrain: Option<Terrain>,
 }
 
 #[derive(Default)]
@@ -64,5 +66,8 @@ impl Cursor {
 /// Represents the currently selected thing (object, terrain, etc.) under the cursor
 #[derive(Default)]
 pub struct CursorSelected {
-    pub selected: Option<PickInfo>,
+    /// Entity that was clicked on.
+    pub pinned: Option<PickInfo>,
+    /// Entity currently under the mouse cursor.
+    pub hover_selected: Option<PickInfo>,
 }

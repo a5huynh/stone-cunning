@@ -36,13 +36,14 @@ impl<'a> System<'a> for WorldUpdateSystem {
                         .insert(new_entity, MapObject::new(&resource))
                         .unwrap();
                     positions.insert(new_entity, MapPosition { x, y }).unwrap();
-                    map.collision_map.insert((x, y), new_entity.id());
+                    map.track_object(new_entity.id(), x, y);
                 }
                 Action::AddWorker((x, y)) => {
                     println!("[WUS] Adding worker @ {}, {}", x, y);
                     let entity = entities.create();
                     workers.insert(entity, Worker::new()).unwrap();
                     positions.insert(entity, MapPosition { x, y }).unwrap();
+                    map.track_worker(entity.id(), x, y);
                 }
                 // Deal damage to a particular object
                 Action::DealDamage(id, damage) => {
@@ -57,7 +58,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     let entity = entities.entity(id);
                     if let Some(_) = objects.get(entity) {
                         if let Some(pos) = positions.get(entity) {
-                            map.collision_map.remove(&(pos.x, pos.y));
+                            map.remove_object(id, pos.x, pos.y);
                         }
                     }
                     // Remove from world
@@ -69,7 +70,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                         if let Some(worker) = workers.get_mut(entities.entity(owner)) {
                             worker.inventory.push(target);
                             if let Some(pos) = positions.get(target_entity) {
-                                map.collision_map.remove(&(pos.x, pos.y));
+                                map.remove_object(target_entity.id(), pos.x, pos.y);
                                 positions.remove(target_entity);
                             }
                         }

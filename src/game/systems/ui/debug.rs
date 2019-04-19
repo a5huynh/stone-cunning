@@ -1,16 +1,12 @@
 use amethyst::{
-    core::transform::Transform,
-    ecs::{Join, ReadExpect, ReadStorage, System, Write, WriteStorage},
+    ecs::{ReadExpect, ReadStorage, System, Write, WriteStorage},
     shrev::{EventChannel, ReaderId},
     ui::{UiEvent, UiEventType, UiFinder, UiText, UiTransform},
 };
 
 use libdwarf::{actions::Action, resources::TaskQueue};
 
-use crate::game::{
-    entity::{CursorSelected, Player},
-    render::MapRenderer,
-};
+use crate::game::entity::CursorSelected;
 
 #[derive(Default)]
 pub struct DebugUI {
@@ -19,12 +15,9 @@ pub struct DebugUI {
 
 impl<'s> System<'s> for DebugUI {
     type SystemData = (
-        WriteStorage<'s, Player>,
-        WriteStorage<'s, Transform>,
         UiFinder<'s>,
         WriteStorage<'s, UiText>,
         ReadExpect<'s, CursorSelected>,
-        ReadExpect<'s, MapRenderer>,
         Write<'s, TaskQueue>,
         Write<'s, EventChannel<UiEvent>>,
         ReadStorage<'s, UiTransform>,
@@ -32,45 +25,19 @@ impl<'s> System<'s> for DebugUI {
 
     fn run(
         &mut self,
-        (
-            mut players,
-            mut transforms,
-            finder,
-            mut ui_text,
-            cursor_selected,
-            map_render,
-            mut queue,
-            mut events,
-            buttons,
-        ): Self::SystemData,
+        (finder, mut ui_text, cursor_selected, mut queue, mut events, buttons): Self::SystemData,
     ) {
-        let player_loc = (&mut players, &mut transforms).join().next().or(None);
-
-        // Render current player map location
-        if let Some((_player, transform)) = player_loc {
-            let player_x = transform.translation().x;
-            let player_y = transform.translation().y;
-            // Convert player position into map coordinates and bump to new location.
-            let (map_x, map_y) = map_render.to_map_coords(player_x, player_y);
-
-            if let Some(entity) = finder.find("player_info") {
-                if let Some(text) = ui_text.get_mut(entity) {
-                    text.text = format!("Player: ({}, {})", map_x, map_y);
-                }
-            }
-        }
-
         // Render currently selected info data
         if let Some(entity) = finder.find("debug_info") {
             if let Some(text) = ui_text.get_mut(entity) {
-                let selected = &cursor_selected.selected;
+                let selected = &cursor_selected.hover_selected;
                 if let Some(pick_info) = selected {
                     text.text = format!(
-                        "terrain: {}\ndesc: {}",
-                        pick_info.is_terrain, pick_info.description,
+                        "object: {:?}\nterrain: {:?}",
+                        pick_info.object, pick_info.terrain
                     );
                 } else {
-                    text.text = "N/A\nN/A".to_string();
+                    text.text = "object: N/A\nterrain: N/A".to_string();
                 }
             }
         }

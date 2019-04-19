@@ -1,4 +1,4 @@
-use specs::{Entities, Join, ReadExpect, ReadStorage, System, Write, WriteStorage};
+use specs::{Entities, Join, ReadExpect, ReadStorage, System, Write, WriteExpect, WriteStorage};
 use std::collections::VecDeque;
 
 use crate::{
@@ -15,7 +15,7 @@ impl<'a> System<'a> for WorkerSystem {
         WriteStorage<'a, Worker>,
         ReadStorage<'a, MapObject>,
         WriteStorage<'a, MapPosition>,
-        ReadExpect<'a, Map>,
+        WriteExpect<'a, Map>,
         Write<'a, TaskQueue>,
         ReadExpect<'a, Time>,
         ReadExpect<'a, WorldConfig>,
@@ -23,7 +23,7 @@ impl<'a> System<'a> for WorkerSystem {
 
     fn run(
         &mut self,
-        (entities, mut workers, objects, mut positions, map, mut tasks, time, config): Self::SystemData,
+        (entities, mut workers, objects, mut positions, mut map, mut tasks, time, config): Self::SystemData,
     ) {
         for (entity, worker, position) in (&*entities, &mut workers, &mut positions).join() {
             // Regen worker energy.
@@ -42,6 +42,7 @@ impl<'a> System<'a> for WorkerSystem {
                         position.x = target_x;
                         position.y = target_y;
                         worker.energy -= config.action_cost;
+                        map.move_worker(entity.id(), position.x, position.y, target_x, target_y);
                     }
                     // Perform an action.
                     Action::HarvestResource(pos, target, harvest) => {
