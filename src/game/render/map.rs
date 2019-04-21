@@ -38,10 +38,11 @@ impl MapRenderer {
             let sheets = world.read_resource::<SpriteSheetStorage>();
             sheets.terrain.clone()
         };
+
         for y in 0..height {
             for x in 0..width {
-                let terrain = terrain_map.get(&(x as u32, y as u32)).unwrap();
-                let sprite_idx = match terrain {
+                let idx = (y as u32 * width + x) as usize;
+                let sprite_idx = match &terrain_map[idx] {
                     Terrain::STONE => 0,
                     Terrain::MARBLE => 1,
                     Terrain::GRASS => 2,

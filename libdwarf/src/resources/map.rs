@@ -13,7 +13,7 @@ pub struct Map {
     pub object_map: HashMap<(u32, u32), u32>,
     /// Location map of all the workers.
     pub worker_map: HashMap<(u32, u32), u32>,
-    pub terrain: HashMap<(u32, u32), Terrain>,
+    pub terrain: Vec<Terrain>,
     // World dimensions
     pub width: u32,
     pub height: u32,
@@ -21,7 +21,7 @@ pub struct Map {
 
 impl Map {
     pub fn initialize(width: u32, height: u32) -> Self {
-        let mut terrain = HashMap::new();
+        let mut terrain = vec![Terrain::NONE; (width * height) as usize];
         for y in 0..height {
             for x in 0..width {
                 let tile = ((x + y) % 3) as usize;
@@ -32,7 +32,7 @@ impl Map {
                     _ => Terrain::NONE,
                 };
 
-                terrain.insert((x as u32, y as u32), terrain_tile);
+                terrain[(y * width + x) as usize] = terrain_tile;
             }
         }
 
@@ -94,9 +94,8 @@ impl Map {
 
     pub fn terrain_at(&self, x: i32, y: i32) -> Option<Terrain> {
         if self.is_inside_map(x, y) {
-            if let Some(terrain) = self.terrain.get(&(x as u32, y as u32)) {
-                return Some(terrain.clone());
-            }
+            let idx = (y as u32 * self.width + x as u32) as usize;
+            return Some(self.terrain[idx].clone());
         }
 
         None
