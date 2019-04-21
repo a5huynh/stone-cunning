@@ -1,10 +1,14 @@
 use amethyst::{
-    ecs::{ReadExpect, ReadStorage, System, Write, WriteStorage},
+    ecs::{Entities, ReadExpect, ReadStorage, System, Write, WriteStorage},
     shrev::{EventChannel, ReaderId},
     ui::{UiEvent, UiEventType, UiFinder, UiText, UiTransform},
 };
 
-use libdwarf::{actions::Action, resources::TaskQueue};
+use libdwarf::{
+    actions::Action,
+    entities::{MapObject, Worker},
+    resources::TaskQueue,
+};
 
 use crate::game::entity::CursorSelected;
 
@@ -15,7 +19,10 @@ pub struct DebugUI {
 
 impl<'s> System<'s> for DebugUI {
     type SystemData = (
+        Entities<'s>,
         UiFinder<'s>,
+        ReadStorage<'s, MapObject>,
+        ReadStorage<'s, Worker>,
         WriteStorage<'s, UiText>,
         ReadExpect<'s, CursorSelected>,
         Write<'s, TaskQueue>,
@@ -25,20 +32,50 @@ impl<'s> System<'s> for DebugUI {
 
     fn run(
         &mut self,
-        (finder, mut ui_text, cursor_selected, mut queue, mut events, buttons): Self::SystemData,
+        (
+            entities,
+            finder,
+            objects,
+            workers,
+            mut ui_text,
+            cursor_selected,
+            mut queue,
+            mut events,
+            buttons,
+        ): Self::SystemData,
     ) {
         // Render currently selected info data
         if let Some(entity) = finder.find("debug_info") {
-            if let Some(text) = ui_text.get_mut(entity) {
-                let selected = &cursor_selected.hover_selected;
-                if let Some(pick_info) = selected {
-                    text.text = format!(
-                        "object: {:?}\nterrain: {:?}",
-                        pick_info.object, pick_info.terrain
-                    );
-                } else {
-                    text.text = "object: N/A\nterrain: N/A".to_string();
+            let label = ui_text.get_mut(entity).unwrap();
+            let selected = &cursor_selected.hover_selected;
+            if let Some(pick_info) = selected {
+                let mut worker_str = String::from("N/A");
+                if let Some(worker_id) = pick_info.worker {
+                    let entity = entities.entity(worker_id);
+                    if let Some(worker) = workers.get(entity) {
+                        worker_str = worker.to_string();
+                    }
                 }
+
+                let mut object_str = String::from("N/A");
+                if let Some(object_id) = pick_info.object {
+                    let entity = entities.entity(object_id);
+                    if let Some(object) = objects.get(entity) {
+                        object_str = object.to_string();
+                    }
+                }
+
+                let mut terrain_str = String::from("N/A");
+                if let Some(terrain) = &pick_info.terrain {
+                    terrain_str = format!("{:?}", terrain);
+                }
+
+                label.text = format!(
+                    "worker: {}\nobject: {}\nterrain: {}",
+                    worker_str, object_str, terrain_str,
+                );
+            } else {
+                label.text = "worker: N/A\nobject: N/A\nterrain: N/A".to_string();
             }
         }
 

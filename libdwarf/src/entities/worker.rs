@@ -30,4 +30,8 @@ impl Worker {
             inventory: Default::default(),
         }
     }
+
+    pub fn to_string(&self) -> String {
+        format!("({})", self.energy)
+    }
 }

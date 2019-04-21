@@ -10,8 +10,8 @@ mod terrain;
 pub use player::*;
 pub use terrain::*;
 
-use libdwarf::resources::Terrain;
 use crate::game::sprite::SpriteSheetStorage;
+use libdwarf::resources::Terrain;
 
 #[derive(Default)]
 /// Used to move the camera and to follow around other entities

@@ -42,4 +42,8 @@ impl MapObject {
             .filter(|x| x.is_drop())
             .collect()
     }
+
+    pub fn to_string(&self) -> String {
+        format!("{} ({})", self.resource_type.name, self.health)
+    }
 }
