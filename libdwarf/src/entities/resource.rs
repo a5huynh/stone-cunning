@@ -29,6 +29,8 @@ impl ResourceAttribute {
 pub struct ResourceType {
     /// Name of this generic resource type
     pub name: String,
+    /// Sprite idx used to render this resource.
+    pub sprite: usize,
     /// Attributes
     pub attributes: Vec<ResourceAttribute>,
 }

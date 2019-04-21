@@ -1,6 +1,5 @@
 use amethyst::{
     core::{transform::Transform, Parent, Time},
-    ecs::Write,
     input::{is_close_requested, is_key_down},
     prelude::*,
     renderer::{Camera, DisplayConfig, Projection, VirtualKeyCode},
@@ -8,7 +7,7 @@ use amethyst::{
     utils::fps_counter::FPSCounter,
 };
 
-use libdwarf::{actions::Action, resources::TaskQueue, world::WorldSim};
+use libdwarf::world::WorldSim;
 
 use crate::game::{
     config::GameConfig,
@@ -50,21 +49,6 @@ impl SimpleState for RunningState {
         // Create the ui
         world.exec(|mut creator: UiCreator<'_>| {
             creator.create("resources/ui/debug.ron", ());
-        });
-
-        // Setup scene
-        // Add entities to the world
-        world.exec(|(mut queue,): (Write<TaskQueue>,)| {
-            queue.add_world(Action::AddWorker((1, 1)));
-            queue.add_world(Action::Add((9, 9), String::from("tree")));
-        });
-        // Add a task to the task queue.
-        world.exec(|(mut queue,): (Write<TaskQueue>,)| {
-            queue.add(Action::HarvestResource(
-                (9, 9),
-                String::from("tree"),
-                String::from("wood"),
-            ));
         });
     }
 

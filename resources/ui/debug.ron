@@ -12,60 +12,91 @@ Container(
             transform: (
                 id: "task_panel",
                 anchor: TopLeft,
-                x: 200.0,
+                x: 96.0,
                 y: -200.0,
-                width: 400.0,
+                width: 192.0,
                 height: 400.0,
             ),
             background: (
                 image: Data(Rgba((1.0, 1.0, 1.0, 0.5), (channel: Srgb))),
             ),
             children: [
-                Text(
+                Button(
                     transform: (
-                        id: "queue_label",
-                        x: 50.0,
-                        y: -25,
-                        height: 25.,
-                        anchor: TopLeft,
-                        stretch: X(x_margin: 0.0),
-                        transparent: true,
+                        id: "add_worker_btn",
+                        y: -40.,
+                        stretch: X(x_margin: 8),
+                        height: 64.,
+                        tab_order: 0,
+                        anchor: TopMiddle,
+                        mouse_reactive: true,
                     ),
-                    text: (
-                        text: "Jobs:",
+                    button: (
+                        text: "Add Worker",
                         font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
-                        font_size: 25.,
-                        color: (0.0, 0.0, 0.0, 1.0),
+                        font_size: 20.,
+                        normal_text_color: (1.0, 0.85, 0.4, 1.0),
+                        hover_text_color: (1.0, 0.85, 0.4, 1.0),
+                        press_text_color: (0.0, 0.0, 0.0, 1.0),
+                        normal_image: Data(Rgba((0.17, 0.16, 0.18, 1.0), (channel: Srgb))),
+                        hover_image: Data(Rgba((0.25, 0.24, 0.26, 1.0), (channel: Srgb))),
+                        press_image: Data(Rgba((1., 1., 1., 1.), (channel: Srgb))),
                     )
                 ),
-                Text(
+                Button(
                     transform: (
-                        id: "jobs",
-                        x: 50.0,
-                        y: -100.0,
-                        height: 100.0,
-                        anchor: TopLeft,
-                        stretch: XY(x_margin: 0., y_margin: 0., keep_aspect_ratio: false),
-                        transparent: true,
+                        id: "add_resource_btn",
+                        y: -112.,
+                        stretch: X(x_margin: 8),
+                        height: 64.,
+                        tab_order: 1,
+                        anchor: TopMiddle,
+                        mouse_reactive: true,
                     ),
-                    text: (
-                        text: "",
+                    button: (
+                        text: "Add Resource",
                         font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
-                        font_size: 25.0,
-                        line_mode: Wrap,
-                        color: (0.0, 0.0, 0.0, 1.0),
+                        font_size: 20.,
+                        normal_text_color: (1.0, 0.85, 0.4, 1.0),
+                        hover_text_color: (1.0, 0.85, 0.4, 1.0),
+                        press_text_color: (0.0, 0.0, 0.0, 1.0),
+                        normal_image: Data(Rgba((0.17, 0.16, 0.18, 1.0), (channel: Srgb))),
+                        hover_image: Data(Rgba((0.25, 0.24, 0.26, 1.0), (channel: Srgb))),
+                        press_image: Data(Rgba((1., 1., 1., 1.), (channel: Srgb))),
+                    )
+                ),
+                Button(
+                    transform: (
+                        id: "add_task_btn",
+                        y: -184.,
+                        stretch: X(x_margin: 8),
+                        height: 64.,
+                        tab_order: 1,
+                        anchor: TopMiddle,
+                        mouse_reactive: true,
+                    ),
+                    button: (
+                        text: "Add Task",
+                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
+                        font_size: 20.,
+                        normal_text_color: (1.0, 0.85, 0.4, 1.0),
+                        hover_text_color: (1.0, 0.85, 0.4, 1.0),
+                        press_text_color: (0.0, 0.0, 0.0, 1.0),
+                        normal_image: Data(Rgba((0.17, 0.16, 0.18, 1.0), (channel: Srgb))),
+                        hover_image: Data(Rgba((0.25, 0.24, 0.26, 1.0), (channel: Srgb))),
+                        press_image: Data(Rgba((1., 1., 1., 1.), (channel: Srgb))),
                     )
                 ),
             ],
         ),
         Container(
             transform: (
-                id: "debug_panel",
+                id: "game_info",
                 anchor: TopRight,
-                x: -200.0,
-                y: -200.0,
-                width: 400.0,
-                height: 400.0,
+                x: -100.0,
+                y: -16.0,
+                width: 200.0,
+                height: 32.0
             ),
             background: (
                 image: Data(Rgba((1.0, 1.0, 1.0, 0.5), (channel: Srgb))),
@@ -74,8 +105,8 @@ Container(
                 Text(
                     transform: (
                         id: "fps",
-                        y: -25,
-                        height: 25.,
+                        y: -16.0,
+                        height: 32.,
                         anchor: TopMiddle,
                         stretch: X(x_margin: 0.0),
                         transparent: true,
@@ -83,40 +114,40 @@ Container(
                     text: (
                         text: "",
                         font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
-                        font_size: 25.,
+                        font_size: 24.,
                         color: (0.0, 0.0, 0.0, 1.0),
                     )
                 ),
-                Text(
-                    transform: (
-                        id: "player_info",
-                        y: -50,
-                        height: 25.,
-                        anchor: TopMiddle,
-                        stretch: X(x_margin: 0.0),
-                        transparent: true,
-                    ),
-                    text: (
-                        text: "",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
-                        font_size: 25.0,
-                        color: (0.0, 0.0, 0.0, 1.0),
-                    )
-                ),
+            ]
+        ),
+        Container(
+            transform: (
+                id: "debug_panel",
+                anchor: TopRight,
+                x: -200.0,
+                y: -264.0,
+                width: 400.0,
+                height: 400.0,
+            ),
+            background: (
+                image: Data(Rgba((1.0, 1.0, 1.0, 0.5), (channel: Srgb))),
+            ),
+            children: [
                 Text(
                     transform: (
                         id: "debug_info",
-                        y: -100,
-                        height: 100.0,
-                        anchor: TopMiddle,
-                        stretch: X(x_margin: 0.0),
+                        x: 216.0,
+                        y: -40.,
+                        anchor: TopLeft,
+                        stretch: XY(x_margin: 0., y_margin: 0., keep_aspect_ratio: false),
                         transparent: true,
                     ),
                     text: (
                         text: "Nothing Selected",
                         font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
-                        font_size: 25.,
+                        font_size: 24.,
                         line_mode: Wrap,
+                        align: MiddleLeft,
                         color: (0.0, 0.0, 0.0, 1.0),
                     )
                 ),

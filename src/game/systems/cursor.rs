@@ -80,27 +80,27 @@ impl<'s> System<'s> for CursorSystem {
             }
         };
 
-        for (_cursor, transform) in (&mut cursors, &mut transforms).join() {
+        let cursor_transform = (&mut cursors, &mut transforms).join().next().or(None);
+        if let Some((_, cursor_transform)) = cursor_transform {
             let (map_x, map_y) = map_render.to_map_coords(scene_x, scene_y);
-            // If there are objects at this location, show debug info about those
-            if let Some(object) = map.objects_at(map_x, map_y) {
-                cursor_selected.selected = Some(PickInfo {
-                    is_terrain: false,
-                    description: format!("{:?}", object),
-                });
-            // Otherwise, get the terrain at this location.
-            } else if let Some(terrain) = map.terrain_at(map_x, map_y) {
-                cursor_selected.selected = Some(PickInfo {
-                    is_terrain: true,
-                    description: format!("{:?}", terrain),
-                });
-            } else {
-                cursor_selected.selected = None
+            // Move cursor to new position.
+            let new_transform = map_render.place(map_x, map_y, 0.0);
+            cursor_transform.set_x(new_transform.translation().x);
+            cursor_transform.set_y(new_transform.translation().y);
+
+            // If the cursor is outside of the map, don't show any debug info.
+            if !map.is_inside_map(map_x, map_y) {
+                cursor_selected.hover_selected = None;
+                return;
             }
 
-            let new_transform = map_render.place(map_x, map_y, 0.0);
-            transform.set_x(new_transform.translation().x);
-            transform.set_y(new_transform.translation().y);
+            let mut pick_info = PickInfo::default();
+            // If there are worker/objects at this location, show debug info about
+            // those
+            pick_info.worker = map.worker_at(map_x, map_y);
+            pick_info.object = map.objects_at(map_x, map_y);
+            pick_info.terrain = map.terrain_at(map_x, map_y);
+            cursor_selected.hover_selected = Some(pick_info);
         }
     }
 }
