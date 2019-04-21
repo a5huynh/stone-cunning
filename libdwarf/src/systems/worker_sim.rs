@@ -35,8 +35,10 @@ impl<'a> System<'a> for WorkerSystem {
             // Handle actions for worker
             let mut new_queue = VecDeque::new();
             while let Some(action) = worker.actions.pop_front() {
-                println!("Worker({}) - Processing action {:?}", entity.id(), action);
                 match action {
+                    Action::Chilling => {
+                        worker.energy -= config.action_cost;
+                    }
                     // Route worker towards a target
                     Action::MoveTo(target_x, target_y) => {
                         position.x = target_x;
