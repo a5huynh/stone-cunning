@@ -13,5 +13,8 @@ libdwarf = { path = "libdwarf" }
 
 [workspace]
 members = [
-    'libdwarf'
+    # Worker/object sim.
+    'libdwarf',
+    # Terrain/biome generation.
+    'libterrain',
 ]

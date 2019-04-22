@@ -5,6 +5,7 @@ pub enum Terrain {
     STONE = 0,
     MARBLE = 1,
     GRASS = 2,
+    WATER = 3,
     NONE = -1,
 }
 
