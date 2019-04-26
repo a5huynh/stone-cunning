@@ -5,6 +5,15 @@ pub struct TerrainGenerator {
     terrain: Vec<f64>,
 }
 
+pub enum Biome {
+    OCEAN,
+    BEACH,
+    GRASSLAND,
+    TAIGA,
+    TUNDRA,
+    SNOW,
+}
+
 impl TerrainGenerator {
     pub fn new(width: u32, height: u32) -> Self {
         TerrainGenerator {
@@ -46,30 +55,28 @@ impl TerrainGenerator {
         self.terrain[idx]
     }
 
-    pub fn get_biome(&self, x: usize, y: usize) -> (usize, usize, usize) {
+    pub fn get_biome(&self, x: usize, y: usize) -> Biome {
         let value = self.get(x, y);
-        let mut red = 0;
-        let mut green = (value * 255.0) as usize;
-        let mut blue = 0;
-
+        // Ocean biome
         if value < 0.2 {
-            red = 0;
-            green = 0;
-            blue = 255;
-        } else if value < 0.25 {
-            red = 231;
-            green = 201;
-            blue = 175;
+            return Biome::OCEAN;
+        // beach biome
+        } else if value < 0.3 {
+            return Biome::BEACH;
+        // grassland
+        } else if value < 0.6 {
+            return Biome::GRASSLAND;
+        // taiga
+        } else if value <= 0.9 {
+            return Biome::TAIGA;
+        // tundra
         } else if value > 0.9 && value < 0.95 {
-            red = 128;
-            green = 128;
-            blue = 128;
+            return Biome::TUNDRA;
+        // snow
         } else if value > 0.95 {
-            red = 255;
-            green = 255;
-            blue = 255;
+            return Biome::SNOW;
         }
 
-        (red, green, blue)
+        Biome::GRASSLAND
     }
 }
