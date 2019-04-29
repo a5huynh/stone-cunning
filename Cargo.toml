@@ -9,7 +9,10 @@ publish = false
 amethyst = "0.10.0"
 rand = "0.6.5"
 serde = "1.0.90"
+# Simulation code
 libdwarf = { path = "libdwarf" }
+# Terrain generation
+libterrain = { path = "libterrain" }
 
 [workspace]
 members = [

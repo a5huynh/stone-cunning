@@ -1,10 +1,13 @@
 use noise::{NoiseFn, Perlin};
+
+#[derive(Clone)]
 pub struct TerrainGenerator {
     width: usize,
     height: usize,
     terrain: Vec<f64>,
 }
 
+#[derive(Clone, Debug)]
 pub enum Biome {
     OCEAN,
     BEACH,
