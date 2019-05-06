@@ -21,3 +21,6 @@ members = [
     # Terrain/biome generation.
     'libterrain',
 ]
+
+[profile.release]
+debug = true

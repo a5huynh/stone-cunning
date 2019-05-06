@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 noise = "0.5.1"
+rand = "0.6.5"

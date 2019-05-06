@@ -1,10 +1,15 @@
 use noise::{NoiseFn, Perlin};
+use std::collections::HashMap;
+
+mod poisson;
+use poisson::PoissonDisk;
 
 #[derive(Clone)]
 pub struct TerrainGenerator {
     width: usize,
     height: usize,
     terrain: Vec<f64>,
+    objects: HashMap<(usize, usize), Object>,
 }
 
 #[derive(Clone, Debug)]
@@ -17,12 +22,18 @@ pub enum Biome {
     SNOW,
 }
 
+#[derive(Clone, Debug)]
+pub enum Object {
+    TREE,
+}
+
 impl TerrainGenerator {
     pub fn new(width: u32, height: u32) -> Self {
         TerrainGenerator {
             width: width as usize,
             height: height as usize,
             terrain: vec![0.0; (width * height) as usize],
+            objects: HashMap::new(),
         }
     }
 
@@ -50,16 +61,26 @@ impl TerrainGenerator {
             }
         }
 
+        // Generate tree distribution.
+        let mut poisson = PoissonDisk::new(self.width, self.height, 5);
+        poisson.generate(5);
+
+        for pt in poisson.samples.iter() {
+            self.objects.insert(*pt, Object::TREE);
+        }
+
         self
     }
 
-    pub fn get(&self, x: usize, y: usize) -> f64 {
+    /// Returns the randomly generated value @ (x, y)
+    pub fn get_value(&self, x: usize, y: usize) -> f64 {
         let idx = self.idx(x, y);
         self.terrain[idx]
     }
 
+    /// Returns the Biome at (x, y).
     pub fn get_biome(&self, x: usize, y: usize) -> Biome {
-        let value = self.get(x, y);
+        let value = self.get_value(x, y);
         // Ocean biome
         if value < 0.2 {
             return Biome::OCEAN;
@@ -81,5 +102,14 @@ impl TerrainGenerator {
         }
 
         Biome::GRASSLAND
+    }
+
+    pub fn objects(&self) -> HashMap<(usize, usize), Object> {
+        self.objects.clone()
+    }
+
+    pub fn has_tree(&self, x: usize, y: usize) -> bool {
+        let object = self.objects.get(&(x, y));
+        object.is_some()
     }
 }
