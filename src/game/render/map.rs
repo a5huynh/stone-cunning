@@ -4,7 +4,7 @@ use amethyst::{
     renderer::{SpriteRender, Transparent},
 };
 use libdwarf::resources::Map;
-use libterrain::Biome;
+use libterrain::{Biome, Object};
 
 use crate::game::{config::GameConfig, sprite::SpriteSheetStorage};
 
@@ -30,9 +30,9 @@ impl MapRenderer {
         };
 
         // Load terrain map from sim
-        let sprite_sheet = {
+        let (sprite_sheet, object_sheet) = {
             let sheets = world.read_resource::<SpriteSheetStorage>();
-            sheets.terrain.clone()
+            (sheets.terrain.clone(), sheets.object.clone())
         };
 
         let (terrain, width, height) = {
@@ -40,6 +40,7 @@ impl MapRenderer {
             (map.terrain.clone(), map.width, map.height)
         };
 
+        // Create terrain
         for y in 0..height {
             for x in 0..width {
                 let sprite_idx = match terrain.get_biome(x as usize, y as usize) {
@@ -61,6 +62,21 @@ impl MapRenderer {
                     .with(Transparent)
                     .build();
             }
+        }
+
+        // Add objects to map
+        for (pos, _) in terrain.objects().iter() {
+            let sprite = SpriteRender {
+                sprite_sheet: object_sheet.clone(),
+                sprite_number: 2,
+            };
+
+            world
+                .create_entity()
+                .with(sprite)
+                .with(map_render.place(pos.0 as i32, pos.1 as i32, 0.0))
+                .with(Transparent)
+                .build();
         }
 
         map_render
