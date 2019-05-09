@@ -47,6 +47,8 @@ impl MapRenderer {
                     Biome::TAIGA => 0,
                     Biome::SNOW => 1,
                     Biome::GRASSLAND => 2,
+                    Biome::OCEAN => 3,
+                    Biome::BEACH => 4,
                     _ => 0,
                 };
 
