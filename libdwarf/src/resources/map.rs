@@ -1,19 +1,12 @@
+use libterrain::{Biome, TerrainGenerator};
 use std::collections::HashMap;
-
-#[derive(Clone, Debug)]
-pub enum Terrain {
-    STONE = 0,
-    MARBLE = 1,
-    GRASS = 2,
-    NONE = -1,
-}
 
 pub struct Map {
     // TODO: Support multiple objects per tile.
     pub object_map: HashMap<(u32, u32), u32>,
     /// Location map of all the workers.
     pub worker_map: HashMap<(u32, u32), u32>,
-    pub terrain: HashMap<(u32, u32), Terrain>,
+    pub terrain: TerrainGenerator,
     // World dimensions
     pub width: u32,
     pub height: u32,
@@ -21,20 +14,7 @@ pub struct Map {
 
 impl Map {
     pub fn initialize(width: u32, height: u32) -> Self {
-        let mut terrain = HashMap::new();
-        for y in 0..height {
-            for x in 0..width {
-                let tile = ((x + y) % 3) as usize;
-                let terrain_tile = match tile {
-                    0 => Terrain::STONE,
-                    1 => Terrain::MARBLE,
-                    2 => Terrain::GRASS,
-                    _ => Terrain::NONE,
-                };
-
-                terrain.insert((x as u32, y as u32), terrain_tile);
-            }
-        }
+        let terrain = TerrainGenerator::new(width, height).build();
 
         Map {
             object_map: HashMap::new(),
@@ -92,14 +72,12 @@ impl Map {
         None
     }
 
-    pub fn terrain_at(&self, x: i32, y: i32) -> Option<Terrain> {
+    pub fn terrain_at(&self, x: i32, y: i32) -> Option<Biome> {
         if self.is_inside_map(x, y) {
-            if let Some(terrain) = self.terrain.get(&(x as u32, y as u32)) {
-                return Some(terrain.clone());
-            }
+            Some(self.terrain.get_biome(x as usize, y as usize))
+        } else {
+            None
         }
-
-        None
     }
 
     pub fn worker_at(&self, x: i32, y: i32) -> Option<u32> {

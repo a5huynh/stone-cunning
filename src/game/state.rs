@@ -11,7 +11,7 @@ use libdwarf::world::WorldSim;
 
 use crate::game::{
     config::GameConfig,
-    entity::{CameraFollow, Cursor, CursorSelected, Floor, Object, Player},
+    entity::{CameraFollow, Cursor, CursorSelected, Object, Player},
     render::MapRenderer,
     sprite::SpriteSheetStorage,
 };
@@ -20,7 +20,6 @@ pub struct RunningState;
 impl SimpleState for RunningState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
-        world.register::<Floor>();
         world.register::<Object>();
         world.register::<Player>();
 

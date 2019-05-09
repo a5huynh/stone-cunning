@@ -3,9 +3,10 @@ use amethyst::{
     prelude::*,
     renderer::{SpriteRender, Transparent},
 };
-use libdwarf::resources::{Map, Terrain};
+use libdwarf::resources::Map;
+use libterrain::{Biome, Object};
 
-use crate::game::{config::GameConfig, entity::Floor, sprite::SpriteSheetStorage};
+use crate::game::{config::GameConfig, sprite::SpriteSheetStorage};
 
 /// Map resource used to convert coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
@@ -29,22 +30,25 @@ impl MapRenderer {
         };
 
         // Load terrain map from sim
-        let (terrain_map, width, height) = {
+        let (sprite_sheet, object_sheet) = {
+            let sheets = world.read_resource::<SpriteSheetStorage>();
+            (sheets.terrain.clone(), sheets.object.clone())
+        };
+
+        let (terrain, width, height) = {
             let map = world.read_resource::<Map>();
             (map.terrain.clone(), map.width, map.height)
         };
 
-        let sprite_sheet = {
-            let sheets = world.read_resource::<SpriteSheetStorage>();
-            sheets.terrain.clone()
-        };
+        // Create terrain
         for y in 0..height {
             for x in 0..width {
-                let terrain = terrain_map.get(&(x as u32, y as u32)).unwrap();
-                let sprite_idx = match terrain {
-                    Terrain::STONE => 0,
-                    Terrain::MARBLE => 1,
-                    Terrain::GRASS => 2,
+                let sprite_idx = match terrain.get_biome(x as usize, y as usize) {
+                    Biome::TAIGA => 0,
+                    Biome::SNOW => 1,
+                    Biome::GRASSLAND => 2,
+                    Biome::OCEAN => 3,
+                    Biome::BEACH => 4,
                     _ => 0,
                 };
 
@@ -56,11 +60,25 @@ impl MapRenderer {
                 world
                     .create_entity()
                     .with(terrain_render)
-                    .with(Floor::default())
                     .with(map_render.place(x as i32, y as i32, 0.0))
                     .with(Transparent)
                     .build();
             }
+        }
+
+        // Add objects to map
+        for (pos, _) in terrain.objects().iter() {
+            let sprite = SpriteRender {
+                sprite_sheet: object_sheet.clone(),
+                sprite_number: 2,
+            };
+
+            world
+                .create_entity()
+                .with(sprite)
+                .with(map_render.place(pos.0 as i32, pos.1 as i32, 0.0))
+                .with(Transparent)
+                .build();
         }
 
         map_render

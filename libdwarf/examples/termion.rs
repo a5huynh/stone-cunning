@@ -6,7 +6,7 @@ use termion::{clear, cursor, style};
 use libdwarf::{
     actions::Action,
     entities::{MapObject, MapPosition, Worker},
-    resources::{Map, TaskQueue, Terrain},
+    resources::{Map, TaskQueue},
     systems,
     world::WorldSim,
 };
@@ -48,13 +48,9 @@ impl<R: Read, W: Write> AsciiRenderer<R, W> {
         let map = world.read_resource::<Map>();
         for y in (0..map.height).rev() {
             for x in 0..map.width {
-                let idx = (x as u32, y as u32);
-                let terrain = map.terrain.get(&idx);
+                let terrain = map.terrain_at(x as i32, y as i32);
                 let tile = match terrain {
-                    Some(Terrain::GRASS) => ',',
-                    Some(Terrain::STONE) => '.',
-                    Some(Terrain::MARBLE) => '.',
-                    _ => '?',
+                    _ => '.',
                 };
 
                 cells[(y * map.width + x) as usize] = tile;
@@ -65,10 +61,10 @@ impl<R: Read, W: Write> AsciiRenderer<R, W> {
     // Add workers to cells
     pub fn render_workers(&mut self, world: &World, cells: &mut Vec<char>) {
         let map = world.read_resource::<Map>();
-        let entities = world.entities();
+        let positions = world.read_storage::<MapPosition>();
         let workers = world.read_storage::<Worker>();
-        for (_, worker) in (&entities, &workers).join() {
-            let idx = (worker.y * map.width + worker.x) as usize;
+        for (pos, _) in (&positions, &workers).join() {
+            let idx = (pos.y * map.width + pos.x) as usize;
             cells[idx] = 'w';
         }
     }

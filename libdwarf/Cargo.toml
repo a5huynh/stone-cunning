@@ -9,4 +9,7 @@ ron = "0.5.1"
 serde = "1.0.90"
 specs = "0.14.3"
 specs-derive = "0.4.0"
-termion = "1.5.1"
+libterrain = { path = "../libterrain" }
+
+[dev-dependencies]
+termion = "1.5.2"

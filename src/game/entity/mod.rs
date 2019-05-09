@@ -11,7 +11,7 @@ pub use player::*;
 pub use terrain::*;
 
 use crate::game::sprite::SpriteSheetStorage;
-use libdwarf::resources::Terrain;
+use libterrain::Biome;
 
 #[derive(Default)]
 /// Used to move the camera and to follow around other entities
@@ -32,7 +32,7 @@ pub enum Direction {
 pub struct PickInfo {
     pub worker: Option<u32>,
     pub object: Option<u32>,
-    pub terrain: Option<Terrain>,
+    pub terrain: Option<Biome>,
 }
 
 #[derive(Default)]

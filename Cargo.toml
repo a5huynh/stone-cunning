@@ -1,5 +1,5 @@
 [package]
-name = "iso-dwarf"
+name = "stone-cunning"
 version = "0.1.0"
 authors = ["Andrew Huynh <a5thuynh@gmail.com>"]
 edition = "2018"
@@ -9,9 +9,18 @@ publish = false
 amethyst = "0.10.0"
 rand = "0.6.5"
 serde = "1.0.90"
+# Simulation code
 libdwarf = { path = "libdwarf" }
+# Terrain generation
+libterrain = { path = "libterrain" }
 
 [workspace]
 members = [
-    'libdwarf'
+    # Worker/object sim.
+    'libdwarf',
+    # Terrain/biome generation.
+    'libterrain',
 ]
+
+[profile.release]
+debug = true
