@@ -1,5 +1,5 @@
 use amethyst::{
-    core::transform::Transform,
+    core::{timing::Time, transform::Transform},
     ecs::{Join, Read, ReadExpect, ReadStorage, System, WriteStorage},
     input::InputHandler,
 };
@@ -14,15 +14,18 @@ impl<'s> System<'s> for MapMovementSystem {
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<String, String>>,
         ReadExpect<'s, GameConfig>,
+        Read<'s, Time>,
     );
 
-    fn run(&mut self, (cameras, mut transforms, input, config): Self::SystemData) {
+    fn run(&mut self, (cameras, mut transforms, input, config, time): Self::SystemData) {
         let x_move = input.axis_value("move_x").unwrap();
         let y_move = input.axis_value("move_y").unwrap();
 
+        let delta = time.delta_seconds();
         for (_, transform) in (&cameras, &mut transforms).join() {
-            transform.translate_x(x_move as f32 * config.map_move_speed);
-            transform.translate_y(y_move as f32 * config.map_move_speed);
+            let map_move = delta * config.map_move_speed;
+            transform.translate_x(x_move as f32 * map_move);
+            transform.translate_y(y_move as f32 * map_move);
         }
     }
 }
