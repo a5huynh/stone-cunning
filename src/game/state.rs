@@ -1,10 +1,12 @@
 use amethyst::{
     core::{transform::Transform, Parent, Time},
+    ecs::{Join, Read, WriteStorage},
     input::{is_close_requested, is_key_down},
     prelude::*,
-    renderer::{Camera, DisplayConfig, Projection, VirtualKeyCode},
+    renderer::{Camera, DisplayConfig, Event, Projection, VirtualKeyCode, WindowEvent},
     ui::{UiCreator, UiFinder, UiText},
     utils::fps_counter::FPSCounter,
+    winit::MouseScrollDelta,
 };
 
 use libdwarf::world::WorldSim;
@@ -16,7 +18,18 @@ use crate::game::{
     sprite::SpriteSheetStorage,
 };
 
-pub struct RunningState;
+pub struct RunningState {
+    zoom: f32,
+}
+
+impl Default for RunningState {
+    fn default() -> RunningState {
+        RunningState {
+            zoom: 3.0
+        }
+    }
+}
+
 impl SimpleState for RunningState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
@@ -32,7 +45,7 @@ impl SimpleState for RunningState {
             (config.map_height, config.map_width)
         };
 
-        initialize_camera(world);
+        initialize_camera(world, self.zoom);
         // Initialize simulation
         WorldSim::new(world, map_width, map_height);
         // Render map
@@ -53,13 +66,47 @@ impl SimpleState for RunningState {
 
     fn handle_event(
         &mut self,
-        _: StateData<'_, GameData<'_, '_>>,
+        data: StateData<'_, GameData<'_, '_>>,
         event: StateEvent,
     ) -> SimpleTrans {
+        let world = data.world;
+
         if let StateEvent::Window(event) = &event {
             // Exit if the user hits escape
             if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) {
                 return Trans::Quit;
+            }
+
+            // Detect
+            match event {
+                Event::WindowEvent {
+                    event:
+                        WindowEvent::MouseWheel {
+                            delta: MouseScrollDelta::LineDelta(_, scroll_y),
+                            ..
+                        },
+                    ..
+                } => {
+                    world.exec(
+                        |(mut cameras, display): (WriteStorage<Camera>, Read<DisplayConfig>)| {
+                            let camera = (&mut cameras).join().next().or(None);
+                            if let Some(camera) = camera {
+                                self.zoom = (self.zoom + scroll_y / 4.0).max(1.0).min(10.0);
+                                let (window_width, window_height) = display.dimensions.unwrap();
+                                let window_width_half = window_width as f32 / (2.0 * self.zoom);
+                                let window_height_half = window_height as f32 / (2.0 * self.zoom);
+
+                                *camera = Camera::from(Projection::orthographic(
+                                    -window_width_half,
+                                    window_width_half,
+                                    -window_height_half,
+                                    window_height_half,
+                                ));
+                            }
+                        },
+                    );
+                }
+                _ => {}
             }
         }
 
@@ -91,7 +138,7 @@ impl SimpleState for RunningState {
     }
 }
 
-fn initialize_camera(world: &mut World) {
+fn initialize_camera(world: &mut World, cam_zoom: f32) {
     let (window_width, window_height) = {
         let display = world.read_resource::<DisplayConfig>();
         display.dimensions.unwrap()
@@ -107,7 +154,6 @@ fn initialize_camera(world: &mut World) {
         .with(transform.clone())
         .build();
 
-    let cam_zoom = 3.0;
     let window_width_half = window_width as f32 / (2.0 * cam_zoom);
     let window_height_half = window_height as f32 / (2.0 * cam_zoom);
 

@@ -87,7 +87,7 @@ fn main() -> amethyst::Result<()> {
             &["cursor", "player_movement"],
         );
 
-    let mut game = Application::build("./", RunningState)?
+    let mut game = Application::build("./", RunningState::default())?
         .with_resource(config)
         .with_resource(game_config.game)
         .with_resource(game_config.player)
