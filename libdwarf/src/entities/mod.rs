@@ -1,3 +1,4 @@
+use libterrain::Point3;
 use specs::{Component, VecStorage};
 use specs_derive::*;
 
@@ -12,6 +13,5 @@ pub use worker::*;
 #[derive(Clone, Component, Debug)]
 #[storage(VecStorage)]
 pub struct MapPosition {
-    pub x: u32,
-    pub y: u32,
+    pub pos: Point3<u32>,
 }

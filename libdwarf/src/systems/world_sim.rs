@@ -28,22 +28,24 @@ impl<'a> System<'a> for WorldUpdateSystem {
         while let Some(event) = queue.pop_front() {
             match event {
                 // Add an object to the map.
-                Action::Add((x, y), name) => {
-                    println!("[WUS] Adding object '{}' @ ({}, {})", name, x, y);
+                Action::Add(pt, name) => {
+                    println!("[WUS] Adding object '{}' @ ({:?})", name, pt);
                     let resource = resources.map.get(&name).unwrap().clone();
                     let new_entity = entities.create();
                     objects
                         .insert(new_entity, MapObject::new(&resource))
                         .unwrap();
-                    positions.insert(new_entity, MapPosition { x, y }).unwrap();
-                    map.track_object(new_entity.id(), x, y);
+                    positions
+                        .insert(new_entity, MapPosition { pos: pt })
+                        .unwrap();
+                    map.track_object(new_entity.id(), pt);
                 }
-                Action::AddWorker((x, y)) => {
-                    println!("[WUS] Adding worker @ {}, {}", x, y);
+                Action::AddWorker(pos) => {
+                    println!("[WUS] Adding worker @ ({:?})", pos);
                     let entity = entities.create();
                     workers.insert(entity, Worker::new()).unwrap();
-                    positions.insert(entity, MapPosition { x, y }).unwrap();
-                    map.track_worker(entity.id(), x, y);
+                    positions.insert(entity, MapPosition { pos }).unwrap();
+                    map.track_worker(entity.id(), pos);
                 }
                 // Deal damage to a particular object
                 Action::DealDamage(id, damage) => {
@@ -57,8 +59,8 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     // Remove from map
                     let entity = entities.entity(id);
                     if let Some(_) = objects.get(entity) {
-                        if let Some(pos) = positions.get(entity) {
-                            map.remove_object(id, pos.x, pos.y);
+                        if let Some(map_pos) = positions.get(entity) {
+                            map.remove_object(id, map_pos.pos);
                         }
                     }
                     // Remove from world
@@ -69,8 +71,8 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     if let Some(_) = objects.get(target_entity) {
                         if let Some(worker) = workers.get_mut(entities.entity(owner)) {
                             worker.inventory.push(target);
-                            if let Some(pos) = positions.get(target_entity) {
-                                map.remove_object(target_entity.id(), pos.x, pos.y);
+                            if let Some(map_pos) = positions.get(target_entity) {
+                                map.remove_object(target_entity.id(), map_pos.pos);
                                 positions.remove(target_entity);
                             }
                         }

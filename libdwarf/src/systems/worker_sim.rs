@@ -1,3 +1,4 @@
+use libterrain::Point3;
 use specs::{Entities, Join, ReadExpect, ReadStorage, System, Write, WriteExpect, WriteStorage};
 use std::collections::VecDeque;
 
@@ -34,28 +35,27 @@ impl<'a> System<'a> for WorkerSystem {
 
             // Handle actions for worker
             let mut new_queue = VecDeque::new();
+            let current_pos = position.pos;
             while let Some(action) = worker.actions.pop_front() {
                 match action {
                     Action::Chilling => {
                         worker.energy -= config.action_cost;
                     }
                     // Route worker towards a target
-                    Action::MoveTo(target_x, target_y) => {
-                        position.x = target_x;
-                        position.y = target_y;
+                    Action::MoveTo(target) => {
+                        position.pos = target;
                         worker.energy -= config.action_cost;
-                        map.move_worker(entity.id(), position.x, position.y, target_x, target_y);
+                        map.move_worker(entity.id(), position.pos, target);
                     }
                     // Perform an action.
                     Action::HarvestResource(pos, target, harvest) => {
-                        let (target_x, target_y) = pos;
                         // Are we next to this resource? Move closer to it
-                        let dist_x = (target_x as i32 - position.x as i32).abs() as u32;
-                        let dist_y = (target_y as i32 - position.y as i32).abs() as u32;
+                        let dist_x = (pos.x as i32 - current_pos.x as i32).abs() as u32;
+                        let dist_y = (pos.y as i32 - current_pos.y as i32).abs() as u32;
 
                         if dist_x + dist_y <= 1 {
                             // Is the resource available nearby?
-                            let neighbors = map.find_neighbors(position.x, position.y);
+                            let neighbors = map.find_neighbors(current_pos);
 
                             let harvest_resource = neighbors.iter().find(|&&&neighbor| {
                                 let entity = entities.entity(neighbor);
@@ -96,15 +96,15 @@ impl<'a> System<'a> for WorkerSystem {
                             }
                         } else {
                             // Move closer
-                            let mut new_x = position.x;
-                            let mut new_y = position.y;
+                            let mut new_x = current_pos.x;
+                            let mut new_y = current_pos.y;
                             if dist_x > dist_y {
                                 new_x += 1;
                             } else {
                                 new_y += 1;
                             }
 
-                            new_queue.push_back(Action::MoveTo(new_x, new_y));
+                            new_queue.push_back(Action::MoveTo(Point3::new(new_x, new_y, 0)));
                             new_queue.push_back(Action::HarvestResource(
                                 pos,
                                 target.clone(),
