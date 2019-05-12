@@ -9,7 +9,7 @@ use crate::game::{
     entity::{CameraFollow, Cursor, CursorSelected, PickInfo},
     render::MapRenderer,
 };
-use libdwarf::resources::Map;
+use libdwarf::{resources::Map, Point3};
 
 pub struct CursorSystem;
 
@@ -84,12 +84,13 @@ impl<'s> System<'s> for CursorSystem {
         if let Some((_, cursor_transform)) = cursor_transform {
             let (map_x, map_y) = map_render.to_map_coords(scene_x, scene_y);
             // Move cursor to new position.
-            let new_transform = map_render.place(map_x, map_y, 0.0);
+            let new_transform = map_render.place(map_x, map_y, 0, 0.0);
             cursor_transform.set_x(new_transform.translation().x);
             cursor_transform.set_y(new_transform.translation().y);
 
             // If the cursor is outside of the map, don't show any debug info.
-            if !map.is_inside_map(map_x, map_y) {
+            let map_pos = Point3::new(map_x, map_y, 0);
+            if !map.is_inside_map(map_pos) {
                 cursor_selected.hover_selected = None;
                 return;
             }
@@ -97,9 +98,9 @@ impl<'s> System<'s> for CursorSystem {
             let mut pick_info = PickInfo::default();
             // If there are worker/objects at this location, show debug info about
             // those
-            pick_info.worker = map.worker_at(map_x, map_y);
-            pick_info.object = map.objects_at(map_x, map_y);
-            pick_info.terrain = map.terrain_at(map_x, map_y);
+            pick_info.worker = map.worker_at(map_pos);
+            pick_info.object = map.objects_at(map_pos);
+            pick_info.terrain = map.terrain_at(map_pos);
             cursor_selected.hover_selected = Some(pick_info);
         }
     }

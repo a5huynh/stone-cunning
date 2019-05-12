@@ -39,10 +39,11 @@ impl<'a> System<'a> for RenderObjectSystem {
             (&*entities, &mut objects, &positions, !&sprites)
                 .join()
                 .collect();
-        for (entity, object, pos, _) in invisible {
+        for (entity, object, map_pos, _) in invisible {
             // Appply transformation
+            let pos = map_pos.pos;
             transforms
-                .insert(entity, map_render.place(pos.x as i32, pos.y as i32, 1.0))
+                .insert(entity, map_render.place(pos.x as i32, pos.y as i32, 0, 1.0))
                 .unwrap();
             // Assign sprite to entity
             sprites

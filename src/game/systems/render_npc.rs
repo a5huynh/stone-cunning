@@ -39,10 +39,11 @@ impl<'a> System<'a> for RenderNPCSystem {
             (&*entities, &mut workers, &positions, !&sprites)
                 .join()
                 .collect();
-        for (entity, _, pos, _) in invisible {
+        for (entity, _, map_pos, _) in invisible {
             // Appply transformation
+            let pos = map_pos.pos;
             transforms
-                .insert(entity, map_render.place(pos.x as i32, pos.y as i32, 1.0))
+                .insert(entity, map_render.place(pos.x as i32, pos.y as i32, 0, 1.0))
                 .unwrap();
             // Assign sprite to entity
             sprites
@@ -58,8 +59,9 @@ impl<'a> System<'a> for RenderNPCSystem {
         }
 
         // Update object positions
-        for (_, pos, transform) in (&mut workers, &positions, &mut transforms).join() {
-            let new_transform = map_render.place(pos.x as i32, pos.y as i32, 1.0);
+        for (_, map_pos, transform) in (&mut workers, &positions, &mut transforms).join() {
+            let pos = map_pos.pos;
+            let new_transform = map_render.place(pos.x as i32, pos.y as i32, 0, 1.0);
             *transform = new_transform;
         }
     }

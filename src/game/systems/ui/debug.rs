@@ -8,6 +8,7 @@ use libdwarf::{
     actions::Action,
     entities::{MapObject, Worker},
     resources::TaskQueue,
+    Point3,
 };
 
 use crate::game::entity::CursorSelected;
@@ -91,14 +92,17 @@ impl<'s> System<'s> for DebugUI {
                     if let Some(button) = buttons.get(ev.target) {
                         match button.id.as_ref() {
                             "add_worker_btn" => {
-                                queue.add_world(Action::AddWorker((1, 1)));
+                                queue.add_world(Action::AddWorker(Point3::new(1, 1, 0)));
                             }
                             "add_resource_btn" => {
-                                queue.add_world(Action::Add((9, 9), String::from("tree")));
+                                queue.add_world(Action::Add(
+                                    Point3::new(9, 9, 0),
+                                    String::from("tree"),
+                                ));
                             }
                             "add_task_btn" => {
                                 queue.add(Action::HarvestResource(
-                                    (9, 9),
+                                    Point3::new(9, 9, 0),
                                     String::from("tree"),
                                     String::from("wood"),
                                 ));

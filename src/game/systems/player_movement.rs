@@ -5,7 +5,7 @@ use amethyst::{
 };
 
 use crate::game::{config::PlayerConfig, entity::Player, render::MapRenderer};
-use libdwarf::resources::Map;
+use libdwarf::{resources::Map, Point3};
 
 pub struct PlayerMovement;
 impl<'s> System<'s> for PlayerMovement {
@@ -49,8 +49,8 @@ impl<'s> System<'s> for PlayerMovement {
                 (map_x + x_move as i32, map_y + y_move as i32)
             };
 
-            if !map.has_collision(new_x, new_y) {
-                let new_transform = map_render.place(new_x, new_y, 1.0);
+            if !map.has_collision(Point3::new(new_x, new_y, 0)) {
+                let new_transform = map_render.place(new_x, new_y, 0, 1.0);
                 transform.set_x(new_transform.translation().x);
                 transform.set_y(new_transform.translation().y);
                 transform.set_z(new_transform.translation().z);
