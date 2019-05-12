@@ -2,6 +2,7 @@ use noise::{NoiseFn, Perlin};
 use std::collections::HashMap;
 
 mod poisson;
+pub use nalgebra::Point3;
 use poisson::PoissonDisk;
 
 #[derive(Clone)]
@@ -9,7 +10,7 @@ pub struct TerrainGenerator {
     width: usize,
     height: usize,
     terrain: Vec<f64>,
-    objects: HashMap<(usize, usize), Object>,
+    objects: HashMap<Point3<u32>, Object>,
 }
 
 #[derive(Clone, Debug)]
@@ -37,8 +38,8 @@ impl TerrainGenerator {
         }
     }
 
-    fn idx(&self, x: usize, y: usize) -> usize {
-        y * self.width + x
+    fn idx(&self, x: u32, y: u32) -> usize {
+        (y * self.width as u32 + x) as usize
     }
 
     pub fn build(mut self) -> Self {
@@ -47,7 +48,7 @@ impl TerrainGenerator {
             for x in 0..self.width {
                 let nx = x as f64 / self.width as f64 - 0.5;
                 let ny = y as f64 / self.height as f64 - 0.5;
-                let idx = self.idx(x, y);
+                let idx = self.idx(x as u32, y as u32);
                 // Generate noise value & normalize to be between [0, 1]
                 self.terrain[idx] = ((1.0
                     + noise.get([nx, ny])
@@ -73,13 +74,13 @@ impl TerrainGenerator {
     }
 
     /// Returns the randomly generated value @ (x, y)
-    pub fn get_value(&self, x: usize, y: usize) -> f64 {
+    pub fn get_value(&self, x: u32, y: u32) -> f64 {
         let idx = self.idx(x, y);
         self.terrain[idx]
     }
 
     /// Returns the Biome at (x, y).
-    pub fn get_biome(&self, x: usize, y: usize) -> Biome {
+    pub fn get_biome(&self, x: u32, y: u32) -> Biome {
         let value = self.get_value(x, y);
         // Ocean biome
         if value < 0.2 {
@@ -104,12 +105,12 @@ impl TerrainGenerator {
         Biome::GRASSLAND
     }
 
-    pub fn objects(&self) -> HashMap<(usize, usize), Object> {
+    pub fn objects(&self) -> HashMap<Point3<u32>, Object> {
         self.objects.clone()
     }
 
     pub fn has_tree(&self, x: usize, y: usize) -> bool {
-        let object = self.objects.get(&(x, y));
+        let object = self.objects.get(&Point3::new(x as u32, y as u32, 0));
         object.is_some()
     }
 }
