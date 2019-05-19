@@ -33,6 +33,8 @@ pub enum Object {
 
 // TODO: Make this a variable?
 const ZLEVELS: u32 = 64;
+const GROUND_HEIGHT: u32 = 32;
+const WATER_HEIGHT: u32 = GROUND_HEIGHT + (0.2 * GROUND_HEIGHT as f64) as u32;
 
 impl TerrainGenerator {
     pub fn new(width: u32, height: u32) -> Self {
@@ -74,13 +76,34 @@ impl TerrainGenerator {
                 // Fill in this chunk based on the elevation
                 // Ground level is always at 32.
                 let biome = self.determine_biome(elevation);
-                let terrain_height = 32 + (32 as f64 * elevation).floor() as u32;
-                for z in 0..ZLEVELS {
-                    let idx = self.idx(x as u32, y as u32, z as u32);
-                    if z == terrain_height {
-                        self.terrain[idx] = Some(biome.clone());
-                    } else if z < terrain_height {
-                        self.terrain[idx] = Some(Biome::ROCK);
+                let terrain_height = GROUND_HEIGHT + (GROUND_HEIGHT as f64 * elevation).floor() as u32;
+
+                match biome {
+                    // For water biomes, the height is always the same, but the
+                    // depth of the water will change.
+                    Biome::OCEAN => {
+                        for z in 0..ZLEVELS {
+                            let idx = self.idx(x as u32, y as u32, z as u32);
+                            if z >= terrain_height && z <= WATER_HEIGHT {
+                                self.terrain[idx] = Some(biome.clone());
+                            } else if z < terrain_height {
+                                self.terrain[idx] = Some(Biome::ROCK);
+                            }
+                        }
+                    },
+                    _ => {
+                        // TODO:
+                        //  * Flatten water levels
+                        //  * Less hilly?
+                        //  * place trees correctly on 3d map
+                        for z in 0..ZLEVELS {
+                            let idx = self.idx(x as u32, y as u32, z as u32);
+                            if z == terrain_height {
+                                self.terrain[idx] = Some(biome.clone());
+                            } else if z < terrain_height {
+                                self.terrain[idx] = Some(Biome::ROCK);
+                            }
+                        }
                     }
                 }
             }
