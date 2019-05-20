@@ -47,16 +47,14 @@ impl TerrainGenerator {
     }
 
     fn idx(&self, x: u32, y: u32, z: u32) -> usize {
-        (
-            z * (self.width * self.height) as u32 +
-            y * self.width as u32 +
-            x
-        ) as usize
+        (z * (self.width * self.height) as u32 + y * self.width as u32 + x) as usize
     }
 
     pub fn build(mut self) -> Self {
         let noise = Perlin::new();
 
+        // Keep track of elevation for object placement.
+        let mut heightmap = vec![0; self.height * self.width];
         for y in 0..self.height {
             for x in 0..self.width {
                 let nx = x as f64 / self.width as f64 - 0.5;
@@ -76,8 +74,14 @@ impl TerrainGenerator {
                 // Fill in this chunk based on the elevation
                 // Ground level is always at 32.
                 let biome = self.determine_biome(elevation);
-                let terrain_height = GROUND_HEIGHT + (GROUND_HEIGHT as f64 * elevation).floor() as u32;
+                let terrain_height =
+                    GROUND_HEIGHT + (GROUND_HEIGHT as f64 * elevation).floor() as u32;
 
+                heightmap[y * self.width + x] = terrain_height;
+
+                // TODO:
+                //  * Less hilly?
+                //  * place trees correctly on 3d map
                 match biome {
                     // For water biomes, the height is always the same, but the
                     // depth of the water will change.
@@ -90,12 +94,8 @@ impl TerrainGenerator {
                                 self.terrain[idx] = Some(Biome::ROCK);
                             }
                         }
-                    },
+                    }
                     _ => {
-                        // TODO:
-                        //  * Flatten water levels
-                        //  * Less hilly?
-                        //  * place trees correctly on 3d map
                         for z in 0..ZLEVELS {
                             let idx = self.idx(x as u32, y as u32, z as u32);
                             if z == terrain_height {
@@ -113,7 +113,10 @@ impl TerrainGenerator {
         let mut poisson = PoissonDisk::new(self.width, self.height, 5);
         poisson.generate(5);
 
-        for pt in poisson.samples.iter() {
+        for pt in poisson.samples.iter_mut() {
+            // Get the terrain height at this location
+            let idx = pt.y * self.width as u32 + pt.x;
+            pt.z = heightmap[idx as usize];
             self.objects.insert(*pt, Object::TREE);
         }
 
