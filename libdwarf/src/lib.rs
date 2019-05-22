@@ -4,3 +4,5 @@ pub mod entities;
 pub mod resources;
 pub mod systems;
 pub mod world;
+
+pub use libterrain::Point3;

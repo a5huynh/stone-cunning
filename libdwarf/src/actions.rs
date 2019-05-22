@@ -1,5 +1,7 @@
+use libterrain::Point3;
+
 type EntityId = u32;
-type MapPosition = (u32, u32);
+type MapPosition = Point3<u32>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Action {
@@ -22,5 +24,5 @@ pub enum Action {
         owner: EntityId,
     },
     /// Move to some location.
-    MoveTo(u32, u32),
+    MoveTo(MapPosition),
 }

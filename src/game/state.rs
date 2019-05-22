@@ -24,9 +24,7 @@ pub struct RunningState {
 
 impl Default for RunningState {
     fn default() -> RunningState {
-        RunningState {
-            zoom: 3.0
-        }
+        RunningState { zoom: 3.0 }
     }
 }
 

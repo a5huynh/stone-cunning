@@ -1,12 +1,11 @@
+use crate::game::{config::GameConfig, sprite::SpriteSheetStorage};
 use amethyst::{
     core::transform::Transform,
     prelude::*,
     renderer::{SpriteRender, Transparent},
 };
 use libdwarf::resources::Map;
-use libterrain::{Biome, Object};
-
-use crate::game::{config::GameConfig, sprite::SpriteSheetStorage};
+use libterrain::Biome;
 
 /// Map resource used to convert coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
@@ -43,26 +42,30 @@ impl MapRenderer {
         // Create terrain
         for y in 0..height {
             for x in 0..width {
-                let sprite_idx = match terrain.get_biome(x as usize, y as usize) {
-                    Biome::TAIGA => 0,
-                    Biome::SNOW => 1,
-                    Biome::GRASSLAND => 2,
-                    Biome::OCEAN => 3,
-                    Biome::BEACH => 4,
-                    _ => 0,
-                };
+                for z in 32..64 {
+                    if let Some(biome) = terrain.get_biome(x as u32, y as u32, z as u32) {
+                        let sprite_idx = match biome {
+                            Biome::TAIGA => 0,
+                            Biome::SNOW | Biome::TUNDRA => 1,
+                            Biome::GRASSLAND => 2,
+                            Biome::OCEAN => 3,
+                            Biome::BEACH => 4,
+                            Biome::ROCK => 5,
+                        };
 
-                let terrain_render = SpriteRender {
-                    sprite_sheet: sprite_sheet.clone(),
-                    sprite_number: sprite_idx,
-                };
+                        let terrain_render = SpriteRender {
+                            sprite_sheet: sprite_sheet.clone(),
+                            sprite_number: sprite_idx,
+                        };
 
-                world
-                    .create_entity()
-                    .with(terrain_render)
-                    .with(map_render.place(x as i32, y as i32, 0.0))
-                    .with(Transparent)
-                    .build();
+                        world
+                            .create_entity()
+                            .with(terrain_render)
+                            .with(map_render.place(x as i32, y as i32, z as i32, 0.0))
+                            .with(Transparent)
+                            .build();
+                    }
+                }
             }
         }
 
@@ -76,7 +79,7 @@ impl MapRenderer {
             world
                 .create_entity()
                 .with(sprite)
-                .with(map_render.place(pos.0 as i32, pos.1 as i32, 0.0))
+                .with(map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 0.0))
                 .with(Transparent)
                 .build();
         }
@@ -102,14 +105,15 @@ impl MapRenderer {
     ///
     /// The zoffset is a float, to allow for multiple objects coexisting
     /// on a single tile in a certain order.
-    pub fn place(&self, x: i32, y: i32, zoffset: f32) -> Transform {
+    pub fn place(&self, x: i32, y: i32, z: i32, zoffset: f32) -> Transform {
         let mut transform = Transform::default();
 
         let px = (x - y) as f32 * self.tile_width / 2.0;
-        let py = (x + y) as f32 * (self.tile_height - self.tile_offset) / 2.0;
+        let py = (x + y) as f32 * (self.tile_height - self.tile_offset) / 2.0
+            - ((64.0 - z as f32) * self.tile_height);
+        let pz = -(x + y) as f32 + zoffset;
 
-        let z = -(x + y) as f32;
-        transform.set_xyz(px, py, z + zoffset);
+        transform.set_xyz(px, py, pz);
         transform
     }
 }

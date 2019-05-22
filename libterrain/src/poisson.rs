@@ -1,6 +1,8 @@
 use rand::{self, Rng};
 use std::f64::consts::PI;
 
+use crate::Point3;
+
 pub struct PoissonDisk {
     min_dist: usize,
     width: usize,
@@ -9,14 +11,14 @@ pub struct PoissonDisk {
     grid_width: f64,
     grid_height: f64,
 
-    grid: Vec<Option<(usize, usize)>>,
-    active: Vec<(usize, usize)>,
-    pub samples: Vec<(usize, usize)>,
+    grid: Vec<Option<Point3<u32>>>,
+    active: Vec<Point3<u32>>,
+    pub samples: Vec<Point3<u32>>,
 }
 
-fn distance(a: (usize, usize), b: (usize, usize)) -> f64 {
-    let dx = a.0 as f64 - b.0 as f64;
-    let dy = a.1 as f64 - b.1 as f64;
+fn distance(a: Point3<u32>, b: Point3<u32>) -> f64 {
+    let dx = a.x as f64 - b.x as f64;
+    let dy = a.y as f64 - b.y as f64;
 
     (dx * dx + dy * dy).sqrt()
 }
@@ -43,9 +45,10 @@ impl PoissonDisk {
 
         // Generates a random point
         let mut rng = rand::thread_rng();
-        let point = (
-            rng.gen_range(0, width - 1) as usize,
-            rng.gen_range(0, height - 1) as usize,
+        let point = Point3::new(
+            rng.gen_range(0, width - 1) as u32,
+            rng.gen_range(0, height - 1) as u32,
+            0,
         );
         disk.insert_point(point);
         disk.active.push(point);
@@ -53,9 +56,9 @@ impl PoissonDisk {
         disk
     }
 
-    fn is_valid(&self, point: (usize, usize)) -> bool {
-        let xidx = (point.0 as f64 / self.grid_size).floor();
-        let yidx = (point.1 as f64 / self.grid_size).floor();
+    fn is_valid(&self, point: Point3<u32>) -> bool {
+        let xidx = (point.x as f64 / self.grid_size).floor();
+        let yidx = (point.y as f64 / self.grid_size).floor();
 
         // Get the neighborhood of the point in the grid.
         let start_x = (xidx - 2.0).max(0.0) as usize;
@@ -77,9 +80,9 @@ impl PoissonDisk {
         true
     }
 
-    fn insert_point(&mut self, point: (usize, usize)) {
-        let cell_x = (point.0 as f64 / self.grid_size).floor();
-        let cell_y = (point.1 as f64 / self.grid_size).floor();
+    fn insert_point(&mut self, point: Point3<u32>) {
+        let cell_x = (point.x as f64 / self.grid_size).floor();
+        let cell_y = (point.y as f64 / self.grid_size).floor();
 
         self.samples.push(point);
 
@@ -87,19 +90,20 @@ impl PoissonDisk {
         self.grid[cell_idx] = Some(point);
     }
 
-    fn generate_around(&mut self, point: (usize, usize)) -> (usize, usize) {
+    fn generate_around(&mut self, point: Point3<u32>) -> Point3<u32> {
         let mut rng = rand::thread_rng();
         // Random angle
         let angle = 2.0 * PI * rng.gen::<f64>();
         // Random radius between min_dist and 2 * min_dist
         let radius = self.min_dist as f64 * (rng.gen::<f64>() + 1.0);
         // The new point is generated around the point (x, y)
-        let new_x = point.0 as f64 + (radius * angle.cos());
-        let new_y = point.1 as f64 + (radius * angle.sin());
+        let new_x = point.x as f64 + (radius * angle.cos());
+        let new_y = point.y as f64 + (radius * angle.sin());
 
-        (
-            new_x.max(0.0).min(self.width as f64 - 1.0) as usize,
-            new_y.max(0.0).min(self.height as f64 - 1.0) as usize,
+        Point3::new(
+            new_x.max(0.0).min(self.width as f64 - 1.0) as u32,
+            new_y.max(0.0).min(self.height as f64 - 1.0) as u32,
+            0,
         )
     }
 

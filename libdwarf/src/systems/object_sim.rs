@@ -17,6 +17,7 @@ impl<'a> System<'a> for ObjectSystem {
 
     fn run(&mut self, (entities, mut objects, mut positions, mut tasks): Self::SystemData) {
         for (entity, object, position) in (&*entities, &mut objects, &mut positions).join() {
+            let current_pos = position.pos;
             // Check object health. Queue destruction if <= 0.
             if object.health <= 0 {
                 // Destroy this object
@@ -25,8 +26,7 @@ impl<'a> System<'a> for ObjectSystem {
                 for drop in object.drop_table().iter() {
                     match drop {
                         ResourceAttribute::Drops(name, _amount) => {
-                            tasks
-                                .add_world(Action::Add((position.x, position.y), name.to_string()));
+                            tasks.add_world(Action::Add(current_pos, name.to_string()));
                         }
                         _ => {}
                     }
