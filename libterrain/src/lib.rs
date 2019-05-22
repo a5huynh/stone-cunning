@@ -13,7 +13,7 @@ pub struct TerrainGenerator {
     objects: HashMap<Point3<u32>, Object>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Biome {
     // Above ground biomes
     OCEAN,
@@ -54,13 +54,13 @@ impl TerrainGenerator {
         let noise = Perlin::new();
 
         // Keep track of elevation for object placement.
-        let mut heightmap = vec![0; self.height * self.width];
+        let mut heightmap = vec![None; self.height * self.width];
         for y in 0..self.height {
             for x in 0..self.width {
                 let nx = x as f64 / self.width as f64 - 0.5;
                 let ny = y as f64 / self.height as f64 - 0.5;
                 // Generate noise value & normalize to be between [0, 1]
-                let elevation = ((1.0
+                let mut elevation = ((1.0
                     + noise.get([nx, ny])
                     + 0.50 * noise.get([2.0 * nx, 2.0 * ny])
                     + 0.25 * noise.get([4.0 * nx, 2.0 * ny]))
@@ -69,7 +69,7 @@ impl TerrainGenerator {
                     .min(1.0);
                 // Smooth things out. By raising the elevation values to a power,
                 // we can make flat valleys.
-                elevation.powf(5.29);
+                elevation = elevation.powf(1.00);
 
                 // Fill in this chunk based on the elevation
                 // Ground level is always at 32.
@@ -77,7 +77,7 @@ impl TerrainGenerator {
                 let terrain_height =
                     GROUND_HEIGHT + (GROUND_HEIGHT as f64 * elevation).floor() as u32;
 
-                heightmap[y * self.width + x] = terrain_height;
+                heightmap[y * self.width + x] = Some((terrain_height, biome.clone()));
 
                 // TODO:
                 //  * Less hilly?
@@ -116,8 +116,12 @@ impl TerrainGenerator {
         for pt in poisson.samples.iter_mut() {
             // Get the terrain height at this location
             let idx = pt.y * self.width as u32 + pt.x;
-            pt.z = heightmap[idx as usize];
-            self.objects.insert(*pt, Object::TREE);
+            if let Some(data) = &heightmap[idx as usize] {
+                if data.1 != Biome::OCEAN {
+                    pt.z = data.0;
+                    self.objects.insert(*pt, Object::TREE);
+                }
+            }
         }
 
         self
