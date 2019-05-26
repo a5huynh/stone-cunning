@@ -40,27 +40,31 @@ impl MapRenderer {
         };
 
         // Create terrain
+        println!("Map dims: ({}, {})", width, height);
         for y in 0..height {
             for x in 0..width {
                 for z in 32..64 {
                     if let Some(biome) = terrain.get_biome(x as u32, y as u32, z as u32) {
-                        let sprite_idx = match biome {
-                            Biome::TAIGA => 0,
-                            Biome::SNOW | Biome::TUNDRA => 1,
-                            Biome::GRASSLAND => 2,
-                            Biome::OCEAN => 3,
-                            Biome::BEACH => 4,
-                            Biome::ROCK => 5,
-                        };
+                        let mut block = world.create_entity();
+                        if terrain.is_visible(x as u32, y as u32, z as u32) {
+                            let sprite_idx = match biome {
+                                Biome::TAIGA => 0,
+                                Biome::SNOW | Biome::TUNDRA => 1,
+                                Biome::GRASSLAND => 2,
+                                Biome::OCEAN => 3,
+                                Biome::BEACH => 4,
+                                Biome::ROCK => 5,
+                            };
 
-                        let terrain_render = SpriteRender {
-                            sprite_sheet: sprite_sheet.clone(),
-                            sprite_number: sprite_idx,
-                        };
+                            let terrain_render = SpriteRender {
+                                sprite_sheet: sprite_sheet.clone(),
+                                sprite_number: sprite_idx,
+                            };
 
-                        world
-                            .create_entity()
-                            .with(terrain_render)
+                            block = block.with(terrain_render);
+                        }
+
+                        block
                             .with(map_render.place(x as i32, y as i32, z as i32, 0.0))
                             .with(Transparent)
                             .build();
