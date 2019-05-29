@@ -115,7 +115,7 @@ impl TerrainGenerator {
             let idx = pt.y * self.width as u32 + pt.x;
             if let Some(data) = &heightmap[idx as usize] {
                 if data.1 != Biome::OCEAN {
-                    pt.z = data.0;
+                    pt.z = data.0 + 1;
                     self.objects.insert(*pt, Object::TREE);
                 }
             }
@@ -161,7 +161,6 @@ impl TerrainGenerator {
             return true;
         }
 
-        // If any side is exposed to air, the block is visible.
         let start_x = match x {
             0 => 0,
             _ => x - 1
@@ -181,6 +180,7 @@ impl TerrainGenerator {
         let end_y = (y + 1).min(self.height as u32 - 1);
         let end_z = (z + 1).min(ZLEVELS - 1);
 
+        // If any side is exposed to air, the block is visible.
         for ix in start_x..=end_x {
             for iy in start_y..=end_y {
                 for iz in start_z..=end_z {

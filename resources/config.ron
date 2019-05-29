@@ -10,9 +10,9 @@
         map_height: 50,
         map_width: 50,
 
-        tile_height: 20,
+        tile_height: 16,
         tile_width: 32,
-        tile_offset: 4,
+        tile_offset: 0,
 
         map_move_speed: 500.0,
     ),
