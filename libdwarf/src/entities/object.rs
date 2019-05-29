@@ -19,7 +19,7 @@ impl MapObject {
     /// Build a new map object positioned at (x, y).
     pub fn new(resource_type: &ResourceType) -> Self {
         let mut default_health = 1;
-        for attribute in resource_type.attributes.iter() {
+        for attribute in &resource_type.attributes {
             match attribute {
                 ResourceAttribute::Health(health) => {
                     default_health = *health as i32;

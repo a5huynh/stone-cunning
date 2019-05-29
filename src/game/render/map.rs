@@ -74,7 +74,7 @@ impl MapRenderer {
         }
 
         // Add objects to map
-        for (pos, _) in terrain.objects().iter() {
+        for (pos, _) in &terrain.objects() {
             let sprite = SpriteRender {
                 sprite_sheet: object_sheet.clone(),
                 sprite_number: 2,

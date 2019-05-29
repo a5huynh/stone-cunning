@@ -45,7 +45,7 @@ impl Map {
 
         // Find the neighbors and return the results
         let mut results = Vec::new();
-        for idx in neighbor_idx.iter() {
+        for idx in &neighbor_idx {
             if let Some(oid) = self.object_map.get(idx) {
                 results.push(oid);
             }

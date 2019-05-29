@@ -110,7 +110,7 @@ impl TerrainGenerator {
         let mut poisson = PoissonDisk::new(self.width, self.height, 5);
         poisson.generate(5);
 
-        for pt in poisson.samples.iter_mut() {
+        for pt in &mut poisson.samples {
             // Get the terrain height at this location
             let idx = pt.y * self.width as u32 + pt.x;
             if let Some(data) = &heightmap[idx as usize] {
@@ -163,17 +163,17 @@ impl TerrainGenerator {
 
         let start_x = match x {
             0 => 0,
-            _ => x - 1
+            _ => x - 1,
         };
 
         let start_y = match y {
             0 => 0,
-            _ => y - 1
+            _ => y - 1,
         };
 
         let start_z = match z {
             0 => 0,
-            _ => z - 1
+            _ => z - 1,
         };
 
         let end_x = (x + 1).min(self.width as u32 - 1);
