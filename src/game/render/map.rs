@@ -105,7 +105,7 @@ impl MapRenderer {
     }
 
     /// Creates a transform that would place an object on the map using
-    /// map coordinates at <x, y> w/ zindex.
+    /// map coordinates at <x, y, z> w/ zindex.
     ///
     /// The zoffset is a float, to allow for multiple objects coexisting
     /// on a single tile in a certain order.
