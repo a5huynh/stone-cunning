@@ -24,3 +24,4 @@ members = [
 
 [profile.release]
 debug = true
+incremental = true
