@@ -75,7 +75,7 @@ impl Map {
 
     pub fn terrain_at(&self, pt: Point3<i32>) -> Option<Biome> {
         if self.is_inside_map(pt) {
-            self.terrain.get_biome(pt.x as u32, pt.y as u32, 0)
+            self.terrain.get_biome(pt.x as u32, pt.y as u32, pt.z as u32)
         } else {
             None
         }

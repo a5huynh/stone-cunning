@@ -11,6 +11,7 @@ pub use player::*;
 pub use terrain::*;
 
 use crate::game::sprite::SpriteSheetStorage;
+use libdwarf::Point3;
 use libterrain::Biome;
 
 #[derive(Default)]
@@ -33,6 +34,7 @@ pub struct PickInfo {
     pub worker: Option<u32>,
     pub object: Option<u32>,
     pub terrain: Option<Biome>,
+    pub position: Option<Point3<i32>>,
 }
 
 #[derive(Default)]
