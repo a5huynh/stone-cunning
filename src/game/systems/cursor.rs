@@ -87,22 +87,23 @@ impl<'s> System<'s> for CursorSystem {
             // shown on the map, we'll loop through the z levels.
             // let mut map_z = 0;
             let (map_x, map_y) = map_render.to_map_coords(scene_x, scene_y);
-            let mut map_pt = Point3::new(map_x, map_y, 0);
 
-            for z in 0..64 {
+            // From the view port, the tallest z level from lower (x,y) coordinates will
+            // show up over ones from higher ones.
+            let mut map_pt = Point3::new(map_x - 63, map_y - 63, 0);
+            for z in (0..64).rev() {
                 map_pt.z = z;
-
+                // Loop until we find the first piece of terrain.
                 if map.is_inside_map(map_pt) {
                     let biome = map.terrain_at(map_pt);
                     if biome.is_some() {
                         pick_info.terrain = biome;
-                    } else {
                         break;
                     }
                 }
 
-                map_pt.x -= 1;
-                map_pt.y -= 1;
+                map_pt.x += 1;
+                map_pt.y += 1;
             }
 
             pick_info.position = Some(map_pt.clone());
@@ -116,6 +117,7 @@ impl<'s> System<'s> for CursorSystem {
             // those
             pick_info.worker = None; // map.worker_at(map_pos);
             pick_info.object = None;
+            // TODO: Correctly determine objects *on top* of terrain.
             // map_pt.z += 1;
             // pick_info.object = map.objects_at(map_pt);
             cursor_selected.hover_selected = Some(pick_info);
