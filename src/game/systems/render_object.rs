@@ -43,7 +43,10 @@ impl<'a> System<'a> for RenderObjectSystem {
             // Appply transformation
             let pos = map_pos.pos;
             transforms
-                .insert(entity, map_render.place(pos.x as i32, pos.y as i32, 0, 1.0))
+                .insert(
+                    entity,
+                    map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 1.0),
+                )
                 .unwrap();
             // Assign sprite to entity
             sprites
