@@ -99,7 +99,7 @@ impl MapRenderer {
 
         let px = (x - y) as f32 * self.tile_width / 2.0;
         let py = (x + y) as f32 * (self.tile_height - self.tile_offset) / 2.0
-            - ((64.0 - z as f32) * self.tile_height);
+            + ((z as f32) * self.tile_height);
         let pz = -(x + y) as f32 + zoffset;
 
         transform.set_xyz(px, py, pz);
