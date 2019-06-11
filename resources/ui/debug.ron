@@ -145,7 +145,7 @@ Container(
                     text: (
                         text: "Nothing Selected",
                         font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
-                        font_size: 24.,
+                        font_size: 20.,
                         line_mode: Wrap,
                         align: MiddleLeft,
                         color: (0.0, 0.0, 0.0, 1.0),

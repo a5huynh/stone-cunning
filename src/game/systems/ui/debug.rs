@@ -71,12 +71,17 @@ impl<'s> System<'s> for DebugUI {
                     terrain_str = format!("{:?}", terrain);
                 }
 
+                let mut pos_str = String::from("N/A");
+                if let Some(position) = &pick_info.position {
+                    pos_str = format!("({}, {}, {})", position.x, position.y, position.z);
+                }
+
                 label.text = format!(
-                    "worker: {}\nobject: {}\nterrain: {}",
-                    worker_str, object_str, terrain_str,
+                    "worker: {}\nobject: {}\nterrain: {}\npos: {}",
+                    worker_str, object_str, terrain_str, pos_str
                 );
             } else {
-                label.text = "worker: N/A\nobject: N/A\nterrain: N/A".to_string();
+                label.text = "worker: N/A\nobject: N/A\nterrain: N/A\npos: N/A".to_string();
             }
         }
 
