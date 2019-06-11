@@ -29,9 +29,9 @@ impl MapRenderer {
         };
 
         // Load terrain map from sim
-        let (sprite_sheet, object_sheet) = {
+        let sprite_sheet = {
             let sheets = world.read_resource::<SpriteSheetStorage>();
-            (sheets.terrain.clone(), sheets.object.clone())
+            sheets.terrain.clone()
         };
 
         let (terrain, width, height) = {
@@ -71,21 +71,6 @@ impl MapRenderer {
                     }
                 }
             }
-        }
-
-        // Add objects to map
-        for (pos, _) in &terrain.objects() {
-            let sprite = SpriteRender {
-                sprite_sheet: object_sheet.clone(),
-                sprite_number: 2,
-            };
-
-            world
-                .create_entity()
-                .with(sprite)
-                .with(map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 0.0))
-                .with(Transparent)
-                .build();
         }
 
         map_render

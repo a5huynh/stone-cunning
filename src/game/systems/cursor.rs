@@ -115,11 +115,9 @@ impl<'s> System<'s> for CursorSystem {
 
             // If there are worker/objects at this location, show debug info about
             // those
-            pick_info.worker = None; // map.worker_at(map_pos);
-            pick_info.object = None;
-            // TODO: Correctly determine objects *on top* of terrain.
-            // map_pt.z += 1;
-            // pick_info.object = map.objects_at(map_pt);
+            map_pt.z += 1;
+            pick_info.worker = map.worker_at(map_pt);
+            pick_info.object = map.objects_at(map_pt);
             cursor_selected.hover_selected = Some(pick_info);
         }
     }

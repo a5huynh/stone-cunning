@@ -1,5 +1,12 @@
-use libterrain::{Biome, Point3, TerrainGenerator};
 use std::collections::HashMap;
+
+use specs::{world::Builder, World};
+
+use crate::{
+    config::ResourceConfig,
+    entities::{MapObject, MapPosition},
+};
+use libterrain::{Biome, Object, Point3, TerrainGenerator};
 
 pub struct Map {
     // TODO: Support multiple objects per tile.
@@ -13,11 +20,32 @@ pub struct Map {
 }
 
 impl Map {
-    pub fn initialize(width: u32, height: u32) -> Self {
+    pub fn initialize(world: &mut World, width: u32, height: u32) -> Self {
         let terrain = TerrainGenerator::new(width, height).build();
+        let mut object_map = HashMap::new();
+
+        let resource_map = {
+            let resources = world.read_resource::<ResourceConfig>();
+            resources.map.clone()
+        };
+
+        // Initialize map w/ objects created in terrain gen
+        for (pos, object) in &terrain.objects() {
+            let mut entity_builder = world.create_entity();
+            entity_builder = match object {
+                Object::TREE => {
+                    let resource = resource_map.get("tree").unwrap().clone();
+                    entity_builder.with(MapObject::new(&resource))
+                }
+            };
+
+            entity_builder = entity_builder.with(MapPosition { pos: *pos });
+            let entity = entity_builder.build();
+            object_map.insert(*pos, entity.id());
+        }
 
         Map {
-            object_map: HashMap::new(),
+            object_map,
             worker_map: HashMap::new(),
             terrain,
             width,
@@ -75,7 +103,8 @@ impl Map {
 
     pub fn terrain_at(&self, pt: Point3<i32>) -> Option<Biome> {
         if self.is_inside_map(pt) {
-            self.terrain.get_biome(pt.x as u32, pt.y as u32, pt.z as u32)
+            self.terrain
+                .get_biome(pt.x as u32, pt.y as u32, pt.z as u32)
         } else {
             None
         }
