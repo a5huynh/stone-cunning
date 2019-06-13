@@ -29,9 +29,9 @@ impl MapRenderer {
         };
 
         // Load terrain map from sim
-        let (sprite_sheet, object_sheet) = {
+        let sprite_sheet = {
             let sheets = world.read_resource::<SpriteSheetStorage>();
-            (sheets.terrain.clone(), sheets.object.clone())
+            sheets.terrain.clone()
         };
 
         let (terrain, width, height) = {
@@ -40,48 +40,37 @@ impl MapRenderer {
         };
 
         // Create terrain
+        println!("Map dims: ({}, {})", width, height);
         for y in 0..height {
             for x in 0..width {
                 for z in 32..64 {
                     if let Some(biome) = terrain.get_biome(x as u32, y as u32, z as u32) {
-                        let sprite_idx = match biome {
-                            Biome::TAIGA => 0,
-                            Biome::SNOW | Biome::TUNDRA => 1,
-                            Biome::GRASSLAND => 2,
-                            Biome::OCEAN => 3,
-                            Biome::BEACH => 4,
-                            Biome::ROCK => 5,
-                        };
+                        let mut block = world.create_entity();
+                        if terrain.is_visible(x as u32, y as u32, z as u32) {
+                            let sprite_idx = match biome {
+                                Biome::TAIGA => 0,
+                                Biome::SNOW | Biome::TUNDRA => 1,
+                                Biome::GRASSLAND => 2,
+                                Biome::OCEAN => 3,
+                                Biome::BEACH => 4,
+                                Biome::ROCK => 5,
+                            };
 
-                        let terrain_render = SpriteRender {
-                            sprite_sheet: sprite_sheet.clone(),
-                            sprite_number: sprite_idx,
-                        };
+                            let terrain_render = SpriteRender {
+                                sprite_sheet: sprite_sheet.clone(),
+                                sprite_number: sprite_idx,
+                            };
 
-                        world
-                            .create_entity()
-                            .with(terrain_render)
+                            block = block.with(terrain_render);
+                        }
+
+                        block
                             .with(map_render.place(x as i32, y as i32, z as i32, 0.0))
                             .with(Transparent)
                             .build();
                     }
                 }
             }
-        }
-
-        // Add objects to map
-        for (pos, _) in terrain.objects().iter() {
-            let sprite = SpriteRender {
-                sprite_sheet: object_sheet.clone(),
-                sprite_number: 2,
-            };
-
-            world
-                .create_entity()
-                .with(sprite)
-                .with(map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 0.0))
-                .with(Transparent)
-                .build();
         }
 
         map_render
@@ -101,7 +90,7 @@ impl MapRenderer {
     }
 
     /// Creates a transform that would place an object on the map using
-    /// map coordinates at <x, y> w/ zindex.
+    /// map coordinates at <x, y, z> w/ zindex.
     ///
     /// The zoffset is a float, to allow for multiple objects coexisting
     /// on a single tile in a certain order.
@@ -110,7 +99,7 @@ impl MapRenderer {
 
         let px = (x - y) as f32 * self.tile_width / 2.0;
         let py = (x + y) as f32 * (self.tile_height - self.tile_offset) / 2.0
-            - ((64.0 - z as f32) * self.tile_height);
+            + ((z as f32) * self.tile_height);
         let pz = -(x + y) as f32 + zoffset;
 
         transform.set_xyz(px, py, pz);

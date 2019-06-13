@@ -82,22 +82,19 @@ impl TerrainGenerator {
                 // TODO:
                 //  * Less hilly?
                 //  * place trees correctly on 3d map
-                match biome {
-                    // For water biomes, the height is always the same, but the
-                    // depth of the water will change.
-                    Biome::OCEAN => {
-                        for z in 0..ZLEVELS {
-                            let idx = self.idx(x as u32, y as u32, z as u32);
+                for z in 0..ZLEVELS {
+                    let idx = self.idx(x as u32, y as u32, z as u32);
+                    match biome {
+                        // For water biomes, the height is always the same, but the
+                        // depth of the water will change.
+                        Biome::OCEAN => {
                             if z >= terrain_height && z <= WATER_HEIGHT {
                                 self.terrain[idx] = Some(biome.clone());
                             } else if z < terrain_height {
                                 self.terrain[idx] = Some(Biome::ROCK);
                             }
                         }
-                    }
-                    _ => {
-                        for z in 0..ZLEVELS {
-                            let idx = self.idx(x as u32, y as u32, z as u32);
+                        _ => {
                             if z == terrain_height {
                                 self.terrain[idx] = Some(biome.clone());
                             } else if z < terrain_height {
@@ -113,12 +110,12 @@ impl TerrainGenerator {
         let mut poisson = PoissonDisk::new(self.width, self.height, 5);
         poisson.generate(5);
 
-        for pt in poisson.samples.iter_mut() {
+        for pt in &mut poisson.samples {
             // Get the terrain height at this location
             let idx = pt.y * self.width as u32 + pt.x;
             if let Some(data) = &heightmap[idx as usize] {
                 if data.1 != Biome::OCEAN {
-                    pt.z = data.0;
+                    pt.z = data.0 + 1;
                     self.objects.insert(*pt, Object::TREE);
                 }
             }
@@ -155,6 +152,47 @@ impl TerrainGenerator {
     pub fn get_biome(&self, x: u32, y: u32, z: u32) -> Option<Biome> {
         let idx = self.idx(x, y, z);
         self.terrain[idx].clone()
+    }
+
+    /// Determines whether the block @ (x, y, z) is visible.
+    pub fn is_visible(&self, x: u32, y: u32, z: u32) -> bool {
+        // Top level is always exposed.
+        if z == ZLEVELS - 1 {
+            return true;
+        }
+
+        let start_x = match x {
+            0 => 0,
+            _ => x - 1,
+        };
+
+        let start_y = match y {
+            0 => 0,
+            _ => y - 1,
+        };
+
+        let start_z = match z {
+            0 => 0,
+            _ => z - 1,
+        };
+
+        let end_x = (x + 1).min(self.width as u32 - 1);
+        let end_y = (y + 1).min(self.height as u32 - 1);
+        let end_z = (z + 1).min(ZLEVELS - 1);
+
+        // If any side is exposed to air, the block is visible.
+        for ix in start_x..=end_x {
+            for iy in start_y..=end_y {
+                for iz in start_z..=end_z {
+                    let idx = self.idx(ix, iy, iz);
+                    if self.terrain[idx].is_none() {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        false
     }
 
     pub fn objects(&self) -> HashMap<Point3<u32>, Object> {
