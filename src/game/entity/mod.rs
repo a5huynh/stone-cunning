@@ -21,14 +21,6 @@ impl Component for CameraFollow {
     type Storage = DenseVecStorage<Self>;
 }
 
-// #[derive(Clone, Debug, PartialEq)]
-pub enum Direction {
-    WEST,
-    NORTH,
-    EAST,
-    SOUTH,
-}
-
 #[derive(Clone, Debug, Default)]
 pub struct PickInfo {
     pub worker: Option<u32>,

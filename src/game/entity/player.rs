@@ -5,7 +5,6 @@ use amethyst::{
     renderer::{SpriteRender, Transparent},
 };
 
-use super::Direction;
 use crate::game::sprite::SpriteSheetStorage;
 
 #[derive(Default)]
@@ -40,23 +39,5 @@ impl Player {
             .with(player_transform)
             .with(Transparent)
             .build();
-    }
-
-    /// Determine which way the player is facing based on the last
-    /// movement transform.
-    pub fn calculate_direction(x: f64, y: f64) -> Direction {
-        if x < 0.0 {
-            return Direction::WEST;
-        } else if x > 0.0 {
-            return Direction::EAST;
-        } else if x == 0.0 {
-            if y > 0.0 {
-                return Direction::NORTH;
-            } else if y < 0.0 {
-                return Direction::SOUTH;
-            }
-        }
-
-        return Direction::NORTH;
     }
 }
