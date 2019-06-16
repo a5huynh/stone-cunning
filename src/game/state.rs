@@ -1,6 +1,6 @@
 use amethyst::{
     core::{transform::Transform, Parent, Time},
-    ecs::{Join, Read, WriteStorage},
+    ecs::{Join, Read, Write, WriteStorage},
     input::{is_close_requested, is_key_down},
     prelude::*,
     renderer::{Camera, DisplayConfig, Event, Projection, VirtualKeyCode, WindowEvent},
@@ -9,7 +9,12 @@ use amethyst::{
     winit::MouseScrollDelta,
 };
 
-use libdwarf::world::WorldSim;
+use libdwarf::{
+    actions::Action,
+    resources::TaskQueue,
+    world::WorldSim,
+    Point3
+};
 
 use crate::game::{
     config::GameConfig,
@@ -43,22 +48,31 @@ impl SimpleState for RunningState {
             (config.map_height, config.map_width)
         };
 
-        initialize_camera(world, self.zoom);
         // Initialize simulation
         WorldSim::new(world, map_width, map_height);
         // Render map
         let map_render = MapRenderer::initialize(world);
+        initialize_camera(
+            world,
+            map_render.place(8, 8, 42, 0.0),
+            self.zoom
+        );
         world.add_resource(map_render);
         // Initialize cursor sprite.
         Cursor::initialize(world);
         // Initialize player.
-        Player::initialize(world);
+        // Player::initialize(world);
 
         world.add_resource(CursorSelected::default());
 
         // Create the ui
         world.exec(|mut creator: UiCreator<'_>| {
             creator.create("resources/ui/debug.ron", ());
+        });
+
+        // Initialize workers
+        world.exec(|mut queue: Write<'_, TaskQueue>| {
+            queue.add_world(Action::AddWorker(Point3::new(8, 8, 42)));
         });
     }
 
@@ -136,16 +150,15 @@ impl SimpleState for RunningState {
     }
 }
 
-fn initialize_camera(world: &mut World, cam_zoom: f32) {
+fn initialize_camera(world: &mut World, center: Transform, cam_zoom: f32) {
     let (window_width, window_height) = {
         let display = world.read_resource::<DisplayConfig>();
         display.dimensions.unwrap()
     };
 
-    let mut transform = Transform::default();
-    transform.set_z(10.0);
-
     // Add an entity we can use to move around the camera.
+    let mut transform = center.clone();
+    transform.set_z(10.0);
     let entity = world
         .create_entity()
         .with(CameraFollow::default())
@@ -164,6 +177,6 @@ fn initialize_camera(world: &mut World, cam_zoom: f32) {
             window_height_half,
         )))
         .with(Parent { entity })
-        .with(transform)
+        .with(Transform::default())
         .build();
 }
