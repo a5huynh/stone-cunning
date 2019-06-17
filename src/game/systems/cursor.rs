@@ -1,8 +1,9 @@
 use amethyst::{
-    core::{nalgebra::Orthographic3, Transform},
+    core::{Float, Transform},
     ecs::{Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
-    input::InputHandler,
-    renderer::{Camera, ScreenDimensions},
+    input::{InputHandler, StringBindings},
+    renderer::Camera,
+    window::ScreenDimensions,
 };
 
 use crate::game::{
@@ -17,7 +18,7 @@ impl<'s> System<'s> for CursorSystem {
     type SystemData = (
         WriteStorage<'s, Cursor>,
         Write<'s, CursorSelected>,
-        Read<'s, InputHandler<String, String>>,
+        Read<'s, InputHandler<StringBindings>>,
         WriteStorage<'s, Transform>,
         ReadStorage<'s, Camera>,
         ReadStorage<'s, CameraFollow>,
@@ -49,7 +50,7 @@ impl<'s> System<'s> for CursorSystem {
                     follow_transform.translation().y,
                 )
             } else {
-                (0.0, 0.0)
+                (Float::from_f32(0.0), Float::from_f32(0.0))
             }
         };
         // Grab the zoom level of the camera
@@ -58,19 +59,21 @@ impl<'s> System<'s> for CursorSystem {
         let (scene_x, scene_y) = {
             if let Some((mx, my)) = input.mouse_position() {
                 if let Some((_, camera)) = camera_transform {
-                    let projection = Orthographic3::from_matrix_unchecked(camera.proj);
+                    if let Some(projection) = camera.projection().as_orthographic() {
+                        let scene_x = mx as f32 / screen_dim.width()
+                            * (projection.right() - projection.left()).abs()
+                            - projection.right()
+                            + map_transform_x.as_f32();
 
-                    let scene_x = mx as f32 / screen_dim.width()
-                        * (projection.right() - projection.left()).abs()
-                        - projection.right()
-                        + map_transform_x;
+                        let scene_y = -my as f32 / screen_dim.height()
+                            * (projection.top() - projection.bottom()).abs()
+                            + projection.top()
+                            + map_transform_y.as_f32();
 
-                    let scene_y = -my as f32 / screen_dim.height()
-                        * (projection.top() - projection.bottom()).abs()
-                        + projection.top()
-                        + map_transform_y;
-
-                    (scene_x, scene_y)
+                        (scene_x, scene_y)
+                    } else {
+                        (0.0, 0.0)
+                    }
                 } else {
                     (0.0, 0.0)
                 }
@@ -110,8 +113,8 @@ impl<'s> System<'s> for CursorSystem {
 
             // Move cursor to new position.
             let new_transform = map_render.place(map_pt.x, map_pt.y, map_pt.z, 0.0);
-            cursor_transform.set_x(new_transform.translation().x);
-            cursor_transform.set_y(new_transform.translation().y);
+            cursor_transform.set_translation_x(new_transform.translation().x);
+            cursor_transform.set_translation_y(new_transform.translation().y);
 
             // If there are worker/objects at this location, show debug info about
             // those

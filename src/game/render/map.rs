@@ -102,7 +102,7 @@ impl MapRenderer {
             + ((z as f32) * self.tile_height);
         let pz = -(x + y) as f32 + zoffset;
 
-        transform.set_xyz(px, py, pz);
+        transform.set_translation_xyz(px, py, pz);
         transform
     }
 }

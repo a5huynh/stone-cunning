@@ -43,7 +43,10 @@ impl<'a> System<'a> for RenderNPCSystem {
             // Appply transformation
             let pos = map_pos.pos;
             transforms
-                .insert(entity, map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 1.0))
+                .insert(
+                    entity,
+                    map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 1.0),
+                )
                 .unwrap();
             // Assign sprite to entity
             sprites
@@ -62,7 +65,11 @@ impl<'a> System<'a> for RenderNPCSystem {
         for (_, map_pos, transform) in (&mut workers, &positions, &mut transforms).join() {
             let pos = map_pos.pos;
             let new_transform = map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 1.0);
-            *transform = new_transform;
+            transform.set_translation_xyz(
+                new_transform.translation().x,
+                new_transform.translation().y,
+                new_transform.translation().z,
+            );
         }
     }
 }

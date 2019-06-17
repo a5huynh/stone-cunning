@@ -1,7 +1,7 @@
 use amethyst::{
-    core::{timing::Time, transform::Transform},
+    core::{timing::Time, transform::Transform, Float},
     ecs::{Join, Read, ReadExpect, ReadStorage, System, WriteStorage},
-    input::InputHandler,
+    input::{InputHandler, StringBindings},
 };
 
 use super::super::{config::GameConfig, entity::CameraFollow};
@@ -12,7 +12,7 @@ impl<'s> System<'s> for MapMovementSystem {
     type SystemData = (
         ReadStorage<'s, CameraFollow>,
         WriteStorage<'s, Transform>,
-        Read<'s, InputHandler<String, String>>,
+        Read<'s, InputHandler<StringBindings>>,
         ReadExpect<'s, GameConfig>,
         Read<'s, Time>,
     );
@@ -24,8 +24,8 @@ impl<'s> System<'s> for MapMovementSystem {
         let delta = time.delta_seconds();
         for (_, transform) in (&cameras, &mut transforms).join() {
             let map_move = delta * config.map_move_speed;
-            transform.translate_x(x_move as f32 * map_move);
-            transform.translate_y(y_move as f32 * map_move);
+            transform.prepend_translation_x(Float::from_f32(x_move as f32 * map_move));
+            transform.prepend_translation_y(Float::from_f32(y_move as f32 * map_move));
         }
     }
 }

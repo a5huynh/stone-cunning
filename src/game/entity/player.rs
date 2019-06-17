@@ -25,7 +25,7 @@ impl Player {
         };
 
         let mut player_transform = Transform::default();
-        player_transform.set_xyz(0.0, 0.0, 1.0);
+        player_transform.set_translation_xyz(0.0, 0.0, 1.0);
 
         let sprite_render = SpriteRender {
             sprite_sheet,

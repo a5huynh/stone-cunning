@@ -1,20 +1,16 @@
 use amethyst::{
     core::{transform::Transform, Parent, Time},
     ecs::{Join, Read, Write, WriteStorage},
-    input::{is_close_requested, is_key_down},
+    input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
-    renderer::{Camera, DisplayConfig, Event, Projection, VirtualKeyCode, WindowEvent},
+    renderer::{camera::Projection, Camera},
     ui::{UiCreator, UiFinder, UiText},
     utils::fps_counter::FPSCounter,
-    winit::MouseScrollDelta,
+    window::DisplayConfig,
+    winit::{Event, MouseScrollDelta, WindowEvent},
 };
 
-use libdwarf::{
-    actions::Action,
-    resources::TaskQueue,
-    world::WorldSim,
-    Point3
-};
+use libdwarf::{actions::Action, resources::TaskQueue, world::WorldSim, Point3};
 
 use crate::game::{
     config::GameConfig,
@@ -52,11 +48,7 @@ impl SimpleState for RunningState {
         WorldSim::new(world, map_width, map_height);
         // Render map
         let map_render = MapRenderer::initialize(world);
-        initialize_camera(
-            world,
-            map_render.place(8, 8, 42, 0.0),
-            self.zoom
-        );
+        initialize_camera(world, map_render.place(8, 8, 42, 0.0), self.zoom);
         world.add_resource(map_render);
         // Initialize cursor sprite.
         Cursor::initialize(world);
@@ -105,14 +97,16 @@ impl SimpleState for RunningState {
                             if let Some(camera) = camera {
                                 self.zoom = (self.zoom + scroll_y / 4.0).max(1.0).min(10.0);
                                 let (window_width, window_height) = display.dimensions.unwrap();
-                                let window_width_half = window_width as f32 / (2.0 * self.zoom);
-                                let window_height_half = window_height as f32 / (2.0 * self.zoom);
+                                let zoom_width = window_width as f32 / self.zoom;
+                                let zoom_height = window_height as f32 / self.zoom;
 
                                 *camera = Camera::from(Projection::orthographic(
-                                    -window_width_half,
-                                    window_width_half,
-                                    -window_height_half,
-                                    window_height_half,
+                                    -zoom_width,
+                                    zoom_width,
+                                    -zoom_height,
+                                    zoom_height,
+                                    -100.0,
+                                    100.0,
                                 ));
                             }
                         },
@@ -158,23 +152,25 @@ fn initialize_camera(world: &mut World, center: Transform, cam_zoom: f32) {
 
     // Add an entity we can use to move around the camera.
     let mut transform = center.clone();
-    transform.set_z(10.0);
+    transform.set_translation_z(10.0);
     let entity = world
         .create_entity()
         .with(CameraFollow::default())
         .with(transform.clone())
         .build();
 
-    let window_width_half = window_width as f32 / (2.0 * cam_zoom);
-    let window_height_half = window_height as f32 / (2.0 * cam_zoom);
+    let width = window_width as f32 / cam_zoom;
+    let height = window_height as f32 / cam_zoom;
 
     world
         .create_entity()
         .with(Camera::from(Projection::orthographic(
-            -window_width_half,
-            window_width_half,
-            -window_height_half,
-            window_height_half,
+            -(width as f32),
+            width as f32,
+            -(height as f32),
+            height as f32,
+            -100.0,
+            100.0,
         )))
         .with(Parent { entity })
         .with(Transform::default())

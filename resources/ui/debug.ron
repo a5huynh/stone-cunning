@@ -17,9 +17,7 @@ Container(
                 width: 192.0,
                 height: 400.0,
             ),
-            background: (
-                image: Data(Rgba((1.0, 1.0, 1.0, 0.5), (channel: Srgb))),
-            ),
+            background: SolidColor(1.0, 1.0, 1.0, 0.5),
             children: [
                 Button(
                     transform: (
@@ -33,14 +31,14 @@ Container(
                     ),
                     button: (
                         text: "Add Worker",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
+                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", ("TTF", ())),
                         font_size: 20.,
                         normal_text_color: (1.0, 0.85, 0.4, 1.0),
                         hover_text_color: (1.0, 0.85, 0.4, 1.0),
                         press_text_color: (0.0, 0.0, 0.0, 1.0),
-                        normal_image: Data(Rgba((0.17, 0.16, 0.18, 1.0), (channel: Srgb))),
-                        hover_image: Data(Rgba((0.25, 0.24, 0.26, 1.0), (channel: Srgb))),
-                        press_image: Data(Rgba((1., 1., 1., 1.), (channel: Srgb))),
+                        normal_image: SolidColor(0.17, 0.16, 0.18, 1.0),
+                        hover_image: SolidColor(0.25, 0.24, 0.26, 1.0),
+                        press_image: SolidColor(1., 1., 1., 1.),
                     )
                 ),
                 Button(
@@ -55,14 +53,14 @@ Container(
                     ),
                     button: (
                         text: "Add Resource",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
+                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", ("TTF", ())),
                         font_size: 20.,
                         normal_text_color: (1.0, 0.85, 0.4, 1.0),
                         hover_text_color: (1.0, 0.85, 0.4, 1.0),
                         press_text_color: (0.0, 0.0, 0.0, 1.0),
-                        normal_image: Data(Rgba((0.17, 0.16, 0.18, 1.0), (channel: Srgb))),
-                        hover_image: Data(Rgba((0.25, 0.24, 0.26, 1.0), (channel: Srgb))),
-                        press_image: Data(Rgba((1., 1., 1., 1.), (channel: Srgb))),
+                        normal_image: SolidColor(0.17, 0.16, 0.18, 1.0),
+                        hover_image: SolidColor(0.25, 0.24, 0.26, 1.0),
+                        press_image: SolidColor(1., 1., 1., 1.),
                     )
                 ),
                 Button(
@@ -77,14 +75,14 @@ Container(
                     ),
                     button: (
                         text: "Add Task",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
+                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", ("TTF", ())),
                         font_size: 20.,
                         normal_text_color: (1.0, 0.85, 0.4, 1.0),
                         hover_text_color: (1.0, 0.85, 0.4, 1.0),
                         press_text_color: (0.0, 0.0, 0.0, 1.0),
-                        normal_image: Data(Rgba((0.17, 0.16, 0.18, 1.0), (channel: Srgb))),
-                        hover_image: Data(Rgba((0.25, 0.24, 0.26, 1.0), (channel: Srgb))),
-                        press_image: Data(Rgba((1., 1., 1., 1.), (channel: Srgb))),
+                        normal_image: SolidColor(0.17, 0.16, 0.18, 1.0),
+                        hover_image: SolidColor(0.25, 0.24, 0.26, 1.0),
+                        press_image: SolidColor(1., 1., 1., 1.),
                     )
                 ),
             ],
@@ -98,11 +96,9 @@ Container(
                 width: 200.0,
                 height: 32.0
             ),
-            background: (
-                image: Data(Rgba((1.0, 1.0, 1.0, 0.5), (channel: Srgb))),
-            ),
+            background: SolidColor(1.0, 1.0, 1.0, 0.5),
             children: [
-                Text(
+                Label(
                     transform: (
                         id: "fps",
                         y: -16.0,
@@ -113,7 +109,7 @@ Container(
                     ),
                     text: (
                         text: "",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
+                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", ("TTF", ())),
                         font_size: 24.,
                         color: (0.0, 0.0, 0.0, 1.0),
                     )
@@ -129,11 +125,9 @@ Container(
                 width: 400.0,
                 height: 400.0,
             ),
-            background: (
-                image: Data(Rgba((1.0, 1.0, 1.0, 0.5), (channel: Srgb))),
-            ),
+            background: SolidColor(1.0, 1.0, 1.0, 0.5),
             children: [
-                Text(
+                Label(
                     transform: (
                         id: "debug_info",
                         x: 216.0,
@@ -144,7 +138,7 @@ Container(
                     ),
                     text: (
                         text: "Nothing Selected",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", Ttf, ()),
+                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", ("TTF", ())),
                         font_size: 20.,
                         line_mode: Wrap,
                         align: MiddleLeft,

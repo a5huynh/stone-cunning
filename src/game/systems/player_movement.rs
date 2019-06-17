@@ -1,7 +1,7 @@
 use amethyst::{
     core::{timing::Time, transform::Transform},
     ecs::{Join, Read, ReadExpect, System, WriteStorage},
-    input::InputHandler,
+    input::{InputHandler, StringBindings},
 };
 
 use crate::game::{config::PlayerConfig, entity::Player, render::MapRenderer};
@@ -13,7 +13,7 @@ impl<'s> System<'s> for PlayerMovement {
         WriteStorage<'s, Player>,
         ReadExpect<'s, PlayerConfig>,
         WriteStorage<'s, Transform>,
-        Read<'s, InputHandler<String, String>>,
+        Read<'s, InputHandler<StringBindings>>,
         Read<'s, Time>,
         ReadExpect<'s, Map>,
         ReadExpect<'s, MapRenderer>,
@@ -45,15 +45,15 @@ impl<'s> System<'s> for PlayerMovement {
             let player_y = transform.translation().y;
             // Convert player position into map coordinates and bump to new location.
             let (new_x, new_y) = {
-                let (map_x, map_y) = map_render.to_map_coords(player_x, player_y);
+                let (map_x, map_y) = map_render.to_map_coords(player_x.as_f32(), player_y.as_f32());
                 (map_x + x_move as i32, map_y + y_move as i32)
             };
 
             if !map.has_collision(Point3::new(new_x, new_y, 0)) {
                 let new_transform = map_render.place(new_x, new_y, 0, 1.0);
-                transform.set_x(new_transform.translation().x);
-                transform.set_y(new_transform.translation().y);
-                transform.set_z(new_transform.translation().z);
+                transform.set_translation_x(new_transform.translation().x);
+                transform.set_translation_y(new_transform.translation().y);
+                transform.set_translation_z(new_transform.translation().z);
             }
         }
     }
