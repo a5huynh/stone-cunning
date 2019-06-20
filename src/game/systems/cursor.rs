@@ -9,6 +9,7 @@ use amethyst::{
 use crate::game::{
     entity::{CameraFollow, Cursor, CursorSelected, PickInfo},
     render::MapRenderer,
+    utils::camera_to_world,
 };
 use libdwarf::{resources::Map, Point3};
 
@@ -36,14 +37,14 @@ impl<'s> System<'s> for CursorSystem {
             mut transforms,
             cameras,
             follow,
-            screen_dim,
+            screen,
             map,
             map_render,
         ): Self::SystemData,
     ) {
         // Grab the transform from map movement.
         let camera_follow = (&transforms, &follow).join().next().or(None).clone();
-        let (map_transform_x, map_transform_y) = {
+        let map_transform = {
             if let Some((follow_transform, _)) = camera_follow {
                 (
                     follow_transform.translation().x,
@@ -53,27 +54,14 @@ impl<'s> System<'s> for CursorSystem {
                 (Float::from_f32(0.0), Float::from_f32(0.0))
             }
         };
+
         // Grab the zoom level of the camera
         let camera_transform = (&transforms, &cameras).join().next().or(None).clone();
         // Convert mouse position into scene coordinates.
         let (scene_x, scene_y) = {
             if let Some((mx, my)) = input.mouse_position() {
                 if let Some((_, camera)) = camera_transform {
-                    if let Some(projection) = camera.projection().as_orthographic() {
-                        let scene_x = mx as f32 / screen_dim.width()
-                            * (projection.right() - projection.left()).abs()
-                            - projection.right()
-                            + map_transform_x.as_f32();
-
-                        let scene_y = -my as f32 / screen_dim.height()
-                            * (projection.top() - projection.bottom()).abs()
-                            + projection.top()
-                            + map_transform_y.as_f32();
-
-                        (scene_x, scene_y)
-                    } else {
-                        (0.0, 0.0)
-                    }
+                    camera_to_world(mx, my, map_transform, &screen, camera)
                 } else {
                     (0.0, 0.0)
                 }

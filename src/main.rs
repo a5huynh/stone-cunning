@@ -5,9 +5,9 @@ use amethyst::{
     input::{InputBundle, StringBindings},
     prelude::*,
     renderer::{
-        pass::DrawFlat2DTransparentDesc, types::DefaultBackend, Factory, Format, GraphBuilder,
-        GraphCreator, Kind, RenderGroupDesc, RenderingSystem, SpriteSheet, SubpassBuilder,
-        sprite_visibility::SpriteVisibilitySortingSystem,
+        pass::DrawFlat2DTransparentDesc, sprite_visibility::SpriteVisibilitySortingSystem,
+        types::DefaultBackend, Factory, Format, GraphBuilder, GraphCreator, Kind, RenderGroupDesc,
+        RenderingSystem, SpriteSheet, SubpassBuilder,
     },
     ui::{DrawUiDesc, UiBundle},
     utils::{application_root_dir, fps_counter::FPSCounterBundle},
