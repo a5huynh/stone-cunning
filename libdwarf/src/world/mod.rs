@@ -2,7 +2,7 @@ use specs::World;
 
 use crate::{
     config::{ResourceConfig, WorldConfig},
-    entities::{MapObject, Worker},
+    components::{MapObject, Worker},
     resources::{time, Map, TaskQueue},
 };
 

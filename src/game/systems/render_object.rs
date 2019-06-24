@@ -4,7 +4,7 @@ use amethyst::{
     renderer::{SpriteRender, Transparent},
 };
 
-use libdwarf::entities::{MapObject, MapPosition};
+use libdwarf::components::{MapObject, MapPosition};
 
 use crate::game::{render::MapRenderer, sprite::SpriteSheetStorage};
 

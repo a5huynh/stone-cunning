@@ -4,7 +4,7 @@ use amethyst::{
     input::{InputHandler, StringBindings},
 };
 
-use super::super::{config::GameConfig, entity::CameraFollow};
+use super::super::{config::GameConfig, components::CameraFollow};
 
 pub struct MapMovementSystem;
 

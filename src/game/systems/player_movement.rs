@@ -4,7 +4,7 @@ use amethyst::{
     input::{InputHandler, StringBindings},
 };
 
-use crate::game::{config::PlayerConfig, entity::Player, render::MapRenderer};
+use crate::game::{config::PlayerConfig, components::Player, render::MapRenderer};
 use libdwarf::{resources::Map, Point3};
 
 pub struct PlayerMovement;

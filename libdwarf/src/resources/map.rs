@@ -4,7 +4,7 @@ use specs::{world::Builder, World};
 
 use crate::{
     config::ResourceConfig,
-    entities::{MapObject, MapPosition},
+    components::{MapObject, MapPosition},
 };
 use libterrain::{Biome, Object, Point3, TerrainGenerator};
 

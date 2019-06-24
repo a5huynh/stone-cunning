@@ -3,7 +3,7 @@ use specs::{Entities, ReadExpect, System, WriteExpect, WriteStorage};
 use crate::{
     actions::Action,
     config::ResourceConfig,
-    entities::{MapObject, MapPosition, Worker},
+    components::{MapObject, MapPosition, Worker},
     resources::{Map, TaskQueue},
 };
 

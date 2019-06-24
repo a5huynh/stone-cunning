@@ -14,7 +14,7 @@ use libdwarf::{actions::Action, resources::TaskQueue, world::WorldSim, Point3};
 
 use crate::game::{
     config::GameConfig,
-    entity::{CameraFollow, Cursor, CursorSelected, Object, Player},
+    components::{CameraFollow, Cursor, CursorSelected, Object, Player},
     render::MapRenderer,
     sprite::SpriteSheetStorage,
 };

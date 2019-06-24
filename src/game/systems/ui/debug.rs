@@ -6,12 +6,12 @@ use amethyst::{
 
 use libdwarf::{
     actions::Action,
-    entities::{MapObject, Worker},
+    components::{MapObject, Worker},
     resources::TaskQueue,
     Point3,
 };
 
-use crate::game::entity::CursorSelected;
+use crate::game::components::CursorSelected;
 
 #[derive(Default)]
 pub struct DebugUI {

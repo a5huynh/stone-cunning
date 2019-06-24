@@ -2,7 +2,7 @@ use specs::{Entities, Join, System, Write, WriteStorage};
 
 use crate::{
     actions::Action,
-    entities::{MapObject, MapPosition, ResourceAttribute},
+    components::{MapObject, MapPosition, ResourceAttribute},
     resources::TaskQueue,
 };
 

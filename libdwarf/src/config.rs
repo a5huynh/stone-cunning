@@ -2,7 +2,7 @@ use ron::de::from_reader;
 use serde::Deserialize;
 use std::{collections::HashMap, fs::File};
 
-use crate::entities::ResourceType;
+use crate::components::ResourceType;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct ResourceConfig {

@@ -5,8 +5,8 @@ use amethyst::{
     renderer::rendy::wsi::winit::MouseButton,
 };
 
-use crate::game::entity::{Cursor, CursorDown, CursorSelected};
-use libdwarf::entities::MapObject;
+use crate::game::components::{Cursor, CursorDown, CursorSelected};
+use libdwarf::components::MapObject;
 
 pub struct ClickSystem;
 

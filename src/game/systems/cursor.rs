@@ -7,7 +7,7 @@ use amethyst::{
 };
 
 use crate::game::{
-    entity::{CameraFollow, Cursor, CursorSelected, PickInfo},
+    components::{CameraFollow, Cursor, CursorSelected, PickInfo},
     render::MapRenderer,
     utils::camera_to_world,
 };

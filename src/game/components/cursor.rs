@@ -5,7 +5,7 @@ use amethyst::{
     renderer::{SpriteRender, Transparent},
 };
 use specs_derive::*;
-use crate::game::{entity::PickInfo, sprite::SpriteSheetStorage};
+use crate::game::{components::PickInfo, sprite::SpriteSheetStorage};
 
 #[derive(Component, Default)]
 #[storage(DenseVecStorage)]

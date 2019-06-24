@@ -5,7 +5,7 @@ use std::collections::VecDeque;
 use crate::{
     actions::Action,
     config::WorldConfig,
-    entities::{MapObject, MapPosition, Worker},
+    components::{MapObject, MapPosition, Worker},
     resources::{time::Time, Map, TaskQueue},
 };
 

@@ -4,7 +4,7 @@ use std::collections::VecDeque;
 
 use crate::{
     actions::Action,
-    entities::{ResourceAttribute, ResourceType},
+    components::{ResourceAttribute, ResourceType},
 };
 
 #[derive(Clone, Component, Debug)]
