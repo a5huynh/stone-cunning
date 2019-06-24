@@ -7,14 +7,15 @@ publish = false
 
 [dependencies]
 rand = "0.6.5"
-serde = "1.0.92"
+serde = "1.0.93"
+specs-derive = "0.4.0"
 # Simulation code
 libdwarf = { path = "libdwarf" }
 # Terrain generation
 libterrain = { path = "libterrain" }
 
 [dependencies.amethyst]
-version = "0.11.0"
+version = "0.11.1"
 features = ["metal"]
 
 [workspace]

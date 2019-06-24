@@ -4,7 +4,7 @@ use amethyst::{
     prelude::*,
     renderer::{SpriteRender, Transparent},
 };
-
+use specs_derive::*;
 use crate::game::{entity::PickInfo, sprite::SpriteSheetStorage};
 
 #[derive(Default)]

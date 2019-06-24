@@ -1,7 +1,6 @@
 use amethyst::ecs::prelude::{Component, DenseVecStorage};
+use specs_derive::*;
 
-#[derive(Default)]
+#[derive(Component, Default)]
+#[storage(DenseVecStorage)]
 pub struct Object;
-impl Component for Object {
-    type Storage = DenseVecStorage<Self>;
-}

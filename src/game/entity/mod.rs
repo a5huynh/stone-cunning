@@ -1,4 +1,5 @@
 use amethyst::ecs::prelude::{Component, DenseVecStorage};
+use specs_derive::*;
 
 mod cursor;
 mod player;
@@ -10,12 +11,10 @@ pub use terrain::*;
 use libdwarf::Point3;
 use libterrain::Biome;
 
-#[derive(Default)]
+#[derive(Component, Default)]
+#[storage(DenseVecStorage)]
 /// Used to move the camera and to follow around other entities
 pub struct CameraFollow;
-impl Component for CameraFollow {
-    type Storage = DenseVecStorage<Self>;
-}
 
 #[derive(Clone, Debug, Default)]
 pub struct PickInfo {

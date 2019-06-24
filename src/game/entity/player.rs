@@ -4,17 +4,15 @@ use amethyst::{
     prelude::*,
     renderer::{SpriteRender, Transparent},
 };
+use specs_derive::*;
 
 use crate::game::sprite::SpriteSheetStorage;
 
-#[derive(Default)]
+#[derive(Component, Default)]
+#[storage(DenseVecStorage)]
 pub struct Player {
     // Used to keep track of the player's animation frame.
     pub last_tick: f32,
-}
-
-impl Component for Player {
-    type Storage = DenseVecStorage<Self>;
 }
 
 impl Player {
