@@ -1,17 +1,15 @@
 use amethyst::{
     core::transform::Transform,
-    ecs::prelude::{Component, DenseVecStorage},
+    ecs::prelude::{Component, DenseVecStorage, NullStorage},
     prelude::*,
     renderer::{SpriteRender, Transparent},
 };
 use specs_derive::*;
 use crate::game::{entity::PickInfo, sprite::SpriteSheetStorage};
 
-#[derive(Default)]
+#[derive(Component, Default)]
+#[storage(DenseVecStorage)]
 pub struct Cursor;
-impl Component for Cursor {
-    type Storage = DenseVecStorage<Self>;
-}
 
 impl Cursor {
     pub fn initialize(world: &mut World) {
@@ -34,6 +32,10 @@ impl Cursor {
             .build();
     }
 }
+
+#[derive(Component, Default)]
+#[storage(NullStorage)]
+pub struct CursorDown;
 
 /// Represents the currently selected thing (object, terrain, etc.) under the cursor
 #[derive(Default)]

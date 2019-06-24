@@ -21,8 +21,8 @@ use game::{
     config::DwarfConfig,
     state::RunningState,
     systems::{
-        ui::debug::DebugUI, CursorSystem, MapMovementSystem, PlayerMovement, RenderNPCSystem,
-        RenderObjectSystem,
+        ui::debug::DebugUI, ClickSystem, CursorSystem, MapMovementSystem, PlayerMovement,
+        RenderNPCSystem, RenderObjectSystem,
     },
 };
 
@@ -74,6 +74,8 @@ fn main() -> amethyst::Result<()> {
         .with(RenderNPCSystem, "render_npc_system", &["world_updates"])
         // Cursor selection
         .with(CursorSystem, "cursor", &[])
+        // We handle click after the cursor is correctly transformed on the map.
+        .with(ClickSystem, "click", &["cursor"])
         // Moving around the map
         .with(MapMovementSystem, "map_movement", &[])
         .with(PlayerMovement, "player_movement", &[])
