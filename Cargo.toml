@@ -24,6 +24,8 @@ members = [
     'libdwarf',
     # Terrain/biome generation.
     'libterrain',
+    # Pathing library,
+    "libpath",
 ]
 
 [profile.release]
