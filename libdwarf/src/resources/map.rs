@@ -62,13 +62,13 @@ impl Map {
     pub fn find_neighbors(&self, pt: Point3<u32>) -> Vec<&u32> {
         // Generate the coordinates for the neighbors
         let mut neighbor_idx = Vec::with_capacity(4);
-        neighbor_idx.push(Point3::new(pt.x, pt.y + 1, 0));
-        neighbor_idx.push(Point3::new(pt.x + 1, pt.y, 0));
+        neighbor_idx.push(Point3::new(pt.x, pt.y + 1, pt.z));
+        neighbor_idx.push(Point3::new(pt.x + 1, pt.y, pt.z));
         if pt.y > 0 {
-            neighbor_idx.push(Point3::new(pt.x, pt.y - 1, 0));
+            neighbor_idx.push(Point3::new(pt.x, pt.y - 1, pt.z));
         }
         if pt.x > 0 {
-            neighbor_idx.push(Point3::new(pt.x - 1, pt.y, 0));
+            neighbor_idx.push(Point3::new(pt.x - 1, pt.y, pt.z));
         }
 
         // Find the neighbors and return the results

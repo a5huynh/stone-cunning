@@ -104,7 +104,7 @@ impl<'a> System<'a> for WorkerSystem {
                                 new_y += 1;
                             }
 
-                            new_queue.push_back(Action::MoveTo(Point3::new(new_x, new_y, 0)));
+                            new_queue.push_back(Action::MoveTo(Point3::new(new_x, new_y, current_pos.z)));
                             new_queue.push_back(Action::HarvestResource(
                                 pos,
                                 target.clone(),
