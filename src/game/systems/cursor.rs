@@ -1,5 +1,5 @@
 use amethyst::{
-    core::{Float, Transform},
+    core::Transform,
     ecs::{Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
     input::{InputHandler, StringBindings},
     renderer::Camera,
@@ -51,7 +51,7 @@ impl<'s> System<'s> for CursorSystem {
                     follow_transform.translation().y,
                 )
             } else {
-                (Float::from_f32(0.0), Float::from_f32(0.0))
+                (0.0, 0.0)
             }
         };
 

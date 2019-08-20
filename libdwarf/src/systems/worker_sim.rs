@@ -4,8 +4,8 @@ use std::collections::VecDeque;
 
 use crate::{
     actions::Action,
-    config::WorldConfig,
     components::{MapObject, MapPosition, Worker},
+    config::WorldConfig,
     resources::{time::Time, Map, TaskQueue},
 };
 
@@ -104,7 +104,11 @@ impl<'a> System<'a> for WorkerSystem {
                                 new_y += 1;
                             }
 
-                            new_queue.push_back(Action::MoveTo(Point3::new(new_x, new_y, current_pos.z)));
+                            new_queue.push_back(Action::MoveTo(Point3::new(
+                                new_x,
+                                new_y,
+                                current_pos.z,
+                            )));
                             new_queue.push_back(Action::HarvestResource(
                                 pos,
                                 target.clone(),

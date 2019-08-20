@@ -1,6 +1,6 @@
 use amethyst::{
     core::Transform,
-    ecs::{Entities, Join, Read, ReadExpect, ReadStorage, System, WriteStorage, Write},
+    ecs::{Entities, Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
     input::{InputHandler, StringBindings},
     renderer::rendy::wsi::winit::MouseButton,
 };
@@ -8,9 +8,9 @@ use amethyst::{
 use crate::game::components::{Cursor, CursorDown, CursorSelected};
 use libdwarf::{
     actions::Action,
-    components::{ MapObject, MapPosition },
+    components::{MapObject, MapPosition},
     resources::TaskQueue,
-    Point3
+    Point3,
 };
 
 pub struct ClickSystem;
@@ -63,18 +63,17 @@ impl<'s> System<'s> for ClickSystem {
             if !input.mouse_button_is_down(MouseButton::Left) {
                 if let Some(pick) = &cursor_selected.hover_selected {
                     if let Some(obj_entity) = pick.object {
-
                         let obj_info = map_objects.get(entities.entity(obj_entity));
                         let obj_pos = map_pos.get(entities.entity(obj_entity));
 
                         if let Some(info) = obj_info {
-                                if let Some(pos) = obj_pos {
+                            if let Some(pos) = obj_pos {
                                 println!("click! {:?}", info);
                                 // Add to task queue
                                 task_queue.add(Action::HarvestResource(
                                     pos.pos,
                                     String::from("tree"),
-                                    String::from("wood")
+                                    String::from("wood"),
                                 ));
                             }
                         }

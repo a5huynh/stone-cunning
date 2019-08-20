@@ -5,7 +5,7 @@ use amethyst::{
     prelude::*,
     renderer::{camera::Projection, Camera},
     ui::{UiCreator, UiFinder, UiText},
-    utils::fps_counter::FPSCounter,
+    utils::fps_counter::FpsCounter,
     window::DisplayConfig,
     winit::{Event, MouseScrollDelta, WindowEvent},
 };
@@ -13,8 +13,8 @@ use amethyst::{
 use libdwarf::{actions::Action, resources::TaskQueue, world::WorldSim, Point3};
 
 use crate::game::{
-    config::GameConfig,
     components::{CameraFollow, Cursor, CursorSelected, Object, Player},
+    config::GameConfig,
     render::MapRenderer,
     sprite::SpriteSheetStorage,
 };
@@ -134,7 +134,7 @@ impl SimpleState for RunningState {
         {
             if let Some(fps) = fps_display.and_then(|entity| ui_text.get_mut(entity)) {
                 if world.read_resource::<Time>().frame_number() % 20 == 0 {
-                    let fps_samp = world.read_resource::<FPSCounter>().sampled_fps();
+                    let fps_samp = world.read_resource::<FpsCounter>().sampled_fps();
                     fps.text = format!("FPS: {:.*}", 2, fps_samp);
                 }
             }

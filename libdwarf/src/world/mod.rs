@@ -1,8 +1,8 @@
 use specs::World;
 
 use crate::{
-    config::{ResourceConfig, WorldConfig},
     components::{MapObject, Worker},
+    config::{ResourceConfig, WorldConfig},
     resources::{time, Map, TaskQueue},
 };
 

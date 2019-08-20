@@ -1,3 +1,4 @@
+use crate::game::{components::PickInfo, sprite::SpriteSheetStorage};
 use amethyst::{
     core::transform::Transform,
     ecs::prelude::{Component, DenseVecStorage, NullStorage},
@@ -5,7 +6,6 @@ use amethyst::{
     renderer::{SpriteRender, Transparent},
 };
 use specs_derive::*;
-use crate::game::{components::PickInfo, sprite::SpriteSheetStorage};
 
 #[derive(Component, Default)]
 #[storage(DenseVecStorage)]

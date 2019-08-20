@@ -6,8 +6,8 @@ edition = "2018"
 publish = false
 
 [dependencies]
-rand = "0.6.5"
-serde = "1.0.93"
+rand = "0.7.0"
+serde = "1.0.99"
 specs-derive = "0.4.0"
 # Simulation code
 libdwarf = { path = "libdwarf" }
@@ -15,7 +15,7 @@ libdwarf = { path = "libdwarf" }
 libterrain = { path = "libterrain" }
 
 [dependencies.amethyst]
-version = "0.11.1"
+version = "0.12.0"
 features = ["metal"]
 
 [workspace]

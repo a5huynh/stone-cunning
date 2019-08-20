@@ -2,8 +2,8 @@ use specs::{Entities, ReadExpect, System, WriteExpect, WriteStorage};
 
 use crate::{
     actions::Action,
-    config::ResourceConfig,
     components::{MapObject, MapPosition, Worker},
+    config::ResourceConfig,
     resources::{Map, TaskQueue},
 };
 

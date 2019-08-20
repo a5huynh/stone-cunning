@@ -4,7 +4,7 @@ use amethyst::{
     input::{InputHandler, StringBindings},
 };
 
-use crate::game::{config::PlayerConfig, components::Player, render::MapRenderer};
+use crate::game::{components::Player, config::PlayerConfig, render::MapRenderer};
 use libdwarf::{resources::Map, Point3};
 
 pub struct PlayerMovement;
@@ -45,7 +45,7 @@ impl<'s> System<'s> for PlayerMovement {
             let player_y = transform.translation().y;
             // Convert player position into map coordinates and bump to new location.
             let (new_x, new_y) = {
-                let (map_x, map_y) = map_render.to_map_coords(player_x.as_f32(), player_y.as_f32());
+                let (map_x, map_y) = map_render.to_map_coords(player_x, player_y);
                 (map_x + x_move as i32, map_y + y_move as i32)
             };
 

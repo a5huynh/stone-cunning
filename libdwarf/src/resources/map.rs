@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use specs::{world::Builder, World};
 
 use crate::{
-    config::ResourceConfig,
     components::{MapObject, MapPosition},
+    config::ResourceConfig,
 };
 use libterrain::{Biome, Object, Point3, TerrainGenerator};
 

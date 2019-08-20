@@ -1,10 +1,10 @@
 use amethyst::{
-    core::{timing::Time, transform::Transform, Float},
+    core::{timing::Time, transform::Transform},
     ecs::{Join, Read, ReadExpect, ReadStorage, System, WriteStorage},
     input::{InputHandler, StringBindings},
 };
 
-use super::super::{config::GameConfig, components::CameraFollow};
+use super::super::{components::CameraFollow, config::GameConfig};
 
 pub struct MapMovementSystem;
 
@@ -24,8 +24,8 @@ impl<'s> System<'s> for MapMovementSystem {
         let delta = time.delta_seconds();
         for (_, transform) in (&cameras, &mut transforms).join() {
             let map_move = delta * config.map_move_speed;
-            transform.prepend_translation_x(Float::from_f32(x_move as f32 * map_move));
-            transform.prepend_translation_y(Float::from_f32(y_move as f32 * map_move));
+            transform.prepend_translation_x(x_move as f32 * map_move);
+            transform.prepend_translation_y(y_move as f32 * map_move);
         }
     }
 }
