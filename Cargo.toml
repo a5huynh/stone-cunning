@@ -23,7 +23,9 @@ members = [
     # Worker/object sim.
     'libdwarf',
     # Terrain/biome generation.
-    'libterrain'
+    'libterrain',
+    # Pathing library
+    'libpath',
 ]
 
 [profile.release]

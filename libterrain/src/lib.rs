@@ -5,25 +5,16 @@ mod poisson;
 pub use nalgebra::Point3;
 use poisson::PoissonDisk;
 
+mod chunk;
+pub use chunk::{Biome, TerrainChunk};
+
 #[derive(Clone)]
 pub struct TerrainGenerator {
     width: usize,
     height: usize,
-    terrain: Vec<Option<Biome>>,
+    // TODO: Support multiple chunks.
+    terrain: TerrainChunk,
     objects: HashMap<Point3<u32>, Object>,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum Biome {
-    // Above ground biomes
-    OCEAN,
-    BEACH,
-    GRASSLAND,
-    TAIGA,
-    TUNDRA,
-    SNOW,
-    // Underground biomes
-    ROCK,
 }
 
 #[derive(Clone, Debug)]
@@ -41,13 +32,9 @@ impl TerrainGenerator {
         TerrainGenerator {
             width: width as usize,
             height: height as usize,
-            terrain: vec![None; (width * height * ZLEVELS) as usize],
+            terrain: TerrainChunk::new(width, height),
             objects: HashMap::new(),
         }
-    }
-
-    fn idx(&self, x: u32, y: u32, z: u32) -> usize {
-        (z * (self.width * self.height) as u32 + y * self.width as u32 + x) as usize
     }
 
     pub fn build(mut self) -> Self {
@@ -83,22 +70,22 @@ impl TerrainGenerator {
                 //  * Less hilly?
                 //  * place trees correctly on 3d map
                 for z in 0..ZLEVELS {
-                    let idx = self.idx(x as u32, y as u32, z as u32);
+                    let idx = (x as u32, y as u32, z as u32);
                     match biome {
                         // For water biomes, the height is always the same, but the
                         // depth of the water will change.
                         Biome::OCEAN => {
                             if z >= terrain_height && z <= WATER_HEIGHT {
-                                self.terrain[idx] = Some(biome.clone());
+                                self.terrain.set(idx, Some(biome.clone()));
                             } else if z < terrain_height {
-                                self.terrain[idx] = Some(Biome::ROCK);
+                                self.terrain.set(idx, Some(Biome::ROCK));
                             }
                         }
                         _ => {
                             if z == terrain_height {
-                                self.terrain[idx] = Some(biome.clone());
+                                self.terrain.set(idx, Some(biome.clone()));
                             } else if z < terrain_height {
-                                self.terrain[idx] = Some(Biome::ROCK);
+                                self.terrain.set(idx, Some(Biome::ROCK));
                             }
                         }
                     }
@@ -150,8 +137,7 @@ impl TerrainGenerator {
 
     /// Returns the Biome at (x, y).
     pub fn get_biome(&self, x: u32, y: u32, z: u32) -> Option<Biome> {
-        let idx = self.idx(x, y, z);
-        self.terrain[idx].clone()
+        self.terrain.get(x, y, z).clone()
     }
 
     /// Determines whether the block @ (x, y, z) is visible.
@@ -184,8 +170,7 @@ impl TerrainGenerator {
         for ix in start_x..=end_x {
             for iy in start_y..=end_y {
                 for iz in start_z..=end_z {
-                    let idx = self.idx(ix, iy, iz);
-                    if self.terrain[idx].is_none() {
+                    if self.terrain.get(ix, iy, iz).is_none() {
                         return true;
                     }
                 }
