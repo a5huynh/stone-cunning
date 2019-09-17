@@ -1842,15 +1842,6 @@ version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "libpath"
-version = "0.1.0"
-dependencies = [
- "libterrain 0.1.0",
- "nalgebra 0.18.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "libterrain"
 version = "0.1.0"
 dependencies = [
