@@ -1,10 +1,15 @@
 use amethyst::{
     core::{frame_limiter::FrameRateLimitStrategy, transform::TransformBundle},
-    input::InputBundle,
+    input::{InputBundle, StringBindings},
     prelude::*,
-    renderer::{ColorMask, DisplayConfig, DrawFlat2D, Pipeline, RenderBundle, Stage, ALPHA},
-    ui::{DrawUi, UiBundle},
-    utils::{application_root_dir, fps_counter::FPSCounterBundle},
+    renderer::{
+        plugins::{RenderFlat2D, RenderToWindow},
+        types::DefaultBackend,
+        RenderingBundle,
+    },
+    ui::{RenderUi, UiBundle},
+    utils::{application_root_dir, fps_counter::FpsCounterBundle},
+    window::DisplayConfig,
 };
 
 use libdwarf::systems;
@@ -14,53 +19,41 @@ use game::{
     config::DwarfConfig,
     state::RunningState,
     systems::{
-        ui::debug::DebugUI, CursorSystem, MapMovementSystem, PlayerMovement, RenderNPCSystem,
-        RenderObjectSystem,
+        ui::debug::DebugUI, ClickSystem, CursorSystem, MapMovementSystem, PlayerMovement,
+        RenderNPCSystem, RenderObjectSystem,
     },
 };
 
 fn main() -> amethyst::Result<()> {
-    amethyst::start_logger(amethyst::LoggerConfig {
-        stdout: amethyst::StdoutLog::Colored,
-        level_filter: amethyst::LogLevelFilter::Error,
-        log_file: None,
-        allow_env_override: true,
-    });
+    amethyst::start_logger(Default::default());
 
-    let resource_root = format!("{}/resources", application_root_dir());
-    let path = format!("{}/display_config.ron", resource_root);
-    let binding_path = format!("{}/bindings.ron", resource_root);
-    let config_path = format!("{}/config.ron", resource_root);
+    let app_root = application_root_dir()?;
 
-    let config = DisplayConfig::load(&path);
+    let display_config_path = app_root.join("resources").join("display_config.ron");
+    let binding_path = app_root.join("resources").join("bindings.ron");
+    let config_path = app_root.join("resources").join("config.ron");
+
+    let config = DisplayConfig::load(&display_config_path);
     let game_config = DwarfConfig::load(&config_path);
     let input_bundle =
-        InputBundle::<String, String>::new().with_bindings_from_file(binding_path)?;
-
-    // Setup the rendering pipeline
-    let pipe = Pipeline::build().with_stage(
-        Stage::with_backbuffer()
-            .clear_target([0.0, 0.0, 0.0, 0.0], 1.0)
-            // Draw sprites on a 2D quad.
-            .with_pass(DrawFlat2D::new().with_transparency(ColorMask::all(), ALPHA, None))
-            // Draw mesh without any lighting.
-            // .with_pass(DrawFlat::<PosTex>::new())
-            // Should always be the last pass in the pipeline.
-            .with_pass(DrawUi::new()),
-    );
+        InputBundle::<StringBindings>::new().with_bindings_from_file(binding_path)?;
 
     let game_data = GameDataBuilder::default()
-        .with_bundle(
-            RenderBundle::new(pipe, Some(config.clone()))
-                .with_sprite_sheet_processor()
-                .with_sprite_visibility_sorting(&[]),
-        )?
         .with_bundle(TransformBundle::new())?
-        .with_bundle(UiBundle::<String, String>::new())?
-        .with_bundle(FPSCounterBundle::default())?
+        .with_bundle(UiBundle::<StringBindings>::new())?
+        .with_bundle(FpsCounterBundle::default())?
         // Register the systems, give it a name, and specify any
         // dependencies for that system.
         .with_bundle(input_bundle)?
+        .with_bundle(
+            RenderingBundle::<DefaultBackend>::new()
+                .with_plugin(
+                    RenderToWindow::from_config_path(display_config_path)
+                        .with_clear([0.0, 0.0, 0.0, 1.0]),
+                )
+                .with_plugin(RenderFlat2D::default())
+                .with_plugin(RenderUi::default()),
+        )?
         // Simulation systems.
         .with(systems::AssignTaskSystem, "assign_task", &[])
         .with(systems::WorkerSystem, "worker_sim", &["assign_task"])
@@ -77,6 +70,8 @@ fn main() -> amethyst::Result<()> {
         .with(RenderNPCSystem, "render_npc_system", &["world_updates"])
         // Cursor selection
         .with(CursorSystem, "cursor", &[])
+        // We handle click after the cursor is correctly transformed on the map.
+        .with(ClickSystem, "click", &["cursor"])
         // Moving around the map
         .with(MapMovementSystem, "map_movement", &[])
         .with(PlayerMovement, "player_movement", &[])

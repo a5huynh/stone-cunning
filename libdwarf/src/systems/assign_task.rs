@@ -1,6 +1,6 @@
 use specs::{Entities, Join, System, Write, WriteStorage};
 
-use crate::{actions::Action, entities::Worker, resources::TaskQueue};
+use crate::{actions::Action, components::Worker, resources::TaskQueue};
 
 /// Assign tasks to idle workers.
 pub struct AssignTaskSystem;

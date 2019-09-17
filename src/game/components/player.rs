@@ -4,18 +4,15 @@ use amethyst::{
     prelude::*,
     renderer::{SpriteRender, Transparent},
 };
+use specs_derive::*;
 
-use super::Direction;
 use crate::game::sprite::SpriteSheetStorage;
 
-#[derive(Default)]
+#[derive(Component, Default)]
+#[storage(DenseVecStorage)]
 pub struct Player {
     // Used to keep track of the player's animation frame.
     pub last_tick: f32,
-}
-
-impl Component for Player {
-    type Storage = DenseVecStorage<Self>;
 }
 
 impl Player {
@@ -26,7 +23,7 @@ impl Player {
         };
 
         let mut player_transform = Transform::default();
-        player_transform.set_xyz(0.0, 0.0, 1.0);
+        player_transform.set_translation_xyz(0.0, 0.0, 1.0);
 
         let sprite_render = SpriteRender {
             sprite_sheet,
@@ -40,23 +37,5 @@ impl Player {
             .with(player_transform)
             .with(Transparent)
             .build();
-    }
-
-    /// Determine which way the player is facing based on the last
-    /// movement transform.
-    pub fn calculate_direction(x: f64, y: f64) -> Direction {
-        if x < 0.0 {
-            return Direction::WEST;
-        } else if x > 0.0 {
-            return Direction::EAST;
-        } else if x == 0.0 {
-            if y > 0.0 {
-                return Direction::NORTH;
-            } else if y < 0.0 {
-                return Direction::SOUTH;
-            }
-        }
-
-        return Direction::NORTH;
     }
 }

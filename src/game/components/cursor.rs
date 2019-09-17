@@ -1,47 +1,15 @@
+use crate::game::{components::PickInfo, sprite::SpriteSheetStorage};
 use amethyst::{
     core::transform::Transform,
-    ecs::prelude::{Component, DenseVecStorage},
+    ecs::prelude::{Component, DenseVecStorage, NullStorage},
     prelude::*,
     renderer::{SpriteRender, Transparent},
 };
+use specs_derive::*;
 
-mod player;
-mod terrain;
-pub use player::*;
-pub use terrain::*;
-
-use crate::game::sprite::SpriteSheetStorage;
-use libdwarf::Point3;
-use libterrain::Biome;
-
-#[derive(Default)]
-/// Used to move the camera and to follow around other entities
-pub struct CameraFollow;
-impl Component for CameraFollow {
-    type Storage = DenseVecStorage<Self>;
-}
-
-// #[derive(Clone, Debug, PartialEq)]
-pub enum Direction {
-    WEST,
-    NORTH,
-    EAST,
-    SOUTH,
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct PickInfo {
-    pub worker: Option<u32>,
-    pub object: Option<u32>,
-    pub terrain: Option<Biome>,
-    pub position: Option<Point3<i32>>,
-}
-
-#[derive(Default)]
+#[derive(Component, Default)]
+#[storage(DenseVecStorage)]
 pub struct Cursor;
-impl Component for Cursor {
-    type Storage = DenseVecStorage<Self>;
-}
 
 impl Cursor {
     pub fn initialize(world: &mut World) {
@@ -64,6 +32,10 @@ impl Cursor {
             .build();
     }
 }
+
+#[derive(Component, Default)]
+#[storage(NullStorage)]
+pub struct CursorDown;
 
 /// Represents the currently selected thing (object, terrain, etc.) under the cursor
 #[derive(Default)]

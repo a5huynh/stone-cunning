@@ -1,13 +1,15 @@
 use amethyst::{
-    core::{nalgebra::Orthographic3, Transform},
+    core::Transform,
     ecs::{Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
-    input::InputHandler,
-    renderer::{Camera, ScreenDimensions},
+    input::{InputHandler, StringBindings},
+    renderer::Camera,
+    window::ScreenDimensions,
 };
 
 use crate::game::{
-    entity::{CameraFollow, Cursor, CursorSelected, PickInfo},
+    components::{CameraFollow, Cursor, CursorSelected, PickInfo},
     render::MapRenderer,
+    utils::camera_to_world,
 };
 use libdwarf::{resources::Map, Point3};
 
@@ -17,7 +19,7 @@ impl<'s> System<'s> for CursorSystem {
     type SystemData = (
         WriteStorage<'s, Cursor>,
         Write<'s, CursorSelected>,
-        Read<'s, InputHandler<String, String>>,
+        Read<'s, InputHandler<StringBindings>>,
         WriteStorage<'s, Transform>,
         ReadStorage<'s, Camera>,
         ReadStorage<'s, CameraFollow>,
@@ -35,14 +37,14 @@ impl<'s> System<'s> for CursorSystem {
             mut transforms,
             cameras,
             follow,
-            screen_dim,
+            screen,
             map,
             map_render,
         ): Self::SystemData,
     ) {
         // Grab the transform from map movement.
         let camera_follow = (&transforms, &follow).join().next().or(None).clone();
-        let (map_transform_x, map_transform_y) = {
+        let map_transform = {
             if let Some((follow_transform, _)) = camera_follow {
                 (
                     follow_transform.translation().x,
@@ -52,25 +54,14 @@ impl<'s> System<'s> for CursorSystem {
                 (0.0, 0.0)
             }
         };
+
         // Grab the zoom level of the camera
         let camera_transform = (&transforms, &cameras).join().next().or(None).clone();
         // Convert mouse position into scene coordinates.
         let (scene_x, scene_y) = {
             if let Some((mx, my)) = input.mouse_position() {
                 if let Some((_, camera)) = camera_transform {
-                    let projection = Orthographic3::from_matrix_unchecked(camera.proj);
-
-                    let scene_x = mx as f32 / screen_dim.width()
-                        * (projection.right() - projection.left()).abs()
-                        - projection.right()
-                        + map_transform_x;
-
-                    let scene_y = -my as f32 / screen_dim.height()
-                        * (projection.top() - projection.bottom()).abs()
-                        + projection.top()
-                        + map_transform_y;
-
-                    (scene_x, scene_y)
+                    camera_to_world(mx, my, map_transform, &screen, camera)
                 } else {
                     (0.0, 0.0)
                 }
@@ -110,8 +101,8 @@ impl<'s> System<'s> for CursorSystem {
 
             // Move cursor to new position.
             let new_transform = map_render.place(map_pt.x, map_pt.y, map_pt.z, 0.0);
-            cursor_transform.set_x(new_transform.translation().x);
-            cursor_transform.set_y(new_transform.translation().y);
+            cursor_transform.set_translation_x(new_transform.translation().x);
+            cursor_transform.set_translation_y(new_transform.translation().y);
 
             // If there are worker/objects at this location, show debug info about
             // those

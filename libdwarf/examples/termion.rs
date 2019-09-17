@@ -5,7 +5,7 @@ use termion::{clear, cursor, style};
 
 use libdwarf::{
     actions::Action,
-    entities::{MapObject, MapPosition, Worker},
+    components::{MapObject, MapPosition, Worker},
     resources::{Map, TaskQueue},
     systems,
     world::WorldSim,

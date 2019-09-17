@@ -1,10 +1,10 @@
 use amethyst::{
     core::{timing::Time, transform::Transform},
     ecs::{Join, Read, ReadExpect, System, WriteStorage},
-    input::InputHandler,
+    input::{InputHandler, StringBindings},
 };
 
-use crate::game::{config::PlayerConfig, entity::Player, render::MapRenderer};
+use crate::game::{components::Player, config::PlayerConfig, render::MapRenderer};
 use libdwarf::{resources::Map, Point3};
 
 pub struct PlayerMovement;
@@ -13,7 +13,7 @@ impl<'s> System<'s> for PlayerMovement {
         WriteStorage<'s, Player>,
         ReadExpect<'s, PlayerConfig>,
         WriteStorage<'s, Transform>,
-        Read<'s, InputHandler<String, String>>,
+        Read<'s, InputHandler<StringBindings>>,
         Read<'s, Time>,
         ReadExpect<'s, Map>,
         ReadExpect<'s, MapRenderer>,
@@ -51,9 +51,9 @@ impl<'s> System<'s> for PlayerMovement {
 
             if !map.has_collision(Point3::new(new_x, new_y, 0)) {
                 let new_transform = map_render.place(new_x, new_y, 0, 1.0);
-                transform.set_x(new_transform.translation().x);
-                transform.set_y(new_transform.translation().y);
-                transform.set_z(new_transform.translation().z);
+                transform.set_translation_x(new_transform.translation().x);
+                transform.set_translation_y(new_transform.translation().y);
+                transform.set_translation_z(new_transform.translation().z);
             }
         }
     }
