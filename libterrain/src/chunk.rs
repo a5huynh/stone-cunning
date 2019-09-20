@@ -40,9 +40,10 @@ impl TerrainChunk {
         point.x < self.width && point.y < self.height && point.z < ZLEVELS
     }
 
-    // Is this point reachable?
+    /// Is this point reachable?
+    /// A space is passable if there is no block there
     pub fn is_passable(&self, point: &Point3<u32>) -> bool {
-        return true;
+        self.get(point.x, point.y, point.z).is_none()
     }
 
     /// Get chunk data at a specific position
