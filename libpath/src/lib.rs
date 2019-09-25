@@ -32,7 +32,7 @@ pub fn heuristic(a: Point3<u32>, b: Point3<u32>) -> usize {
         + (a.z as i32 - b.z as i32).abs() as usize
 }
 
-pub fn dijkstra(
+pub fn find_path(
     terrain: &TerrainChunk,
     start: Point3<u32>,
     goal: Point3<u32>,
