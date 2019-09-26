@@ -2,6 +2,8 @@
 
 `stone-cunning` is a Dwarf Fortress inspired town builder.
 
+![In-game screenshot](docs/screenshot.png)
+
 ## Building & Running
 
 You can run the current version of `stone-cunning` by running the following
