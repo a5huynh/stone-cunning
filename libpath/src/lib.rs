@@ -1,7 +1,11 @@
 use std::cmp::Ordering;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap};
 
 use libterrain::{Point3, TerrainChunk};
+
+/// Maps how the algorithm has arrived at a particular point.
+/// e.g. let parent_point = ParentMap[point]
+pub type ParentMap = HashMap<Point3<u32>, Point3<u32>>;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct State {
@@ -32,11 +36,12 @@ pub fn heuristic(a: Point3<u32>, b: Point3<u32>) -> usize {
         + (a.z as i32 - b.z as i32).abs() as usize
 }
 
+/// Using the information provided in terrain, find a path from <start> to <goal>
 pub fn find_path(
     terrain: &TerrainChunk,
     start: Point3<u32>,
     goal: Point3<u32>,
-) -> (HashMap<Point3<u32>, Point3<u32>>, HashSet<Point3<u32>>) {
+) -> (ParentMap, Vec<Point3<u32>>) {
     let mut frontier = BinaryHeap::new();
     frontier.push(State {
         cost: 0,
@@ -69,13 +74,13 @@ pub fn find_path(
     }
 
     // Reconstruct path
-    let mut path = HashSet::new();
+    let mut path = Vec::new();
     let mut current = goal;
     while current != start {
-        path.insert(current);
+        path.push(current);
         current = came_from[&current];
     }
-    path.insert(start);
+    path.push(start);
 
     (came_from, path)
 }

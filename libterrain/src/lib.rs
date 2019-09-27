@@ -62,7 +62,7 @@ impl TerrainGenerator {
                 // Ground level is always at 32.
                 let biome = self.determine_biome(elevation);
                 let terrain_height =
-                    GROUND_HEIGHT + (GROUND_HEIGHT as f64 * elevation).floor() as u32;
+                    GROUND_HEIGHT + (f64::from(GROUND_HEIGHT) * elevation).floor() as u32;
 
                 heightmap[y * self.width + x] = Some((terrain_height, biome.clone()));
 

@@ -47,8 +47,8 @@ impl TerrainChunk {
             return self.get(point.x, point.y, point.z).is_none();
         }
 
-        return self.get(point.x, point.y, point.z).is_none() &&
-            self.get(point.x, point.y, point.z - 1).is_some();
+        self.get(point.x, point.y, point.z).is_none()
+            && self.get(point.x, point.y, point.z - 1).is_some()
     }
 
     /// Get chunk data at a specific position
@@ -106,7 +106,7 @@ impl TerrainChunk {
 
 #[cfg(test)]
 mod tests {
-    use super::{Biome, TerrainChunk, Point3};
+    use super::{Biome, Point3, TerrainChunk};
 
     #[test]
     fn test_basic_neighbors() {
@@ -141,6 +141,5 @@ mod tests {
         let neighbors = chunk.neighbors(&Point3::new(1, 0, 0));
         assert_eq!(neighbors[0], Point3::new(0, 0, 0));
         assert_eq!(neighbors[1], Point3::new(2, 0, 0));
-
     }
 }
