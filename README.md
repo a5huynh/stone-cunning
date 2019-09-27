@@ -38,24 +38,24 @@ maps, etc.
 ## Roadmap (TODOs)
 
 ### Core Mechanics
-- [] Pathing
-- [] Resource gathering
-- [] Mining
-- [] Buildings
-- [] Task management
+- [ ] Pathing
+- [ ] Resource gathering
+- [ ] Mining
+- [ ] Buildings
+- [ ] Task management
 
 ### Resources
-- [] Tree variety
-- [] Stone variety
-- [] Farming support
+- [ ] Tree variety
+- [ ] Stone variety
+- [ ] Farming support
 
 ### Terrain
-- [] Move biomes into config file(?)
-- [] More Biome types.
-- [] Support for multiple chunks.
+- [ ] Move biomes into config file(?)
+- [ ] More Biome types.
+- [ ] Support for multiple chunks.
 
 ### NPCs
-- [] Support for monsters.
+- [ ] Support for monsters.
 
 
 ## Credits
