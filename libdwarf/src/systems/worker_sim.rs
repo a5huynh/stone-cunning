@@ -1,6 +1,7 @@
-use libterrain::Point3;
 use specs::{Entities, Join, ReadExpect, ReadStorage, System, Write, WriteExpect, WriteStorage};
 use std::collections::VecDeque;
+
+use libpath::find_path;
 
 use crate::{
     actions::Action,
@@ -41,15 +42,28 @@ impl<'a> System<'a> for WorkerSystem {
                     Action::Chilling => {
                         worker.energy -= config.action_cost;
                     }
+                    Action::Move(mut path) => {
+                        if !path.is_empty() {
+                            if let Some(pt) = path.pop() {
+                                position.pos = pt;
+                                worker.energy -= config.action_cost;
+                                println!("Moving worker to {}", position.pos);
+                                map.move_worker(entity.id(), position.pos, position.pos);
+                            }
+                        }
+                    }
                     // Route worker towards a target
                     Action::MoveTo(target) => {
                         position.pos = target;
                         worker.energy -= config.action_cost;
+                        println!("Moving worker to {}", position.pos);
                         map.move_worker(entity.id(), position.pos, target);
                     }
                     // Perform an action.
                     Action::HarvestResource(pos, target, harvest) => {
-                        // Are we next to this resource? Move closer to it
+                        println!("Harvesting {:?} @ {}", target, pos);
+
+                        // Are we next to this resource? Move closer to it if not.
                         let dist_x = (pos.x as i32 - current_pos.x as i32).abs() as u32;
                         let dist_y = (pos.y as i32 - current_pos.y as i32).abs() as u32;
 
@@ -96,19 +110,8 @@ impl<'a> System<'a> for WorkerSystem {
                             }
                         } else {
                             // Move closer
-                            let mut new_x = current_pos.x;
-                            let mut new_y = current_pos.y;
-                            if dist_x > dist_y {
-                                new_x += 1;
-                            } else {
-                                new_y += 1;
-                            }
-
-                            new_queue.push_back(Action::MoveTo(Point3::new(
-                                new_x,
-                                new_y,
-                                current_pos.z,
-                            )));
+                            let (_, path) = find_path(&map.terrain, current_pos, pos);
+                            new_queue.push_back(Action::Move(path));
                             new_queue.push_back(Action::HarvestResource(
                                 pos,
                                 target.clone(),

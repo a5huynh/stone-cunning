@@ -10,6 +10,7 @@ serde = "1.0.101"
 specs = "0.15.1"
 specs-derive = "0.4.0"
 libterrain = { path = "../libterrain" }
+libpath = { path = "../libpath" }
 
 [dev-dependencies]
 crossterm = "0.11"

@@ -5,6 +5,7 @@ use libterrain::{Point3, TerrainChunk};
 
 /// Maps how the algorithm has arrived at a particular point.
 /// e.g. let parent_point = ParentMap[point]
+pub type Path = Vec<Point3<u32>>;
 pub type ParentMap = HashMap<Point3<u32>, Point3<u32>>;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -41,7 +42,7 @@ pub fn find_path(
     terrain: &TerrainChunk,
     start: Point3<u32>,
     goal: Point3<u32>,
-) -> (ParentMap, Vec<Point3<u32>>) {
+) -> (ParentMap, Path) {
     let mut frontier = BinaryHeap::new();
     frontier.push(State {
         cost: 0,
@@ -77,10 +78,14 @@ pub fn find_path(
     let mut path = Vec::new();
     let mut current = goal;
     while current != start {
-        path.push(current);
-        current = came_from[&current];
+        let parent = came_from.get(&current);
+        if let Some(pt) = parent {
+            path.push(current);
+            current = *pt;
+        } else {
+            break;
+        }
     }
-    path.push(start);
 
     (came_from, path)
 }

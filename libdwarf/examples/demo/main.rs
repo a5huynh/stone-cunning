@@ -1,26 +1,26 @@
 use crossterm::{input, RawScreen};
 
-use specs::{prelude::*};
-
-use libterrain::Point3;
+use specs::prelude::*;
 
 mod renderer;
 use self::renderer::AsciiRenderer;
 
-use libdwarf::{
-    actions::Action,
-    resources::TaskQueue,
-    systems,
-    world::WorldSim,
-};
+const MAP_WIDTH: u32 = 10;
+const MAP_HEIGHT: u32 = 10;
+
+use libdwarf::{actions::Action, resources::TaskQueue, systems, world::WorldSim};
+use libterrain::{Point3, TerrainChunk};
 
 fn main() {
     // Setup ascii renderer
-    let screen = RawScreen::into_raw_mode();
+    let _screen = RawScreen::into_raw_mode();
     let mut renderer = AsciiRenderer::new();
 
     let mut world = World::new();
-    WorldSim::new(&mut world, 10, 10);
+
+    // Initialize the world.
+    let terrain = TerrainChunk::new(MAP_WIDTH, MAP_HEIGHT);
+    WorldSim::new(&mut world, &terrain, MAP_WIDTH, MAP_HEIGHT);
 
     let mut dispatcher = DispatcherBuilder::new()
         .with(systems::AssignTaskSystem, "assign_task", &[])
@@ -31,6 +31,7 @@ fn main() {
             "world_updates",
             &["worker_sim", "object_sim"],
         )
+        .with(systems::TimeTickSystem, "game_tick", &["world_updates"])
         .build();
 
     dispatcher.setup(&mut world);

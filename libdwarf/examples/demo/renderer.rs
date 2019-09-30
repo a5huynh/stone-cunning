@@ -1,7 +1,6 @@
 use crossterm::{cursor, terminal, ClearType, Terminal, TerminalCursor};
 use specs::{prelude::*, Join};
 
-
 use libdwarf::{
     components::{MapObject, MapPosition, Worker},
     resources::Map,
@@ -67,9 +66,8 @@ impl AsciiRenderer {
     }
 
     pub fn render(&mut self, world: &World) {
-
-        self.terminal.clear(ClearType::All);
-        self.cursor.goto(0, 0);
+        self.terminal.clear(ClearType::All).unwrap();
+        self.cursor.goto(0, 0).unwrap();
 
         print!("num ticks: {}\n\r", self.num_ticks);
 
@@ -90,29 +88,34 @@ impl AsciiRenderer {
         }
 
         // Render workers & worker status
-        self.cursor.goto(1, 12);
+        self.cursor.goto(1, 12).unwrap();
 
         print!("\n\rWorkers\n\r--------------\n\r");
         let entities = world.entities();
         let workers = world.read_storage::<Worker>();
-        for (_, worker) in (&entities, &workers).join() {
-            print!("[Inventory]\n\r");
+        for (entity, worker) in (&entities, &workers).join() {
+            print!("[W{}: Inventory]\n\r", entity.id());
             for obj in worker.inventory.iter() {
-                print!("- {:?}\n\r", obj);
+                print!("- {:?}\n\r", obj.to_string());
             }
 
-            print!("[Task Queue]\n\r");
+            print!("[W{}: Task Queue]\n\r", entity.id());
             for action in worker.actions.iter() {
                 print!("- {:?}\n\r", action);
             }
         }
 
         // Render objects & object queue
-        print!("\n\rObjects\n\r--------------\n\r");
+        print!("\n\rWorld Objects\n\r--------------\n\r");
         let objects = world.read_storage::<MapObject>();
         let positions = world.read_storage::<MapPosition>();
         for (entity, object, pos) in (&entities, &objects, &positions).join() {
-            print!("{:?} {}\n\r", (pos.pos.x, pos.pos.y), entity.id());
+            print!(
+                "{} [pos: {:?} id: {}]\n\r",
+                object.to_string(),
+                (pos.pos.x, pos.pos.y),
+                entity.id()
+            );
             for action in object.actions.iter() {
                 print!("- {:?}\n\r", action);
             }
