@@ -12,4 +12,4 @@ specs-derive = "0.4.0"
 libterrain = { path = "../libterrain" }
 
 [dev-dependencies]
-termion = "1.5.3"
+crossterm = "0.11"
