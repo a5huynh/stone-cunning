@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use specs::{world::Builder, World};
+use specs::prelude::*;
+use specs::World;
 
 use crate::{
     components::{MapObject, MapPosition},

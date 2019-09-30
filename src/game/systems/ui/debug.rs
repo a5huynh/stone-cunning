@@ -91,32 +91,27 @@ impl<'s> System<'s> for DebugUI {
             .get_or_insert_with(|| events.register_reader());
 
         for ev in events.read(reader_id) {
-            match ev.event_type {
-                UiEventType::Click => {
-                    // Determine which button was clicked and implement action.
-                    if let Some(button) = buttons.get(ev.target) {
-                        match button.id.as_ref() {
-                            "add_worker_btn" => {
-                                queue.add_world(Action::AddWorker(Point3::new(1, 1, 0)));
-                            }
-                            "add_resource_btn" => {
-                                queue.add_world(Action::Add(
-                                    Point3::new(9, 9, 0),
-                                    String::from("tree"),
-                                ));
-                            }
-                            "add_task_btn" => {
-                                queue.add(Action::HarvestResource(
-                                    Point3::new(9, 9, 0),
-                                    String::from("tree"),
-                                    String::from("wood"),
-                                ));
-                            }
-                            _ => {}
+            if ev.event_type == UiEventType::Click {
+                // Determine which button was clicked and implement action.
+                if let Some(button) = buttons.get(ev.target) {
+                    match button.id.as_ref() {
+                        "add_worker_btn" => {
+                            queue.add_world(Action::AddWorker(Point3::new(1, 1, 0)));
                         }
+                        "add_resource_btn" => {
+                            queue
+                                .add_world(Action::Add(Point3::new(9, 9, 0), String::from("tree")));
+                        }
+                        "add_task_btn" => {
+                            queue.add(Action::HarvestResource(
+                                Point3::new(9, 9, 0),
+                                String::from("tree"),
+                                String::from("wood"),
+                            ));
+                        }
+                        _ => {}
                     }
                 }
-                _ => {}
             }
         }
     }

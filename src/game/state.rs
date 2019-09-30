@@ -36,7 +36,7 @@ impl SimpleState for RunningState {
         world.register::<Player>();
 
         let storage = SpriteSheetStorage::new(world);
-        world.add_resource(storage);
+        world.insert(storage);
 
         // Initialize simulation;
         let (map_height, map_width) = {
@@ -49,13 +49,13 @@ impl SimpleState for RunningState {
         // Render map
         let map_render = MapRenderer::initialize(world);
         initialize_camera(world, map_render.place(8, 8, 42, 0.0), self.zoom);
-        world.add_resource(map_render);
+        world.insert(map_render);
         // Initialize cursor sprite.
         Cursor::initialize(world);
         // Initialize player.
         // Player::initialize(world);
 
-        world.add_resource(CursorSelected::default());
+        world.insert(CursorSelected::default());
 
         // Create the ui
         world.exec(|mut creator: UiCreator<'_>| {

@@ -10,7 +10,6 @@ use libdwarf::{
     actions::Action,
     components::{MapObject, MapPosition},
     resources::TaskQueue,
-    Point3,
 };
 
 pub struct ClickSystem;

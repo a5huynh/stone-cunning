@@ -1,7 +1,8 @@
+use specs::prelude::*;
 use specs::World;
 
 use crate::{
-    components::{MapObject, Worker},
+    components::{MapObject, MapPosition, Worker},
     config::{ResourceConfig, WorldConfig},
     resources::{time, Map, TaskQueue},
 };
@@ -10,26 +11,27 @@ use crate::{
 pub struct WorldSim;
 impl WorldSim {
     pub fn new(world: &mut World, width: u32, height: u32) -> Self {
+        world.register::<MapPosition>();
         world.register::<MapObject>();
         world.register::<Worker>();
 
         // Load resource configs
         let resources = ResourceConfig::load("./resources/data/resources.ron");
-        world.add_resource(resources);
+        world.insert(resources);
 
         // Load sim config
         let world_config = WorldConfig::load("./resources/sim_config.ron");
-        world.add_resource(world_config);
+        world.insert(world_config);
 
         // Initialize map.
         let map = Map::initialize(world, width, height);
-        world.add_resource(map);
+        world.insert(map);
 
         // Initialize task queue.
-        world.add_resource(TaskQueue::default());
+        world.insert(TaskQueue::default());
         // Add time tracking resources
-        world.add_resource(time::Time::default());
-        world.add_resource(time::Stopwatch::default());
+        world.insert(time::Time::default());
+        world.insert(time::Stopwatch::default());
 
         Default::default()
     }

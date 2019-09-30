@@ -43,7 +43,7 @@ impl<'s> System<'s> for CursorSystem {
         ): Self::SystemData,
     ) {
         // Grab the transform from map movement.
-        let camera_follow = (&transforms, &follow).join().next().or(None).clone();
+        let camera_follow = (&transforms, &follow).join().next().or(None);
         let map_transform = {
             if let Some((follow_transform, _)) = camera_follow {
                 (
@@ -56,7 +56,7 @@ impl<'s> System<'s> for CursorSystem {
         };
 
         // Grab the zoom level of the camera
-        let camera_transform = (&transforms, &cameras).join().next().or(None).clone();
+        let camera_transform = (&transforms, &cameras).join().next().or(None);
         // Convert mouse position into scene coordinates.
         let (scene_x, scene_y) = {
             if let Some((mx, my)) = input.mouse_position() {
@@ -97,7 +97,7 @@ impl<'s> System<'s> for CursorSystem {
                 map_pt.y += 1;
             }
 
-            pick_info.position = Some(map_pt.clone());
+            pick_info.position = Some(map_pt);
 
             // Move cursor to new position.
             let new_transform = map_render.place(map_pt.x, map_pt.y, map_pt.z, 0.0);
