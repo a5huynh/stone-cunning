@@ -1,12 +1,11 @@
 use noise::{NoiseFn, Perlin};
-use std::collections::HashMap;
 
 mod poisson;
 pub use nalgebra::Point3;
 use poisson::PoissonDisk;
 
 mod chunk;
-pub use chunk::{Biome, TerrainChunk};
+pub use chunk::{Biome, Object, TerrainChunk};
 
 #[derive(Clone)]
 pub struct TerrainGenerator {
@@ -14,12 +13,6 @@ pub struct TerrainGenerator {
     height: usize,
     // TODO: Support multiple chunks.
     terrain: TerrainChunk,
-    objects: HashMap<Point3<u32>, Object>,
-}
-
-#[derive(Clone, Debug)]
-pub enum Object {
-    TREE,
 }
 
 // TODO: Make this a variable?
@@ -33,7 +26,6 @@ impl TerrainGenerator {
             width: width as usize,
             height: height as usize,
             terrain: TerrainChunk::new(width, height),
-            objects: HashMap::new(),
         }
     }
 
@@ -103,7 +95,7 @@ impl TerrainGenerator {
             if let Some(data) = &heightmap[idx as usize] {
                 if data.1 != Biome::OCEAN {
                     pt.z = data.0 + 1;
-                    self.objects.insert(*pt, Object::TREE);
+                    self.terrain.set_object(&pt, Object::TREE);
                 }
             }
         }
@@ -135,57 +127,7 @@ impl TerrainGenerator {
         Biome::GRASSLAND
     }
 
-    /// Returns the Biome at (x, y).
-    pub fn get_biome(&self, x: u32, y: u32, z: u32) -> Option<Biome> {
-        self.terrain.get(x, y, z).clone()
-    }
-
-    /// Determines whether the block @ (x, y, z) is visible.
-    pub fn is_visible(&self, x: u32, y: u32, z: u32) -> bool {
-        // Top level is always exposed.
-        if z == ZLEVELS - 1 {
-            return true;
-        }
-
-        let start_x = match x {
-            0 => 0,
-            _ => x - 1,
-        };
-
-        let start_y = match y {
-            0 => 0,
-            _ => y - 1,
-        };
-
-        let start_z = match z {
-            0 => 0,
-            _ => z - 1,
-        };
-
-        let end_x = (x + 1).min(self.width as u32 - 1);
-        let end_y = (y + 1).min(self.height as u32 - 1);
-        let end_z = (z + 1).min(ZLEVELS - 1);
-
-        // If any side is exposed to air, the block is visible.
-        for ix in start_x..=end_x {
-            for iy in start_y..=end_y {
-                for iz in start_z..=end_z {
-                    if self.terrain.get(ix, iy, iz).is_none() {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        false
-    }
-
-    pub fn objects(&self) -> HashMap<Point3<u32>, Object> {
-        self.objects.clone()
-    }
-
-    pub fn has_tree(&self, x: usize, y: usize) -> bool {
-        let object = self.objects.get(&Point3::new(x as u32, y as u32, 0));
-        object.is_some()
+    pub fn get_terrain(&self) -> TerrainChunk {
+        self.terrain.clone()
     }
 }

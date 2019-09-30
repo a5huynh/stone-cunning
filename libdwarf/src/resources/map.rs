@@ -7,22 +7,21 @@ use crate::{
     components::{MapObject, MapPosition},
     config::ResourceConfig,
 };
-use libterrain::{Biome, Object, Point3, TerrainGenerator};
+use libterrain::{Biome, Object, Point3, TerrainChunk};
 
 pub struct Map {
     // TODO: Support multiple objects per tile.
     pub object_map: HashMap<Point3<u32>, u32>,
     /// Location map of all the workers.
     pub worker_map: HashMap<Point3<u32>, u32>,
-    pub terrain: TerrainGenerator,
+    pub terrain: TerrainChunk,
     // World dimensions
     pub width: u32,
     pub height: u32,
 }
 
 impl Map {
-    pub fn initialize(world: &mut World, width: u32, height: u32) -> Self {
-        let terrain = TerrainGenerator::new(width, height).build();
+    pub fn initialize(world: &mut World, terrain: &TerrainChunk, width: u32, height: u32) -> Self {
         let mut object_map = HashMap::new();
 
         let resource_map = {
@@ -31,7 +30,7 @@ impl Map {
         };
 
         // Initialize map w/ objects created in terrain gen
-        for (pos, object) in &terrain.objects() {
+        for (pos, object) in &terrain.objects {
             let mut entity_builder = world.create_entity();
             entity_builder = match object {
                 Object::TREE => {
@@ -48,7 +47,7 @@ impl Map {
         Map {
             object_map,
             worker_map: HashMap::new(),
-            terrain,
+            terrain: terrain.clone(),
             width,
             height,
         }
@@ -104,8 +103,7 @@ impl Map {
 
     pub fn terrain_at(&self, pt: Point3<i32>) -> Option<Biome> {
         if self.is_inside_map(pt) {
-            self.terrain
-                .get_biome(pt.x as u32, pt.y as u32, pt.z as u32)
+            self.terrain.get(pt.x as u32, pt.y as u32, pt.z as u32)
         } else {
             None
         }

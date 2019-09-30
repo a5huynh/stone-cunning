@@ -7,10 +7,12 @@ use crate::{
     resources::{time, Map, TaskQueue},
 };
 
+use libterrain::TerrainChunk;
+
 #[derive(Default)]
 pub struct WorldSim;
 impl WorldSim {
-    pub fn new(world: &mut World, width: u32, height: u32) -> Self {
+    pub fn new(world: &mut World, terrain: &TerrainChunk, width: u32, height: u32) -> Self {
         world.register::<MapPosition>();
         world.register::<MapObject>();
         world.register::<Worker>();
@@ -24,7 +26,7 @@ impl WorldSim {
         world.insert(world_config);
 
         // Initialize map.
-        let map = Map::initialize(world, width, height);
+        let map = Map::initialize(world, terrain, width, height);
         world.insert(map);
 
         // Initialize task queue.
