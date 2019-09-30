@@ -17,8 +17,8 @@ pub struct PoissonDisk {
 }
 
 fn distance(a: Point3<u32>, b: Point3<u32>) -> f64 {
-    let dx = a.x as f64 - b.x as f64;
-    let dy = a.y as f64 - b.y as f64;
+    let dx = f64::from(a.x) - f64::from(b.x);
+    let dy = f64::from(a.y) - f64::from(b.y);
 
     (dx * dx + dy * dy).sqrt()
 }
@@ -57,8 +57,8 @@ impl PoissonDisk {
     }
 
     fn is_valid(&self, point: Point3<u32>) -> bool {
-        let xidx = (point.x as f64 / self.grid_size).floor();
-        let yidx = (point.y as f64 / self.grid_size).floor();
+        let xidx = (f64::from(point.x) / self.grid_size).floor();
+        let yidx = (f64::from(point.y) / self.grid_size).floor();
 
         // Get the neighborhood of the point in the grid.
         let start_x = (xidx - 2.0).max(0.0) as usize;
@@ -81,8 +81,8 @@ impl PoissonDisk {
     }
 
     fn insert_point(&mut self, point: Point3<u32>) {
-        let cell_x = (point.x as f64 / self.grid_size).floor();
-        let cell_y = (point.y as f64 / self.grid_size).floor();
+        let cell_x = (f64::from(point.x) / self.grid_size).floor();
+        let cell_y = (f64::from(point.y) / self.grid_size).floor();
 
         self.samples.push(point);
 
@@ -97,8 +97,8 @@ impl PoissonDisk {
         // Random radius between min_dist and 2 * min_dist
         let radius = self.min_dist as f64 * (rng.gen::<f64>() + 1.0);
         // The new point is generated around the point (x, y)
-        let new_x = point.x as f64 + (radius * angle.cos());
-        let new_y = point.y as f64 + (radius * angle.sin());
+        let new_x = f64::from(point.x) + (radius * angle.cos());
+        let new_y = f64::from(point.y) + (radius * angle.sin());
 
         Point3::new(
             new_x.max(0.0).min(self.width as f64 - 1.0) as u32,

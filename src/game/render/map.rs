@@ -44,7 +44,7 @@ impl MapRenderer {
         for y in 0..height {
             for x in 0..width {
                 for z in 32..64 {
-                    if let Some(biome) = terrain.get_biome(x as u32, y as u32, z as u32) {
+                    if let Some(biome) = terrain.get(x as u32, y as u32, z as u32) {
                         let mut block = world.create_entity();
                         if terrain.is_visible(x as u32, y as u32, z as u32) {
                             let sprite_idx = match biome {

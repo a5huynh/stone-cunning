@@ -1,3 +1,4 @@
+use libpath::Path;
 use libterrain::Point3;
 
 type EntityId = u32;
@@ -23,6 +24,8 @@ pub enum Action {
         target: EntityId,
         owner: EntityId,
     },
+    /// Move along path
+    Move(Path),
     /// Move to some location.
     MoveTo(MapPosition),
 }

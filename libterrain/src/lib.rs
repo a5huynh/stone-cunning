@@ -1,34 +1,18 @@
 use noise::{NoiseFn, Perlin};
-use std::collections::HashMap;
 
 mod poisson;
 pub use nalgebra::Point3;
 use poisson::PoissonDisk;
 
+mod chunk;
+pub use chunk::{Biome, Object, TerrainChunk};
+
 #[derive(Clone)]
 pub struct TerrainGenerator {
     width: usize,
     height: usize,
-    terrain: Vec<Option<Biome>>,
-    objects: HashMap<Point3<u32>, Object>,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum Biome {
-    // Above ground biomes
-    OCEAN,
-    BEACH,
-    GRASSLAND,
-    TAIGA,
-    TUNDRA,
-    SNOW,
-    // Underground biomes
-    ROCK,
-}
-
-#[derive(Clone, Debug)]
-pub enum Object {
-    TREE,
+    // TODO: Support multiple chunks.
+    terrain: TerrainChunk,
 }
 
 // TODO: Make this a variable?
@@ -41,13 +25,8 @@ impl TerrainGenerator {
         TerrainGenerator {
             width: width as usize,
             height: height as usize,
-            terrain: vec![None; (width * height * ZLEVELS) as usize],
-            objects: HashMap::new(),
+            terrain: TerrainChunk::new(width, height),
         }
-    }
-
-    fn idx(&self, x: u32, y: u32, z: u32) -> usize {
-        (z * (self.width * self.height) as u32 + y * self.width as u32 + x) as usize
     }
 
     pub fn build(mut self) -> Self {
@@ -75,7 +54,7 @@ impl TerrainGenerator {
                 // Ground level is always at 32.
                 let biome = self.determine_biome(elevation);
                 let terrain_height =
-                    GROUND_HEIGHT + (GROUND_HEIGHT as f64 * elevation).floor() as u32;
+                    GROUND_HEIGHT + (f64::from(GROUND_HEIGHT) * elevation).floor() as u32;
 
                 heightmap[y * self.width + x] = Some((terrain_height, biome.clone()));
 
@@ -83,22 +62,22 @@ impl TerrainGenerator {
                 //  * Less hilly?
                 //  * place trees correctly on 3d map
                 for z in 0..ZLEVELS {
-                    let idx = self.idx(x as u32, y as u32, z as u32);
+                    let idx = (x as u32, y as u32, z as u32);
                     match biome {
                         // For water biomes, the height is always the same, but the
                         // depth of the water will change.
                         Biome::OCEAN => {
                             if z >= terrain_height && z <= WATER_HEIGHT {
-                                self.terrain[idx] = Some(biome.clone());
+                                self.terrain.set(idx, Some(biome.clone()));
                             } else if z < terrain_height {
-                                self.terrain[idx] = Some(Biome::ROCK);
+                                self.terrain.set(idx, Some(Biome::ROCK));
                             }
                         }
                         _ => {
                             if z == terrain_height {
-                                self.terrain[idx] = Some(biome.clone());
+                                self.terrain.set(idx, Some(biome.clone()));
                             } else if z < terrain_height {
-                                self.terrain[idx] = Some(Biome::ROCK);
+                                self.terrain.set(idx, Some(Biome::ROCK));
                             }
                         }
                     }
@@ -116,7 +95,7 @@ impl TerrainGenerator {
             if let Some(data) = &heightmap[idx as usize] {
                 if data.1 != Biome::OCEAN {
                     pt.z = data.0 + 1;
-                    self.objects.insert(*pt, Object::TREE);
+                    self.terrain.set_object(&pt, Object::TREE);
                 }
             }
         }
@@ -148,59 +127,7 @@ impl TerrainGenerator {
         Biome::GRASSLAND
     }
 
-    /// Returns the Biome at (x, y).
-    pub fn get_biome(&self, x: u32, y: u32, z: u32) -> Option<Biome> {
-        let idx = self.idx(x, y, z);
-        self.terrain[idx].clone()
-    }
-
-    /// Determines whether the block @ (x, y, z) is visible.
-    pub fn is_visible(&self, x: u32, y: u32, z: u32) -> bool {
-        // Top level is always exposed.
-        if z == ZLEVELS - 1 {
-            return true;
-        }
-
-        let start_x = match x {
-            0 => 0,
-            _ => x - 1,
-        };
-
-        let start_y = match y {
-            0 => 0,
-            _ => y - 1,
-        };
-
-        let start_z = match z {
-            0 => 0,
-            _ => z - 1,
-        };
-
-        let end_x = (x + 1).min(self.width as u32 - 1);
-        let end_y = (y + 1).min(self.height as u32 - 1);
-        let end_z = (z + 1).min(ZLEVELS - 1);
-
-        // If any side is exposed to air, the block is visible.
-        for ix in start_x..=end_x {
-            for iy in start_y..=end_y {
-                for iz in start_z..=end_z {
-                    let idx = self.idx(ix, iy, iz);
-                    if self.terrain[idx].is_none() {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        false
-    }
-
-    pub fn objects(&self) -> HashMap<Point3<u32>, Object> {
-        self.objects.clone()
-    }
-
-    pub fn has_tree(&self, x: usize, y: usize) -> bool {
-        let object = self.objects.get(&Point3::new(x as u32, y as u32, 0));
-        object.is_some()
+    pub fn get_terrain(&self) -> TerrainChunk {
+        self.terrain.clone()
     }
 }

@@ -11,6 +11,7 @@ use amethyst::{
 };
 
 use libdwarf::{actions::Action, resources::TaskQueue, world::WorldSim, Point3};
+use libterrain::TerrainGenerator;
 
 use crate::game::{
     components::{CameraFollow, Cursor, CursorSelected, Object, Player},
@@ -36,7 +37,7 @@ impl SimpleState for RunningState {
         world.register::<Player>();
 
         let storage = SpriteSheetStorage::new(world);
-        world.add_resource(storage);
+        world.insert(storage);
 
         // Initialize simulation;
         let (map_height, map_width) = {
@@ -45,17 +46,18 @@ impl SimpleState for RunningState {
         };
 
         // Initialize simulation
-        WorldSim::new(world, map_width, map_height);
+        let terrain_gen = TerrainGenerator::new(map_width, map_height).build();
+        WorldSim::new(world, &terrain_gen.get_terrain(), map_width, map_height);
         // Render map
         let map_render = MapRenderer::initialize(world);
         initialize_camera(world, map_render.place(8, 8, 42, 0.0), self.zoom);
-        world.add_resource(map_render);
+        world.insert(map_render);
         // Initialize cursor sprite.
         Cursor::initialize(world);
         // Initialize player.
         // Player::initialize(world);
 
-        world.add_resource(CursorSelected::default());
+        world.insert(CursorSelected::default());
 
         // Create the ui
         world.exec(|mut creator: UiCreator<'_>| {
