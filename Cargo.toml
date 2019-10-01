@@ -18,6 +18,12 @@ libterrain = { path = "libterrain" }
 version = "0.13.0"
 features = ["metal"]
 
+[dependencies.amethyst-imgui]
+version = "0.5.1"
+# amethyst-imgui by default uses vulkan, however since we
+# primarily work in OSX, we need to turn this off.
+default-features = false
+
 [workspace]
 members = [
     # Worker/object sim.
