@@ -25,7 +25,9 @@ use game::{
 };
 
 fn main() -> amethyst::Result<()> {
-    amethyst::start_logger(Default::default());
+    amethyst::Logger::from_config(Default::default())
+        .level_for("gfx_backend_metal", amethyst::LogLevelFilter::Warn)
+        .start();
 
     let app_root = application_root_dir()?;
 
