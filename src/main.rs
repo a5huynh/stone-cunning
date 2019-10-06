@@ -11,6 +11,7 @@ use amethyst::{
     utils::{application_root_dir, fps_counter::FpsCounterBundle},
     window::DisplayConfig,
 };
+use amethyst_imgui::RenderImgui;
 
 use libdwarf::systems;
 
@@ -54,7 +55,8 @@ fn main() -> amethyst::Result<()> {
                         .with_clear([0.0, 0.0, 0.0, 1.0]),
                 )
                 .with_plugin(RenderFlat2D::default())
-                .with_plugin(RenderUi::default()),
+                .with_plugin(RenderUi::default())
+                .with_plugin(RenderImgui::<StringBindings>::default()),
         )?
         // Simulation systems.
         .with(systems::AssignTaskSystem, "assign_task", &[])
