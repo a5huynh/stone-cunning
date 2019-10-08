@@ -47,9 +47,15 @@ impl<'s> System<'s> for DebugUI {
                             .collapsing_header(&im_str!("Worker {}", entity.id()))
                             .build()
                         {
-                            ui.text(&im_str!("action queue: {}", worker.actions.len()));
                             ui.text(&im_str!("inventory: {}", worker.inventory.len()));
+                            if ui.collapsing_header(im_str!("Action Queue")).build() {
+                                for action in worker.actions.iter() {
+                                    ui.text(&im_str!("{:?}", action));
+                                }
+                            }
                         }
+
+                        ui.separator();
                     }
                 });
 
