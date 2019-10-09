@@ -110,7 +110,6 @@ impl PoissonDisk {
     pub fn generate(&mut self, new_points_count: usize) {
         let mut rng = rand::thread_rng();
         // Generate other points from points in queue
-        println!("generating points");
         while !self.active.is_empty() {
             let idx = (rng.gen::<f64>() * (self.active.len() - 1) as f64) as usize;
             let point = self.active[idx];
@@ -131,7 +130,5 @@ impl PoissonDisk {
                 self.active.remove(idx);
             }
         }
-
-        println!("finished generating points: ({})", self.samples.len());
     }
 }

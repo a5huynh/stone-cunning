@@ -10,85 +10,6 @@ Container(
     children: [
         Container(
             transform: (
-                id: "task_panel",
-                anchor: TopLeft,
-                x: 96.0,
-                y: -200.0,
-                width: 192.0,
-                height: 400.0,
-            ),
-            background: SolidColor(1.0, 1.0, 1.0, 0.5),
-            children: [
-                Button(
-                    transform: (
-                        id: "add_worker_btn",
-                        y: -40.,
-                        stretch: X(x_margin: 8),
-                        height: 64.,
-                        tab_order: 0,
-                        anchor: TopMiddle,
-                        mouse_reactive: true,
-                    ),
-                    button: (
-                        text: "Add Worker",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", ("TTF", ())),
-                        font_size: 20.,
-                        normal_text_color: (1.0, 0.85, 0.4, 1.0),
-                        hover_text_color: (1.0, 0.85, 0.4, 1.0),
-                        press_text_color: (0.0, 0.0, 0.0, 1.0),
-                        normal_image: SolidColor(0.17, 0.16, 0.18, 1.0),
-                        hover_image: SolidColor(0.25, 0.24, 0.26, 1.0),
-                        press_image: SolidColor(1., 1., 1., 1.),
-                    )
-                ),
-                Button(
-                    transform: (
-                        id: "add_resource_btn",
-                        y: -112.,
-                        stretch: X(x_margin: 8),
-                        height: 64.,
-                        tab_order: 1,
-                        anchor: TopMiddle,
-                        mouse_reactive: true,
-                    ),
-                    button: (
-                        text: "Add Resource",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", ("TTF", ())),
-                        font_size: 20.,
-                        normal_text_color: (1.0, 0.85, 0.4, 1.0),
-                        hover_text_color: (1.0, 0.85, 0.4, 1.0),
-                        press_text_color: (0.0, 0.0, 0.0, 1.0),
-                        normal_image: SolidColor(0.17, 0.16, 0.18, 1.0),
-                        hover_image: SolidColor(0.25, 0.24, 0.26, 1.0),
-                        press_image: SolidColor(1., 1., 1., 1.),
-                    )
-                ),
-                Button(
-                    transform: (
-                        id: "add_task_btn",
-                        y: -184.,
-                        stretch: X(x_margin: 8),
-                        height: 64.,
-                        tab_order: 1,
-                        anchor: TopMiddle,
-                        mouse_reactive: true,
-                    ),
-                    button: (
-                        text: "Add Task",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", ("TTF", ())),
-                        font_size: 20.,
-                        normal_text_color: (1.0, 0.85, 0.4, 1.0),
-                        hover_text_color: (1.0, 0.85, 0.4, 1.0),
-                        press_text_color: (0.0, 0.0, 0.0, 1.0),
-                        normal_image: SolidColor(0.17, 0.16, 0.18, 1.0),
-                        hover_image: SolidColor(0.25, 0.24, 0.26, 1.0),
-                        press_image: SolidColor(1., 1., 1., 1.),
-                    )
-                ),
-            ],
-        ),
-        Container(
-            transform: (
                 id: "game_info",
                 anchor: TopRight,
                 x: -100.0,
@@ -115,37 +36,6 @@ Container(
                     )
                 ),
             ]
-        ),
-        Container(
-            transform: (
-                id: "debug_panel",
-                anchor: TopRight,
-                x: -200.0,
-                y: -264.0,
-                width: 400.0,
-                height: 400.0,
-            ),
-            background: SolidColor(1.0, 1.0, 1.0, 0.5),
-            children: [
-                Label(
-                    transform: (
-                        id: "debug_info",
-                        x: 216.0,
-                        y: -40.,
-                        anchor: TopLeft,
-                        stretch: XY(x_margin: 0., y_margin: 0., keep_aspect_ratio: false),
-                        transparent: true,
-                    ),
-                    text: (
-                        text: "Nothing Selected",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", ("TTF", ())),
-                        font_size: 20.,
-                        line_mode: Wrap,
-                        align: MiddleLeft,
-                        color: (0.0, 0.0, 0.0, 1.0),
-                    )
-                ),
-            ]
-        ),
+        )
     ],
 )

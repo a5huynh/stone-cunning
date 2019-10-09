@@ -1,8 +1,5 @@
-use amethyst::{
-    ecs::{Entities, ReadExpect, ReadStorage, System, Write, WriteStorage},
-    shrev::{EventChannel, ReaderId},
-    ui::{UiEvent, UiEventType, UiFinder, UiText, UiTransform},
-};
+use amethyst::ecs::{Entities, Join, ReadExpect, ReadStorage, System, Write};
+use amethyst_imgui::imgui::{im_str, Condition, Window};
 
 use libdwarf::{
     actions::Action,
@@ -15,104 +12,120 @@ use crate::game::components::CursorSelected;
 
 #[derive(Default)]
 pub struct DebugUI {
-    reader_id: Option<ReaderId<UiEvent>>,
+    new_worker_pos: [i32; 3],
 }
 
 impl<'s> System<'s> for DebugUI {
     type SystemData = (
         Entities<'s>,
-        UiFinder<'s>,
         ReadStorage<'s, MapObject>,
         ReadStorage<'s, Worker>,
-        WriteStorage<'s, UiText>,
         ReadExpect<'s, CursorSelected>,
         Write<'s, TaskQueue>,
-        Write<'s, EventChannel<UiEvent>>,
-        ReadStorage<'s, UiTransform>,
     );
 
-    fn run(
-        &mut self,
-        (
-            entities,
-            finder,
-            objects,
-            workers,
-            mut ui_text,
-            cursor_selected,
-            mut queue,
-            mut events,
-            buttons,
-        ): Self::SystemData,
-    ) {
-        // Render currently selected info data
-        if let Some(entity) = finder.find("debug_info") {
-            let label = ui_text.get_mut(entity).unwrap();
-            let selected = &cursor_selected.hover_selected;
-            if let Some(pick_info) = selected {
-                let mut worker_str = String::from("N/A");
-                if let Some(worker_id) = pick_info.worker {
-                    let entity = entities.entity(worker_id);
-                    if let Some(worker) = workers.get(entity) {
-                        worker_str = worker.to_string();
-                    }
-                }
-
-                let mut object_str = String::from("N/A");
-                if let Some(object_id) = pick_info.object {
-                    let entity = entities.entity(object_id);
-                    if let Some(object) = objects.get(entity) {
-                        object_str = object.to_string();
-                    }
-                }
-
-                let mut terrain_str = String::from("N/A");
-                if let Some(terrain) = &pick_info.terrain {
-                    terrain_str = format!("{:?}", terrain);
-                }
-
-                let mut pos_str = String::from("N/A");
-                if let Some(position) = &pick_info.position {
-                    pos_str = format!("({}, {}, {})", position.x, position.y, position.z);
-                }
-
-                label.text = format!(
-                    "worker: {}\nobject: {}\nterrain: {}\npos: {}",
-                    worker_str, object_str, terrain_str, pos_str
-                );
-            } else {
-                label.text = "worker: N/A\nobject: N/A\nterrain: N/A\npos: N/A".to_string();
-            }
-        }
-
-        // Handle UI events
-        let reader_id = self
-            .reader_id
-            .get_or_insert_with(|| events.register_reader());
-
-        for ev in events.read(reader_id) {
-            if ev.event_type == UiEventType::Click {
-                // Determine which button was clicked and implement action.
-                if let Some(button) = buttons.get(ev.target) {
-                    match button.id.as_ref() {
-                        "add_worker_btn" => {
-                            queue.add_world(Action::AddWorker(Point3::new(1, 1, 0)));
+    fn run(&mut self, (entities, objects, workers, cursor_selected, mut queue): Self::SystemData) {
+        amethyst_imgui::with(|ui| {
+            Window::new(im_str!("Tasks"))
+                .size([300.0, 500.0], Condition::FirstUseEver)
+                .build(ui, || {
+                    if ui.collapsing_header(im_str!("world")).build() {
+                        for action in queue.world.iter() {
+                            ui.text(&im_str!("{:?}", action));
                         }
-                        "add_resource_btn" => {
-                            queue
-                                .add_world(Action::Add(Point3::new(9, 9, 0), String::from("tree")));
-                        }
-                        "add_task_btn" => {
-                            queue.add(Action::HarvestResource(
-                                Point3::new(9, 9, 0),
-                                String::from("tree"),
-                                String::from("wood"),
-                            ));
-                        }
-                        _ => {}
                     }
-                }
-            }
-        }
+
+                    if ui.collapsing_header(im_str!("worker")).build() {
+                        for action in queue.worker.iter() {
+                            ui.text(&im_str!("{:?}", action));
+                        }
+                    }
+                });
+
+            Window::new(im_str!("Workers"))
+                .size([300.0, 100.0], Condition::FirstUseEver)
+                .build(ui, || {
+                    ui.input_int3(im_str!("map pos"), &mut self.new_worker_pos)
+                        .build();
+
+                    if ui.button(im_str!("Add Worker"), [0.0, 0.0]) {
+                        queue.add_world(Action::AddWorker(Point3::new(
+                            self.new_worker_pos[0] as u32,
+                            self.new_worker_pos[1] as u32,
+                            self.new_worker_pos[2] as u32,
+                        )));
+                    }
+
+                    ui.separator();
+
+                    for (entity, worker) in (&entities, &workers).join() {
+                        if ui
+                            .collapsing_header(&im_str!("Worker {}", entity.id()))
+                            .build()
+                        {
+                            ui.text(&im_str!("inventory: {}", worker.inventory.len()));
+                            if ui.collapsing_header(im_str!("Action Queue")).build() {
+                                for action in worker.actions.iter() {
+                                    ui.text(&im_str!("{:?}", action));
+                                }
+                            }
+                        }
+
+                        ui.separator();
+                    }
+                });
+
+            Window::new(im_str!("Hover"))
+                .size([300.0, 100.0], Condition::FirstUseEver)
+                .build(ui, || {
+                    let selected = &cursor_selected.hover_selected;
+                    if let Some(pick_info) = selected {
+                        let worker_label = pick_info
+                            .worker
+                            .and_then(|worker_id| {
+                                let entity = entities.entity(worker_id);
+                                workers.get(entity)
+                            })
+                            .and_then(|worker| Some(format!("Worker: {}", worker.to_string())))
+                            .unwrap_or("Worker: N/A".to_string());
+                        ui.text(worker_label);
+
+                        let object_label = pick_info
+                            .object
+                            .and_then(|object_id| {
+                                let entity = entities.entity(object_id);
+                                objects.get(entity)
+                            })
+                            .and_then(|object| Some(format!("Object: {}", object.to_string())))
+                            .unwrap_or("Object: N/A".to_string());
+                        ui.text(object_label);
+
+                        let terrain_label = pick_info
+                            .terrain
+                            .as_ref()
+                            .and_then(|terrain| Some(format!("Terrain: {:?}", terrain)))
+                            .unwrap_or("Terrain: N/A".to_string());
+                        ui.text(terrain_label);
+
+                        let map_pos = pick_info
+                            .position
+                            .and_then(|position| {
+                                Some(format!(
+                                    "Map Pos: ({}, {}, {})",
+                                    position.x, position.y, position.z
+                                ))
+                            })
+                            .unwrap_or("Map Pos: N/A".to_string());
+                        ui.text(map_pos);
+
+                        let mouse_pos = ui.io().mouse_pos;
+                        ui.text(im_str!(
+                            "Mouse Pos: ({:.1},{:.1})",
+                            mouse_pos[0],
+                            mouse_pos[1]
+                        ));
+                    }
+                });
+        });
     }
 }

@@ -1,5 +1,4 @@
 use specs::{Component, VecStorage};
-use specs_derive::*;
 use std::collections::VecDeque;
 
 use crate::{

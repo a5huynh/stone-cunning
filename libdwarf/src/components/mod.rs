@@ -1,6 +1,5 @@
 use libterrain::Point3;
 use specs::{Component, VecStorage};
-use specs_derive::*;
 
 mod object;
 mod resource;

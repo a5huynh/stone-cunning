@@ -6,6 +6,7 @@ edition = "2018"
 publish = false
 
 [dependencies]
+log = "0.4.8"
 rand = "0.7.2"
 serde = "1.0.101"
 specs-derive = "0.4.0"
@@ -17,6 +18,12 @@ libterrain = { path = "libterrain" }
 [dependencies.amethyst]
 version = "0.13.0"
 features = ["metal"]
+
+[dependencies.amethyst-imgui]
+version = "0.5.1"
+# amethyst-imgui by default uses vulkan, however since we
+# primarily work in OSX, we need to turn this off.
+default-features = false
 
 [workspace]
 members = [

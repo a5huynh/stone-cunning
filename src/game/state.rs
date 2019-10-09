@@ -9,6 +9,8 @@ use amethyst::{
     window::DisplayConfig,
     winit::{Event, MouseScrollDelta, WindowEvent},
 };
+use log::info;
+use std::time::SystemTime;
 
 use libdwarf::{actions::Action, resources::TaskQueue, world::WorldSim, Point3};
 use libterrain::TerrainGenerator;
@@ -46,7 +48,11 @@ impl SimpleState for RunningState {
         };
 
         // Initialize simulation
+        info!("Generating map w/ dims: ({}, {})", map_width, map_height);
+        let now = SystemTime::now();
         let terrain_gen = TerrainGenerator::new(map_width, map_height).build();
+        info!("Terrain gen took: {}ms", now.elapsed().unwrap().as_millis());
+
         WorldSim::new(world, &terrain_gen.get_terrain(), map_width, map_height);
         // Render map
         let map_render = MapRenderer::initialize(world);

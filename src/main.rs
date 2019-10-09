@@ -11,6 +11,7 @@ use amethyst::{
     utils::{application_root_dir, fps_counter::FpsCounterBundle},
     window::DisplayConfig,
 };
+use amethyst_imgui::RenderImgui;
 
 use libdwarf::systems;
 
@@ -25,7 +26,9 @@ use game::{
 };
 
 fn main() -> amethyst::Result<()> {
-    amethyst::start_logger(Default::default());
+    amethyst::Logger::from_config(Default::default())
+        .level_for("gfx_backend_metal", amethyst::LogLevelFilter::Warn)
+        .start();
 
     let app_root = application_root_dir()?;
 
@@ -52,7 +55,8 @@ fn main() -> amethyst::Result<()> {
                         .with_clear([0.0, 0.0, 0.0, 1.0]),
                 )
                 .with_plugin(RenderFlat2D::default())
-                .with_plugin(RenderUi::default()),
+                .with_plugin(RenderUi::default())
+                .with_plugin(RenderImgui::<StringBindings>::default()),
         )?
         // Simulation systems.
         .with(systems::AssignTaskSystem, "assign_task", &[])

@@ -4,6 +4,7 @@ use amethyst::{
     prelude::*,
     renderer::{SpriteRender, Transparent},
 };
+
 use libdwarf::resources::Map;
 use libterrain::Biome;
 
@@ -39,8 +40,6 @@ impl MapRenderer {
             (map.terrain.clone(), map.width, map.height)
         };
 
-        // Create terrain
-        println!("Map dims: ({}, {})", width, height);
         for y in 0..height {
             for x in 0..width {
                 for z in 32..64 {
