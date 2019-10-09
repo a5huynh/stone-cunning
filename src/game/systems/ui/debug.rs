@@ -26,6 +26,22 @@ impl<'s> System<'s> for DebugUI {
 
     fn run(&mut self, (entities, objects, workers, cursor_selected, mut queue): Self::SystemData) {
         amethyst_imgui::with(|ui| {
+            Window::new(im_str!("Tasks"))
+                .size([300.0, 500.0], Condition::FirstUseEver)
+                .build(ui, || {
+                    if ui.collapsing_header(im_str!("world")).build() {
+                        for action in queue.world.iter() {
+                            ui.text(&im_str!("{:?}", action));
+                        }
+                    }
+
+                    if ui.collapsing_header(im_str!("worker")).build() {
+                        for action in queue.worker.iter() {
+                            ui.text(&im_str!("{:?}", action));
+                        }
+                    }
+                });
+
             Window::new(im_str!("Workers"))
                 .size([300.0, 100.0], Condition::FirstUseEver)
                 .build(ui, || {
