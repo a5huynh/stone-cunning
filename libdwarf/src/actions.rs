@@ -4,8 +4,8 @@ use libterrain::Point3;
 type EntityId = u32;
 type MapPosition = Point3<u32>;
 
-#[derive(Debug, Clone, PartialEq)]
-pub enum Action {
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
+pub enum ActionType {
     /// Idle dwarf
     Chilling,
     /// Deals damage to an entity.

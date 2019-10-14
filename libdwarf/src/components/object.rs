@@ -1,8 +1,9 @@
-use specs::{Component, VecStorage};
 use std::collections::VecDeque;
+use specs::prelude::*;
+use specs_derive::*;
 
 use crate::{
-    actions::Action,
+    actions::ActionType,
     components::{ResourceAttribute, ResourceType},
 };
 
@@ -11,7 +12,7 @@ use crate::{
 pub struct MapObject {
     pub health: i32,
     pub resource_type: ResourceType,
-    pub actions: VecDeque<Action>,
+    pub actions: VecDeque<ActionType>,
 }
 
 impl MapObject {

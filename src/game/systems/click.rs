@@ -7,7 +7,7 @@ use amethyst::{
 
 use crate::game::components::{Cursor, CursorDown, CursorSelected};
 use libdwarf::{
-    actions::Action,
+    actions::ActionType,
     components::{MapObject, MapPosition},
     resources::TaskQueue,
 };
@@ -69,7 +69,7 @@ impl<'s> System<'s> for ClickSystem {
                             if let Some(pos) = obj_pos {
                                 println!("click! {:?}", info);
                                 // Add to task queue
-                                task_queue.add(Action::HarvestResource(
+                                task_queue.add(ActionType::HarvestResource(
                                     pos.pos,
                                     String::from("tree"),
                                     String::from("wood"),

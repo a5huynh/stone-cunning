@@ -1,7 +1,7 @@
 use specs::{Entities, ReadExpect, System, WriteExpect, WriteStorage};
 
 use crate::{
-    actions::Action,
+    actions::ActionType,
     components::{MapObject, MapPosition, Worker},
     config::ResourceConfig,
     resources::{Map, TaskQueue},
@@ -28,7 +28,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
         while let Some(event) = queue.pop_front() {
             match event {
                 // Add an object to the map.
-                Action::Add(pt, name) => {
+                ActionType::Add(pt, name) => {
                     println!("[WUS] Adding object '{}' @ ({:?})", name, pt);
                     let resource = resources.map.get(&name).unwrap().clone();
                     let new_entity = entities.create();
@@ -40,7 +40,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                         .unwrap();
                     map.track_object(new_entity.id(), pt);
                 }
-                Action::AddWorker(pos) => {
+                ActionType::AddWorker(pos) => {
                     println!("[WUS] Adding worker @ ({:?})", pos);
                     let entity = entities.create();
                     workers.insert(entity, Worker::new()).unwrap();
@@ -48,14 +48,14 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     map.track_worker(entity.id(), pos);
                 }
                 // Deal damage to a particular object
-                Action::DealDamage(id, damage) => {
+                ActionType::DealDamage(id, damage) => {
                     let entity = entities.entity(id);
                     if let Some(object) = objects.get_mut(entity) {
                         object.health -= damage;
                     }
                 }
                 // Destroy an object.
-                Action::Destroy(id) => {
+                ActionType::Destroy(id) => {
                     // Remove from map
                     let entity = entities.entity(id);
                     if let Some(_) = objects.get(entity) {
@@ -66,7 +66,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     // Remove from world
                     entities.delete(entity).unwrap();
                 }
-                Action::Take { target, owner } => {
+                ActionType::Take { target, owner } => {
                     let target_entity = entities.entity(target);
                     if let Some(_) = objects.get(target_entity) {
                         if let Some(worker) = workers.get_mut(entities.entity(owner)) {

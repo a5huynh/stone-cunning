@@ -1,6 +1,6 @@
 use specs::{Entities, Join, System, Write, WriteStorage};
 
-use crate::{actions::Action, components::Worker, resources::TaskQueue};
+use crate::{actions::ActionType, components::Worker, resources::TaskQueue};
 
 /// Assign tasks to idle workers.
 pub struct AssignTaskSystem;
@@ -14,7 +14,7 @@ impl<'a> System<'a> for AssignTaskSystem {
                 if let Some(new_task) = queue.worker.pop_front() {
                     worker.actions.push_back(new_task.clone());
                 } else {
-                    worker.actions.push_back(Action::Chilling);
+                    worker.actions.push_back(ActionType::Chilling);
                 }
             }
         }
