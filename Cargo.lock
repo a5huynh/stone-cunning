@@ -1454,6 +1454,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "indexmap"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "inflate"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1634,6 +1639,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "libpath"
 version = "0.1.0"
 dependencies = [
+ "indexmap 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "libterrain 0.1.0",
  "nalgebra 0.18.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1643,6 +1649,7 @@ dependencies = [
 name = "libterrain"
 version = "0.1.0"
 dependencies = [
+ "libpath 0.1.0",
  "nalgebra 0.18.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "noise 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -3847,6 +3854,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum imgui 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "e70a1b421ac503e94009cc9bcd6ed256f6bf38ced98d841b095da6b94ea67702"
 "checksum imgui-sys 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "0350b22f0a64eeb852ed3995ddb5d6d24bd3038024d2bd81720a6573baa602dc"
 "checksum imgui-winit-support 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6c63c45c058634dbc045dde485a7baf0f4321b77c00cca90c5d2d9b3ab2f5eec"
+"checksum indexmap 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a61202fbe46c4a951e9404a720a0180bcf3212c750d735cb5c4ba4dc551299f3"
 "checksum inflate 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)" = "f5f9f47468e9a76a6452271efadc88fe865a82be91fe75e6c0c57b87ccea59d4"
 "checksum inflate 0.4.5 (registry+https://github.com/rust-lang/crates.io-index)" = "1cdb29978cc5797bd8dcc8e5bf7de604891df2a8dc576973d71a281e916db2ff"
 "checksum intl_pluralrules 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8f4cbf667b8cb0fec29160019036a35851da8fb8731de904734da66fd5087174"

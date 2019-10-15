@@ -30,7 +30,15 @@ pub fn main() {
     let mut terrain = TerrainChunk::new(TEST_WIDTH, TEST_HEIGHT);
     init_terrain(&mut terrain);
 
-    let (parents, path) = find_path(&terrain, Point3::new(8, 7, 0), Point3::new(17, 2, 0));
+    let start = Point3::new(8, 7, 0);
+    let goal = Point3::new(17, 2, 0);
+    let (parents, path) = find_path(
+        start,
+        goal,
+        |node| TerrainChunk::heuristic(&goal, &node),
+        |pt| terrain.neighbors(pt),
+    );
+
     // Draw parents
     for z in (0..TEST_DEPTH).rev() {
         println!("z-level: {}", z);
@@ -42,8 +50,9 @@ pub fn main() {
                     print!("@");
                 } else {
                     if parents.contains_key(&pt) {
-                        let came_from = parents[&pt];
-                        print!("{}", direction((x, y, z), &came_from));
+                        let (idx, _) = parents[&pt];
+                        let (parent_node, _) = parents.get_index(idx).unwrap();
+                        print!("{}", direction((x, y, z), &parent_node));
                     } else {
                         print!("{}", biome_to_ascii(terrain.get(pt.x, pt.y, pt.z)));
                     }

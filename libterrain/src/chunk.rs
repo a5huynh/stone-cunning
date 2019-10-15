@@ -41,6 +41,12 @@ impl TerrainChunk {
         }
     }
 
+    pub fn heuristic(a: &Point3<u32>, b: &Point3<u32>) -> usize {
+        (a.x as i32 - b.x as i32).abs() as usize
+            + (a.y as i32 - b.y as i32).abs() as usize
+            + (a.z as i32 - b.z as i32).abs() as usize
+    }
+
     fn idx(&self, x: u32, y: u32, z: u32) -> usize {
         (z * (self.width * self.height) as u32 + y * self.width as u32 + x) as usize
     }
@@ -136,8 +142,9 @@ impl TerrainChunk {
         }
     }
 
-    /// Return the list of neighboring points for <pt>.
-    pub fn neighbors(&self, pt: &Point3<u32>) -> Vec<Point3<u32>> {
+    /// Return the list of neighboring points for <pt> as a vector of tuples
+    /// (pt: Point3<u32>, cost: usize)
+    pub fn neighbors(&self, pt: &Point3<u32>) -> Vec<(Point3<u32>, usize)> {
         let mut results = Vec::new();
 
         if pt.z > 0 {
@@ -154,7 +161,11 @@ impl TerrainChunk {
             .into_iter()
             .filter(|pt| self.is_in_bounds(pt))
             .filter(|pt| self.is_walkable(pt))
-            .collect()
+            .collect::<Vec<Point3<u32>>>()
+            .into_iter()
+                // TODO: Make difficult terrain have a higher cost.
+                .map(|pt| (pt, 1 as usize))
+                .collect()
     }
 }
 

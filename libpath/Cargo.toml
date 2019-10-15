@@ -7,4 +7,7 @@ edition = "2018"
 [dependencies]
 nalgebra = { version = "0.18.1", features = ["serde-serialize", "mint"] }
 rand = "0.7.2"
+indexmap = "1.2.0"
+
+[dev-dependencies]
 libterrain = { path = "../libterrain" }

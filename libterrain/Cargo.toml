@@ -8,3 +8,4 @@ edition = "2018"
 nalgebra = { version = "0.18.1", features = ["serde-serialize", "mint"] }
 noise = "0.6.0"
 rand = "0.7.2"
+libpath = { path = "../libpath" }
