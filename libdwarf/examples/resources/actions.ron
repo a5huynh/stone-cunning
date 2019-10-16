@@ -1,0 +1,77 @@
+(
+    actions: [
+        Action(
+            name: "scout",
+            cost: 1,
+            pre: {
+                "armedwithgun": true
+            },
+            post: {
+                "enemyvisible": true
+            }
+        ),
+        Action(
+            name: "approach",
+            cost: 1,
+            pre: {
+                "enemyvisible": true
+            },
+            post: {
+                "nearenemy": true
+            }
+        ),
+        Action(
+            name: "aim",
+            cost: 1,
+            pre: {
+                "enemyvisible": true,
+                "weaponloaded": true
+            },
+            post: {
+                "enemylinedup": true
+            }
+        ),
+        Action(
+            name: "shoot",
+            cost: 1,
+            pre: {
+                "enemylinedup": true
+            },
+            post: {
+                "enemyalive": false
+            }
+        ),
+        Action(
+            name: "load",
+            cost: 1,
+            pre: {
+                "armedwithgun": true
+            },
+            post: {
+                "weaponloaded": true
+            }
+        ),
+        Action(
+            name: "detonatebomb",
+            cost: 1,
+            pre: {
+                "armedwithbomb": true,
+                "nearenemy": true
+            },
+            post: {
+                "enemyalive": false,
+                "alive": false
+            }
+        ),
+        Action(
+            name: "flee",
+            cost: 1,
+            pre: {
+                "enemyvisible": false
+            },
+            post: {
+                "nearenemy": false
+            }
+        )
+    ]
+)

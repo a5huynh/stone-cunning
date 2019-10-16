@@ -1,3 +1,5 @@
+use serde::Deserialize;
+
 use libpath::find_path;
 
 use std::collections::BTreeMap;
@@ -6,6 +8,7 @@ use std::hash::{Hash, Hasher};
 
 pub type State = BTreeMap<String, bool>;
 
+#[derive(Deserialize)]
 pub struct Action {
     pub name: String,
     pub cost: usize,
@@ -13,6 +16,7 @@ pub struct Action {
     pub post: State,
 }
 
+#[derive(Deserialize)]
 pub struct Planner {
     /// List of all actions
     actions: Vec<Action>,
