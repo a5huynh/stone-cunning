@@ -1,6 +1,6 @@
-use std::collections::VecDeque;
 use specs::prelude::*;
 use specs_derive::*;
+use std::collections::VecDeque;
 
 use crate::{
     actions::ActionType,

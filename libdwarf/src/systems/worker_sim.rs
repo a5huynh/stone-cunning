@@ -2,6 +2,7 @@ use specs::{Entities, Join, ReadExpect, ReadStorage, System, Write, WriteExpect,
 use std::collections::VecDeque;
 
 use libpath::find_path;
+use libterrain::TerrainChunk;
 
 use crate::{
     actions::ActionType,
@@ -103,7 +104,13 @@ impl<'a> System<'a> for WorkerSystem {
                             }
                         } else {
                             // Move closer
-                            let (_, path) = find_path(&map.terrain, current_pos, pos);
+                            let (_, path) = find_path(
+                                current_pos,
+                                pos,
+                                |node| TerrainChunk::heuristic(&node, &pos),
+                                |pt| map.terrain.neighbors(pt),
+                            );
+
                             new_queue.push_back(ActionType::Move(path));
                             new_queue.push_back(ActionType::HarvestResource(
                                 pos,

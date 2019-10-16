@@ -7,6 +7,8 @@ use poisson::PoissonDisk;
 mod chunk;
 pub use chunk::{Biome, Object, TerrainChunk};
 
+pub type Path = Vec<Point3<u32>>;
+
 #[derive(Clone)]
 pub struct TerrainGenerator {
     width: usize,

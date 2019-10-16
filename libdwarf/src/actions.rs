@@ -1,5 +1,4 @@
-use libpath::Path;
-use libterrain::Point3;
+use libterrain::{Path, Point3};
 
 type EntityId = u32;
 type MapPosition = Point3<u32>;
