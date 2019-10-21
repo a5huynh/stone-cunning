@@ -4,73 +4,63 @@
             name: "scout",
             cost: 1,
             pre: {
-                "armedwithgun": true
+                Has("gun"): true
             },
             post: {
-                "enemyvisible": true
+                Visible("enemy"): true
             }
         ),
         Action(
             name: "approach",
             cost: 1,
             pre: {
-                "enemyvisible": true
+                Visible("enemy"): true
             },
             post: {
-                "nearenemy": true
-            }
-        ),
-        Action(
-            name: "aim",
-            cost: 1,
-            pre: {
-                "enemyvisible": true,
-                "weaponloaded": true
-            },
-            post: {
-                "enemylinedup": true
+                Near("enemy"): true
             }
         ),
         Action(
             name: "shoot",
             cost: 1,
             pre: {
-                "enemylinedup": true
+                Visible("enemy"): true,
+                HasProperty("weapon", "loaded"): true
             },
             post: {
-                "enemyalive": false
+                Alive("enemy"): false
             }
         ),
         Action(
             name: "load",
             cost: 1,
             pre: {
-                "armedwithgun": true
+                Has("gun"): true
             },
             post: {
-                "weaponloaded": true
+                HasProperty("weapon", "loaded"): true
             }
         ),
         Action(
             name: "detonatebomb",
             cost: 1,
             pre: {
-                "armedwithbomb": true,
-                "nearenemy": true
+                Has("bomb"): true,
+                Near("enemy"): true
             },
             post: {
-                "enemyalive": false,
-                "alive": false
+                Alive("enemy"): false,
+                Alive("me"): false
             }
         ),
         Action(
             name: "flee",
             cost: 1,
             pre: {
-                "enemyvisible": false
+                Near("enemy"): true
             },
             post: {
-                "nearenemy": false
+                Near("enemy"): false
             }
         )
     ]

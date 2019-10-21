@@ -2,11 +2,25 @@ use serde::Deserialize;
 
 use libpath::find_path;
 
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
-pub type State = BTreeMap<String, bool>;
+#[derive(Debug, Clone, Deserialize, Eq, Hash, PartialEq)]
+pub enum Condition {
+    // Agent has `x` in their inventory.
+    Has(String),
+    // Agent has an item `x` w/ some property `y`
+    HasProperty(String, String),
+    // Enemy is killed
+    Alive(String),
+    // Agent is within `x` of some entity
+    Near(String),
+    // Agent can see `x`
+    Visible(String),
+}
+
+pub type State = HashMap<Condition, bool>;
 
 #[derive(Deserialize)]
 pub struct Action {
@@ -27,14 +41,19 @@ impl fmt::Debug for Planner {
         write!(
             f,
             "Planner<{:?}>",
-            self.actions.iter().map(|x| x.name.clone()).collect::<Vec<String>>()
+            self.actions
+                .iter()
+                .map(|x| x.name.clone())
+                .collect::<Vec<String>>()
         )
     }
 }
 
 impl Planner {
     pub fn new() -> Planner {
-        Planner { actions: Default::default() }
+        Planner {
+            actions: Default::default(),
+        }
     }
 
     pub fn heuristic(a: &PlanNode, b: &PlanNode) -> usize {
@@ -45,8 +64,8 @@ impl Planner {
         &mut self,
         name: String,
         cost: usize,
-        pre: Vec<(String, bool)>,
-        post: Vec<(String, bool)>,
+        pre: Vec<(Condition, bool)>,
+        post: Vec<(Condition, bool)>,
     ) {
         let mut action = Action {
             name,
@@ -109,11 +128,12 @@ impl fmt::Debug for PlanNode {
             self.state
                 .iter()
                 .map(|(key, &value)| {
+                    let string = format!("{:?}", key);
                     if value {
-                        return key.clone().to_uppercase();
+                        return string.to_uppercase();
                     }
 
-                    key.clone()
+                    string
                 })
                 .collect::<Vec<String>>()
         )

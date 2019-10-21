@@ -163,9 +163,9 @@ impl TerrainChunk {
             .filter(|pt| self.is_walkable(pt))
             .collect::<Vec<Point3<u32>>>()
             .into_iter()
-                // TODO: Make difficult terrain have a higher cost.
-                .map(|pt| (pt, 1 as usize))
-                .collect()
+            // TODO: Make difficult terrain have a higher cost.
+            .map(|pt| (pt, 1 as usize))
+            .collect()
     }
 }
 

@@ -77,7 +77,7 @@ where
                 // Add to list of neighbors to be visited.
                 frontier.push(State {
                     cost: new_cost + heuristic(&neighbor),
-                    position: index
+                    position: index,
                 });
             }
         }
