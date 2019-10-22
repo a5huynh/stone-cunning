@@ -5,7 +5,7 @@ use libpath::find_path;
 use libterrain::TerrainChunk;
 
 use crate::{
-    actions::ActionType,
+    trigger::TriggerType,
     components::{MapObject, MapPosition, Worker},
     config::WorldConfig,
     resources::{time::Time, Map, TaskQueue},
@@ -40,10 +40,10 @@ impl<'a> System<'a> for WorkerSystem {
             let current_pos = position.pos;
             while let Some(action) = worker.actions.pop_front() {
                 match action {
-                    ActionType::Chilling => {
+                    TriggerType::Chilling => {
                         worker.energy -= config.action_cost;
                     }
-                    ActionType::Move(mut path) => {
+                    TriggerType::Move(mut path) => {
                         if !path.is_empty() {
                             if let Some(pt) = path.pop() {
                                 position.pos = pt;
@@ -54,7 +54,7 @@ impl<'a> System<'a> for WorkerSystem {
                         }
                     }
                     // Perform an action.
-                    ActionType::HarvestResource(pos, target, harvest) => {
+                    TriggerType::HarvestResource(pos, target, harvest) => {
                         println!("Harvesting {:?} @ {}", target, pos);
 
                         // Are we next to this resource? Move closer to it if not.
@@ -87,7 +87,7 @@ impl<'a> System<'a> for WorkerSystem {
                             // add it to inventory.
                             if let Some(id) = harvest_resource {
                                 worker.energy -= config.action_cost;
-                                tasks.add_world(ActionType::Take {
+                                tasks.add_world(TriggerType::Take {
                                     target: **id,
                                     owner: entity.id(),
                                 });
@@ -95,12 +95,12 @@ impl<'a> System<'a> for WorkerSystem {
                             } else if let Some(id) = target_resource {
                                 // Harvest by dealing damage to item.
                                 worker.energy -= config.action_cost;
-                                new_queue.push_back(ActionType::HarvestResource(
+                                new_queue.push_back(TriggerType::HarvestResource(
                                     pos,
                                     target.clone(),
                                     harvest.clone(),
                                 ));
-                                tasks.add_world(ActionType::DealDamage(**id, 10));
+                                tasks.add_world(TriggerType::DealDamage(**id, 10));
                             }
                         } else {
                             // Move closer
@@ -111,8 +111,8 @@ impl<'a> System<'a> for WorkerSystem {
                                 |pt| map.terrain.neighbors(pt),
                             );
 
-                            new_queue.push_back(ActionType::Move(path));
-                            new_queue.push_back(ActionType::HarvestResource(
+                            new_queue.push_back(TriggerType::Move(path));
+                            new_queue.push_back(TriggerType::HarvestResource(
                                 pos,
                                 target.clone(),
                                 harvest.clone(),

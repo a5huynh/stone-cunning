@@ -8,7 +8,7 @@ use self::renderer::AsciiRenderer;
 const MAP_WIDTH: u32 = 10;
 const MAP_HEIGHT: u32 = 10;
 
-use libdwarf::{actions::ActionType, resources::TaskQueue, systems, world::WorldSim};
+use libdwarf::{trigger::TriggerType, resources::TaskQueue, systems, world::WorldSim};
 use libterrain::{Point3, TerrainChunk};
 
 fn main() {
@@ -37,12 +37,12 @@ fn main() {
     dispatcher.setup(&mut world);
     // Add entities to the world
     world.exec(|(mut queue,): (specs::Write<TaskQueue>,)| {
-        queue.add_world(ActionType::AddWorker(Point3::new(0, 0, 0)));
-        queue.add_world(ActionType::Add(Point3::new(9, 9, 0), String::from("tree")));
+        queue.add_world(TriggerType::AddWorker(Point3::new(0, 0, 0)));
+        queue.add_world(TriggerType::Add(Point3::new(9, 9, 0), String::from("tree")));
     });
     // Add a task to the task queue.
     world.exec(|(mut queue,): (specs::Write<TaskQueue>,)| {
-        queue.add(ActionType::HarvestResource(
+        queue.add(TriggerType::HarvestResource(
             Point3::new(9, 9, 0),
             String::from("tree"),
             String::from("wood"),

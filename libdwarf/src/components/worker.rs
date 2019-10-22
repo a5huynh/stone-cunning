@@ -2,7 +2,7 @@ use specs::prelude::*;
 use specs_derive::*;
 use std::collections::VecDeque;
 
-use crate::actions::ActionType;
+use crate::trigger::TriggerType;
 
 #[derive(Clone, Component, Debug)]
 #[storage(VecStorage)]
@@ -17,7 +17,7 @@ pub struct Worker {
     ///
     /// The worker needs to MoveTo some location first before they are able
     /// to perform an action.
-    pub actions: VecDeque<ActionType>,
+    pub actions: VecDeque<TriggerType>,
     /// Worker's inventory.
     pub inventory: Vec<u32>,
 }

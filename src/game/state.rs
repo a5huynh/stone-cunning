@@ -12,7 +12,7 @@ use amethyst::{
 use log::info;
 use std::time::SystemTime;
 
-use libdwarf::{actions::ActionType, resources::TaskQueue, world::WorldSim, Point3};
+use libdwarf::{trigger::TriggerType, resources::TaskQueue, world::WorldSim, Point3};
 use libterrain::TerrainGenerator;
 
 use crate::game::{
@@ -72,7 +72,7 @@ impl SimpleState for RunningState {
 
         // Initialize workers
         world.exec(|mut queue: Write<'_, TaskQueue>| {
-            queue.add_world(ActionType::AddWorker(Point3::new(8, 8, 42)));
+            queue.add_world(TriggerType::AddWorker(Point3::new(8, 8, 42)));
         });
     }
 

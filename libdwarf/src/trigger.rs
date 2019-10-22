@@ -1,11 +1,11 @@
+// Triggers
 use libterrain::{Path, Point3};
 
 type EntityId = u32;
 type MapPosition = Point3<u32>;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
-pub enum ActionType {
-    /// Idle dwarf
+pub enum TriggerType {
     Chilling,
     /// Deals damage to an entity.
     DealDamage(EntityId, i32),

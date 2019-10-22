@@ -2,7 +2,7 @@ use amethyst::ecs::{Entities, Join, ReadExpect, ReadStorage, System, Write};
 use amethyst_imgui::imgui::{im_str, Condition, Window};
 
 use libdwarf::{
-    actions::ActionType,
+    trigger::TriggerType,
     components::{MapObject, Worker},
     resources::TaskQueue,
     Point3,
@@ -49,7 +49,7 @@ impl<'s> System<'s> for DebugUI {
                         .build();
 
                     if ui.button(im_str!("Add Worker"), [0.0, 0.0]) {
-                        queue.add_world(ActionType::AddWorker(Point3::new(
+                        queue.add_world(TriggerType::AddWorker(Point3::new(
                             self.new_worker_pos[0] as u32,
                             self.new_worker_pos[1] as u32,
                             self.new_worker_pos[2] as u32,

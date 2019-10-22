@@ -3,7 +3,7 @@ use specs_derive::*;
 use std::collections::VecDeque;
 
 use crate::{
-    actions::ActionType,
+    trigger::TriggerType,
     components::{ResourceAttribute, ResourceType},
 };
 
@@ -12,7 +12,7 @@ use crate::{
 pub struct MapObject {
     pub health: i32,
     pub resource_type: ResourceType,
-    pub actions: VecDeque<ActionType>,
+    pub actions: VecDeque<TriggerType>,
 }
 
 impl MapObject {
