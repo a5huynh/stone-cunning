@@ -4,6 +4,7 @@ pub mod planner;
 pub mod resources;
 pub mod systems;
 pub mod trigger;
+pub mod utils;
 pub mod world;
 
 pub use libterrain::Point3;

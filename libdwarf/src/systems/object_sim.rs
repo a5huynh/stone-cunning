@@ -1,9 +1,9 @@
 use specs::{Entities, Join, System, Write, WriteStorage};
 
 use crate::{
-    trigger::TriggerType,
     components::{MapObject, MapPosition, ResourceAttribute},
     resources::TaskQueue,
+    trigger::TriggerType,
 };
 
 pub struct ObjectSystem;
@@ -32,13 +32,6 @@ impl<'a> System<'a> for ObjectSystem {
                     }
                 }
                 continue;
-            }
-
-            // Otherwise, process any object specific actions.
-            while let Some(action) = object.actions.pop_front() {
-                match action {
-                    _ => {}
-                }
             }
         }
     }

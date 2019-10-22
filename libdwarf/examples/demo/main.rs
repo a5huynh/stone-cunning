@@ -8,7 +8,12 @@ use self::renderer::AsciiRenderer;
 const MAP_WIDTH: u32 = 10;
 const MAP_HEIGHT: u32 = 10;
 
-use libdwarf::{trigger::TriggerType, resources::TaskQueue, systems, world::WorldSim};
+use libdwarf::{
+    resources::{Map, TaskQueue},
+    systems,
+    trigger::TriggerType,
+    world::WorldSim,
+};
 use libterrain::{Point3, TerrainChunk};
 
 fn main() {
@@ -23,8 +28,7 @@ fn main() {
     WorldSim::new(&mut world, &terrain, MAP_WIDTH, MAP_HEIGHT);
 
     let mut dispatcher = DispatcherBuilder::new()
-        .with(systems::AssignTaskSystem, "assign_task", &[])
-        .with(systems::WorkerSystem, "worker_sim", &["assign_task"])
+        .with(systems::WorkerSystem, "worker_sim", &[])
         .with(systems::ObjectSystem, "object_sim", &[])
         .with(
             systems::WorldUpdateSystem::default(),
@@ -40,14 +44,6 @@ fn main() {
         queue.add_world(TriggerType::AddWorker(Point3::new(0, 0, 0)));
         queue.add_world(TriggerType::Add(Point3::new(9, 9, 0), String::from("tree")));
     });
-    // Add a task to the task queue.
-    world.exec(|(mut queue,): (specs::Write<TaskQueue>,)| {
-        queue.add(TriggerType::HarvestResource(
-            Point3::new(9, 9, 0),
-            String::from("tree"),
-            String::from("wood"),
-        ));
-    });
 
     let input = input();
     loop {
@@ -55,6 +51,19 @@ fn main() {
         renderer.render(&world);
 
         match input.read_char().unwrap() {
+            // Add a task to the task queue.
+            'a' => {
+                world.exec(
+                    |(mut queue, map): (specs::Write<TaskQueue>, specs::ReadExpect<Map>)| {
+                        let entity_id = map.object_map.get(&Point3::new(9, 9, 0)).unwrap();
+                        queue.add(TriggerType::HarvestResource {
+                            target: *entity_id,
+                            position: Point3::new(9, 9, 0),
+                            resource: String::from("wood"),
+                        });
+                    },
+                );
+            }
             // quit
             'q' => return,
             // Tick map

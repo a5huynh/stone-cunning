@@ -1,10 +1,10 @@
 use specs::{Entities, ReadExpect, System, WriteExpect, WriteStorage};
 
 use crate::{
-    trigger::TriggerType,
     components::{MapObject, MapPosition, Worker},
     config::ResourceConfig,
     resources::{Map, TaskQueue},
+    trigger::TriggerType,
 };
 
 #[derive(Default)]
@@ -43,7 +43,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                 TriggerType::AddWorker(pos) => {
                     println!("[WUS] Adding worker @ ({:?})", pos);
                     let entity = entities.create();
-                    workers.insert(entity, Worker::new()).unwrap();
+                    workers.insert(entity, Worker::new(entity.id())).unwrap();
                     positions.insert(entity, MapPosition { pos }).unwrap();
                     map.track_worker(entity.id(), pos);
                 }

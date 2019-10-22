@@ -2,9 +2,9 @@ use amethyst::ecs::{Entities, Join, ReadExpect, ReadStorage, System, Write};
 use amethyst_imgui::imgui::{im_str, Condition, Window};
 
 use libdwarf::{
-    trigger::TriggerType,
     components::{MapObject, Worker},
     resources::TaskQueue,
+    trigger::TriggerType,
     Point3,
 };
 
@@ -65,7 +65,7 @@ impl<'s> System<'s> for DebugUI {
                         {
                             ui.text(&im_str!("inventory: {}", worker.inventory.len()));
                             if ui.collapsing_header(im_str!("Action Queue")).build() {
-                                for action in worker.actions.iter() {
+                                for action in worker.queue.iter() {
                                     ui.text(&im_str!("{:?}", action));
                                 }
                             }

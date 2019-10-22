@@ -20,23 +20,13 @@ fn main() {
     };
 
     println!("{:?}", planner);
+    println!("----");
 
     let mut initial_state = State::new();
-    initial_state.insert(Condition::Visible("enemy".to_string()), false);
-    initial_state.insert(Condition::Has("gun".to_string()), true);
-    initial_state.insert(
-        Condition::HasProperty("weapon".to_string(), "loaded".to_string()),
-        false,
-    );
-
-    initial_state.insert(Condition::Alive("enemy".to_string()), true);
-    initial_state.insert(Condition::Has("bomb".to_string()), true);
-    initial_state.insert(Condition::Near("enemy".to_string()), false);
-    initial_state.insert(Condition::Alive("me".to_string()), true);
+    initial_state.insert(Condition::HasJob("harvest_wood".to_string()), true);
 
     let mut end_state = State::new();
-    end_state.insert(Condition::Alive("enemy".to_string()), false);
-    end_state.insert(Condition::Alive("me".to_string()), true);
+    end_state.insert(Condition::Has("wood".to_string()), true);
 
     let mut planned = planner.plan(&initial_state, &end_state);
     while let Some(action) = planned.pop() {

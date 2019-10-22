@@ -1,18 +1,13 @@
 use specs::prelude::*;
 use specs_derive::*;
-use std::collections::VecDeque;
 
-use crate::{
-    trigger::TriggerType,
-    components::{ResourceAttribute, ResourceType},
-};
+use crate::components::{ResourceAttribute, ResourceType};
 
 #[derive(Clone, Component, Debug)]
 #[storage(VecStorage)]
 pub struct MapObject {
     pub health: i32,
     pub resource_type: ResourceType,
-    pub actions: VecDeque<TriggerType>,
 }
 
 impl MapObject {
@@ -30,9 +25,12 @@ impl MapObject {
 
         MapObject {
             resource_type: resource_type.clone(),
-            actions: VecDeque::new(),
             health: default_health,
         }
+    }
+
+    pub fn is_destroyed(&self) -> bool {
+        self.health <= 0
     }
 
     pub fn drop_table(&self) -> Vec<&ResourceAttribute> {

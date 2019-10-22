@@ -1,4 +1,9 @@
-// Triggers
+///
+/// Trigger servers two main purposes:
+/// - It keeps track of events in the game that agents can respond to
+/// - Minimizes the amount of processing the agents need to do to respond
+///   to these events.
+///
 use libterrain::{Path, Point3};
 
 type EntityId = u32;
@@ -16,7 +21,11 @@ pub enum TriggerType {
     /// Destroys entities and drops items. Should only be handled by the World.
     Destroy(EntityId),
     // Harvest a resource, e.g. chopping wood.
-    HarvestResource(MapPosition, String, String),
+    HarvestResource {
+        target: EntityId,
+        position: MapPosition,
+        resource: String,
+    },
     /// Take an object and place into inventory.
     /// NOTE: No checks are made to see if the entity is actually nearby or not.
     Take {
@@ -27,4 +36,16 @@ pub enum TriggerType {
     Move(Path),
     /// Move to some location.
     MoveTo(MapPosition),
+}
+
+pub enum TriggerPriority {
+    LOW,
+    MEDIUM,
+    HIGH,
+}
+
+pub struct TriggerRecord {
+    pub trigger: TriggerType,
+    pub source: usize,
+    pub priority: TriggerPriority,
 }

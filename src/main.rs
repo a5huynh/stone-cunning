@@ -59,8 +59,7 @@ fn main() -> amethyst::Result<()> {
                 .with_plugin(RenderImgui::<StringBindings>::default()),
         )?
         // Simulation systems.
-        .with(systems::AssignTaskSystem, "assign_task", &[])
-        .with(systems::WorkerSystem, "worker_sim", &["assign_task"])
+        .with(systems::WorkerSystem, "worker_sim", &[])
         .with(systems::ObjectSystem, "object_sim", &[])
         .with(
             systems::WorldUpdateSystem::default(),

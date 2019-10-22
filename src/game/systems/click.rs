@@ -7,9 +7,9 @@ use amethyst::{
 
 use crate::game::components::{Cursor, CursorDown, CursorSelected};
 use libdwarf::{
-    trigger::TriggerType,
     components::{MapObject, MapPosition},
     resources::TaskQueue,
+    trigger::TriggerType,
 };
 
 pub struct ClickSystem;
@@ -69,11 +69,11 @@ impl<'s> System<'s> for ClickSystem {
                             if let Some(pos) = obj_pos {
                                 println!("click! {:?}", info);
                                 // Add to task queue
-                                task_queue.add(TriggerType::HarvestResource(
-                                    pos.pos,
-                                    String::from("tree"),
-                                    String::from("wood"),
-                                ));
+                                task_queue.add(TriggerType::HarvestResource{
+                                    target: obj_entity,
+                                    position: pos.pos,
+                                    resource: String::from("wood")
+                                });
                             }
                         }
                     }

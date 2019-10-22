@@ -1,4 +1,6 @@
+use ron::de::from_reader;
 use serde::Deserialize;
+use std::fs::File;
 
 use libpath::find_path;
 
@@ -8,8 +10,12 @@ use std::hash::{Hash, Hasher};
 
 #[derive(Debug, Clone, Deserialize, Eq, Hash, PartialEq)]
 pub enum Condition {
+    // Agent has destroyed entity
+    Destroy(String),
     // Agent has `x` in their inventory.
     Has(String),
+    // Agent has been tasked to do something.
+    HasJob(String),
     // Agent has an item `x` w/ some property `y`
     HasProperty(String, String),
     // Enemy is killed
@@ -22,12 +28,24 @@ pub enum Condition {
 
 pub type State = HashMap<Condition, bool>;
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize, Eq)]
 pub struct Action {
     pub name: String,
     pub cost: usize,
     pub pre: State,
     pub post: State,
+}
+
+impl fmt::Debug for Action {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Action<{} - {}>", self.name, self.cost)
+    }
+}
+
+impl PartialEq for Action {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
 }
 
 #[derive(Deserialize)]
@@ -50,10 +68,22 @@ impl fmt::Debug for Planner {
 }
 
 impl Planner {
-    pub fn new() -> Planner {
+    pub fn new() -> Self {
         Planner {
             actions: Default::default(),
         }
+    }
+
+    pub fn load(input_path: &str) -> Self {
+        let f = File::open(input_path).expect("Failed opening actions");
+        let planner: Planner = match from_reader(f) {
+            Ok(x) => x,
+            Err(e) => {
+                println!("Failed to load planner actions: {}", e);
+                std::process::exit(1);
+            }
+        };
+        planner
     }
 
     pub fn heuristic(a: &PlanNode, b: &PlanNode) -> usize {
@@ -85,20 +115,29 @@ impl Planner {
         self.actions.push(action);
     }
 
-    pub fn next_actions(&self, plan: &PlanNode) -> Vec<(PlanNode, usize)> {
+    pub fn next_actions<'a>(&self, plan: &PlanNode) -> Vec<(PlanNode, usize)> {
         let mut potential = Vec::new();
 
         for action in self.actions.iter() {
             // Does the current state match the pre conditions?
             if plan.num_mismatched(&action.pre) == 0 {
-                potential.push((plan.apply(&action), action.cost));
+                let affects = &action.post;
+                let new_state = plan.apply(affects);
+
+                potential.push((
+                    PlanNode {
+                        last_action: Some(&action),
+                        state: new_state.clone(),
+                    },
+                    action.cost,
+                ));
             }
         }
 
         potential
     }
 
-    pub fn plan(&self, initial: &State, end: &State) -> Vec<PlanNode> {
+    pub fn plan(&self, initial: &State, end: &State) -> Vec<Action> {
         let start = PlanNode::new(initial);
         let goal = PlanNode::new(end);
 
@@ -109,22 +148,27 @@ impl Planner {
             |node| self.next_actions(node),
         );
 
-        plan
+        let mut planned_actions = Vec::new();
+        for node in plan.iter() {
+            planned_actions.push(node.last_action.unwrap().clone());
+        }
+
+        planned_actions
     }
 }
 
 #[derive(Clone, Eq)]
-pub struct PlanNode {
-    pub last_action: Option<String>,
+pub struct PlanNode<'a> {
+    pub last_action: Option<&'a Action>,
     pub state: State,
 }
 
-impl fmt::Debug for PlanNode {
+impl fmt::Debug for PlanNode<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "PlanNode<{:?} - {:?}>",
-            self.last_action,
+            "PlanNode<{:} - {:?}>",
+            self.last_action.unwrap().name,
             self.state
                 .iter()
                 .map(|(key, &value)| {
@@ -140,10 +184,10 @@ impl fmt::Debug for PlanNode {
     }
 }
 
-impl Hash for PlanNode {
+impl Hash for PlanNode<'_> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        if let Some(action) = &self.last_action {
-            action.hash(state);
+        if let Some(action) = self.last_action {
+            action.name.hash(state);
         }
 
         for (key, value) in self.state.iter() {
@@ -153,13 +197,13 @@ impl Hash for PlanNode {
     }
 }
 
-impl PartialEq for PlanNode {
+impl PartialEq for PlanNode<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.num_mismatched(&other.state) == 0
     }
 }
 
-impl PlanNode {
+impl<'a> PlanNode<'a> {
     pub fn new(initial_state: &State) -> PlanNode {
         PlanNode {
             last_action: None,
@@ -182,16 +226,13 @@ impl PlanNode {
         count
     }
 
-    pub fn apply(&self, action: &Action) -> PlanNode {
-        let mut new_node = PlanNode {
-            last_action: Some(action.name.clone()),
-            state: self.state.clone(),
-        };
+    pub fn apply(&self, state: &State) -> State {
+        let mut new_state = self.state.clone();
 
-        for (name, value) in &action.post {
-            new_node.state.insert(name.clone(), value.clone());
+        for (name, value) in state.iter() {
+            new_state.insert(name.clone(), value.clone());
         }
 
-        new_node
+        new_state
     }
 }
