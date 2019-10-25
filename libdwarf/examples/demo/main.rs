@@ -1,6 +1,6 @@
 use crossterm::{input, RawScreen};
 
-use specs::prelude::*;
+use core::amethyst::ecs::{self, DispatcherBuilder, World, WorldExt};
 
 mod renderer;
 use self::renderer::AsciiRenderer;
@@ -8,13 +8,14 @@ use self::renderer::AsciiRenderer;
 const MAP_WIDTH: u32 = 10;
 const MAP_HEIGHT: u32 = 10;
 
+use core::Point3;
 use libdwarf::{
     resources::{Map, TaskQueue},
     systems,
     trigger::TriggerType,
     world::WorldSim,
 };
-use libterrain::{Point3, TerrainChunk};
+use libterrain::TerrainChunk;
 
 fn main() {
     // Setup ascii renderer
@@ -40,7 +41,7 @@ fn main() {
 
     dispatcher.setup(&mut world);
     // Add entities to the world
-    world.exec(|(mut queue,): (specs::Write<TaskQueue>,)| {
+    world.exec(|(mut queue,): (ecs::Write<TaskQueue>,)| {
         queue.add_world(TriggerType::AddWorker(Point3::new(0, 0, 0)));
         queue.add_world(TriggerType::Add(Point3::new(9, 9, 0), String::from("tree")));
     });
@@ -54,7 +55,7 @@ fn main() {
             // Add a task to the task queue.
             'a' => {
                 world.exec(
-                    |(mut queue, map): (specs::Write<TaskQueue>, specs::ReadExpect<Map>)| {
+                    |(mut queue, map): (ecs::Write<TaskQueue>, ecs::ReadExpect<Map>)| {
                         let entity_id = map.object_map.get(&Point3::new(9, 9, 0)).unwrap();
                         queue.add(TriggerType::HarvestResource {
                             target: *entity_id,

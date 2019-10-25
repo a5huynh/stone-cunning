@@ -5,7 +5,8 @@ use amethyst::{
 };
 
 use crate::game::{components::Player, config::PlayerConfig, render::MapRenderer};
-use libdwarf::{resources::Map, Point3};
+use core::Point3;
+use libdwarf::resources::Map;
 
 pub struct PlayerMovement;
 impl<'s> System<'s> for PlayerMovement {

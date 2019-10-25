@@ -1,4 +1,4 @@
-use specs::{Entities, Join, System, Write, WriteStorage};
+use core::amethyst::ecs::{Entities, Join, System, Write, WriteStorage};
 
 use crate::{
     components::{MapObject, MapPosition, ResourceAttribute},

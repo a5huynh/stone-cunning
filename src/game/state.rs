@@ -12,7 +12,8 @@ use amethyst::{
 use log::info;
 use std::time::SystemTime;
 
-use libdwarf::{resources::TaskQueue, trigger::TriggerType, world::WorldSim, Point3};
+use core::Point3;
+use libdwarf::{resources::TaskQueue, trigger::TriggerType, world::WorldSim};
 use libterrain::TerrainGenerator;
 
 use crate::game::{

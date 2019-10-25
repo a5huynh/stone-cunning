@@ -1,8 +1,6 @@
-use specs::{Entities, Join, ReadExpect, ReadStorage, System, Write, WriteExpect, WriteStorage};
-// use std::collections::VecDeque;
-
-// use libpath::find_path;
-// use libterrain::TerrainChunk;
+use core::amethyst::ecs::{
+    Entities, Join, ReadExpect, ReadStorage, System, Write, WriteExpect, WriteStorage,
+};
 
 use crate::{
     components::{MapObject, MapPosition, Worker, WorkerAction},
@@ -10,8 +8,8 @@ use crate::{
     planner::{Condition, Planner, State},
     resources::{time::Time, Map, TaskQueue},
     trigger::TriggerType,
-    utils::is_near,
 };
+use core::utils::is_near;
 
 pub struct WorkerSystem;
 impl<'a> System<'a> for WorkerSystem {

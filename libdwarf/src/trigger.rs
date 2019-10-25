@@ -4,7 +4,8 @@
 /// - Minimizes the amount of processing the agents need to do to respond
 ///   to these events.
 ///
-use libterrain::{Path, Point3};
+use core::Point3;
+use libterrain::Path;
 
 type EntityId = u32;
 type MapPosition = Point3<u32>;
@@ -31,10 +32,7 @@ pub enum TriggerType {
     },
     /// Take an object and place into inventory.
     /// NOTE: No checks are made to see if the entity is actually nearby or not.
-    Take {
-        target: EntityId,
-        owner: EntityId,
-    },
+    Take { target: EntityId, owner: EntityId },
     /// Move along path
     Move(Path),
     /// Move to some location.

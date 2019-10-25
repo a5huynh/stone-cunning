@@ -1,0 +1,9 @@
+[package]
+name = "core"
+version = "0.1.0"
+authors = ["Andrew Huynh <a5thuynh@gmail.com>"]
+edition = "2018"
+
+[dependencies.amethyst]
+version = "0.13.2"
+features = ["metal"]

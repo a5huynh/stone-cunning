@@ -1,5 +1,6 @@
+use core::Point3;
 use libpath::find_path;
-use libterrain::{Biome, Point3, TerrainChunk};
+use libterrain::{Biome, TerrainChunk};
 
 const TEST_WIDTH: u32 = 30;
 const TEST_HEIGHT: u32 = 15;

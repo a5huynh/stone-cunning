@@ -1,5 +1,4 @@
-use specs::prelude::*;
-use specs_derive::*;
+use core::amethyst::ecs::{Component, VecStorage};
 
 use crate::components::{ResourceAttribute, ResourceType};
 

@@ -1,16 +1,15 @@
-use specs::prelude::*;
-use specs_derive::*;
+use core::amethyst::ecs::{Component, VecStorage};
 use std::collections::VecDeque;
 use std::fmt;
 
-use libterrain::{Path, Point3};
+use core::{utils::is_near, Point3};
+use libterrain::Path;
 
 use crate::{
     components::{MapObject, MapPosition},
     planner::{Action, Condition, State},
     resources::{Map, TaskQueue},
     trigger::TriggerType,
-    utils::is_near,
 };
 
 #[derive(Clone)]

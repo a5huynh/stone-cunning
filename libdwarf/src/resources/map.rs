@@ -1,5 +1,7 @@
-use specs::prelude::*;
-use specs::World;
+use core::amethyst::{
+    ecs::{World, WorldExt},
+    prelude::*,
+};
 use std::collections::HashMap;
 
 use crate::{
@@ -7,8 +9,9 @@ use crate::{
     config::ResourceConfig,
 };
 
+use core::Point3;
 use libpath::find_path;
-use libterrain::{Biome, Object, Path, Point3, TerrainChunk};
+use libterrain::{Biome, Object, Path, TerrainChunk};
 
 pub struct Map {
     // TODO: Support multiple objects per tile.

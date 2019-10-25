@@ -1,4 +1,4 @@
-use specs::{Entities, ReadExpect, System, WriteExpect, WriteStorage};
+use core::amethyst::ecs::{Entities, ReadExpect, System, WriteExpect, WriteStorage};
 
 use crate::{
     components::{MapObject, MapPosition, Worker},
@@ -48,7 +48,11 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     map.track_worker(entity.id(), pos);
                 }
                 // Deal damage to a particular object
-                TriggerType::DealDamage { source: _, target, damage } => {
+                TriggerType::DealDamage {
+                    source: _,
+                    target,
+                    damage,
+                } => {
                     let entity = entities.entity(target);
                     if let Some(object) = objects.get_mut(entity) {
                         object.health -= damage;

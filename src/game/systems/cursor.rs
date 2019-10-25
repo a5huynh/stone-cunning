@@ -11,7 +11,8 @@ use crate::game::{
     render::MapRenderer,
     utils::camera_to_world,
 };
-use libdwarf::{resources::Map, Point3};
+use core::Point3;
+use libdwarf::resources::Map;
 
 pub struct CursorSystem;
 

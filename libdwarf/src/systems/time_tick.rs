@@ -1,4 +1,4 @@
-use specs::{System, WriteExpect};
+use core::amethyst::ecs::{System, WriteExpect};
 
 use crate::resources::time;
 

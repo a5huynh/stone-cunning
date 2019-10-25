@@ -1,5 +1,4 @@
-use specs::prelude::*;
-use specs::World;
+use core::amethyst::ecs::{World, WorldExt};
 
 use crate::{
     components::{MapObject, MapPosition, Worker},

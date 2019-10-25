@@ -8,7 +8,7 @@ pub use cursor::*;
 pub use player::*;
 pub use terrain::*;
 
-use libdwarf::Point3;
+use core::Point3;
 use libterrain::Biome;
 
 #[derive(Component, Default)]

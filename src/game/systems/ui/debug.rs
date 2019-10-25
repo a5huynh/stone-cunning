@@ -1,11 +1,11 @@
 use amethyst::ecs::{Entities, Join, ReadExpect, ReadStorage, System, Write};
 use amethyst_imgui::imgui::{im_str, Condition, Window};
 
+use core::Point3;
 use libdwarf::{
     components::{MapObject, Worker},
     resources::TaskQueue,
     trigger::TriggerType,
-    Point3,
 };
 
 use crate::game::components::CursorSelected;

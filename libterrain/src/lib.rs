@@ -1,7 +1,7 @@
 use noise::{NoiseFn, Perlin};
 
 mod poisson;
-pub use nalgebra::Point3;
+use core::Point3;
 use poisson::PoissonDisk;
 
 mod chunk;

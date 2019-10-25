@@ -1,11 +1,11 @@
+use core::amethyst::{ecs::Join, prelude::*};
 use crossterm::{cursor, terminal, ClearType, Terminal, TerminalCursor};
-use specs::{prelude::*, Join};
 
+use core::Point3;
 use libdwarf::{
     components::{MapObject, MapPosition, Worker},
     resources::Map,
 };
-use libterrain::Point3;
 
 pub struct AsciiRenderer {
     pub num_ticks: u16,
