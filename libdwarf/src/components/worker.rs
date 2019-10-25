@@ -89,7 +89,11 @@ impl Worker {
 
                             if !target_obj.is_destroyed() {
                                 // Queue damage to this entity
-                                tasks.add_world(TriggerType::DealDamage(*target_id, 10));
+                                tasks.add_world(TriggerType::DealDamage {
+                                    source: self.id,
+                                    target: *target_id,
+                                    damage: 10,
+                                });
                                 finished = finished && false;
                             }
                         }

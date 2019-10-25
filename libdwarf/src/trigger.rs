@@ -11,9 +11,12 @@ type MapPosition = Point3<u32>;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum TriggerType {
-    Chilling,
     /// Deals damage to an entity.
-    DealDamage(EntityId, i32),
+    DealDamage {
+        target: EntityId,
+        source: EntityId,
+        damage: i32,
+    },
     /// Adds a new entity to the world.
     Add(MapPosition, String),
     /// Adds a new worker to the world.

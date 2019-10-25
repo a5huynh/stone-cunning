@@ -48,8 +48,8 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     map.track_worker(entity.id(), pos);
                 }
                 // Deal damage to a particular object
-                TriggerType::DealDamage(id, damage) => {
-                    let entity = entities.entity(id);
+                TriggerType::DealDamage { source: _, target, damage } => {
+                    let entity = entities.entity(target);
                     if let Some(object) = objects.get_mut(entity) {
                         object.health -= damage;
                     }

@@ -69,10 +69,10 @@ impl<'s> System<'s> for ClickSystem {
                             if let Some(pos) = obj_pos {
                                 println!("click! {:?}", info);
                                 // Add to task queue
-                                task_queue.add(TriggerType::HarvestResource{
+                                task_queue.add(TriggerType::HarvestResource {
                                     target: obj_entity,
                                     position: pos.pos,
-                                    resource: String::from("wood")
+                                    resource: String::from("wood"),
                                 });
                             }
                         }
