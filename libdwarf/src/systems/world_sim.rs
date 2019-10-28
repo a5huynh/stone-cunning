@@ -1,4 +1,7 @@
-use core::amethyst::ecs::{Entities, ReadExpect, System, WriteExpect, WriteStorage};
+use core::{
+    amethyst::ecs::{Entities, ReadExpect, System, WriteExpect, WriteStorage},
+    log,
+};
 
 use crate::{
     components::{MapObject, MapPosition, Worker},
@@ -29,7 +32,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
             match event {
                 // Add an object to the map.
                 TriggerType::Add(pt, name) => {
-                    println!("[WUS] Adding object '{}' @ ({:?})", name, pt);
+                    log::info!("Adding object '{}' @ ({:?})", name, pt);
                     let resource = resources.map.get(&name).unwrap().clone();
                     let new_entity = entities.create();
                     objects
@@ -41,7 +44,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     map.track_object(new_entity.id(), pt);
                 }
                 TriggerType::AddWorker(pos) => {
-                    println!("[WUS] Adding worker @ ({:?})", pos);
+                    log::info!("Adding worker @ ({:?})", pos);
                     let entity = entities.create();
                     workers.insert(entity, Worker::new(entity.id())).unwrap();
                     positions.insert(entity, MapPosition { pos }).unwrap();

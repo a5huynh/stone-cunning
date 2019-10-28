@@ -6,6 +6,7 @@ use amethyst::{
 };
 
 use crate::game::components::{Cursor, CursorDown, CursorSelected};
+use core::log;
 use libdwarf::{
     components::{MapObject, MapPosition},
     resources::TaskQueue,
@@ -67,7 +68,7 @@ impl<'s> System<'s> for ClickSystem {
 
                         if let Some(info) = obj_info {
                             if let Some(pos) = obj_pos {
-                                println!("click! {:?}", info);
+                                log::debug!("click! {:?}", info);
                                 // Add to task queue
                                 task_queue.add(TriggerType::HarvestResource {
                                     target: obj_entity,

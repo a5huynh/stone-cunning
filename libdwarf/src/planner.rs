@@ -2,6 +2,7 @@ use ron::de::from_reader;
 use serde::Deserialize;
 use std::fs::File;
 
+use core::log;
 use libpath::find_path;
 
 use std::collections::HashMap;
@@ -79,7 +80,7 @@ impl Planner {
         let planner: Planner = match from_reader(f) {
             Ok(x) => x,
             Err(e) => {
-                println!("Failed to load planner actions: {}", e);
+                log::error!("Failed to load Planner: {}", e);
                 std::process::exit(1);
             }
         };
