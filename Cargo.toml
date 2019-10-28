@@ -6,7 +6,6 @@ edition = "2018"
 publish = false
 
 [dependencies]
-log = "0.4.8"
 # Workaround metal compilation error
 objc = "=0.2.6"
 rand = "0.7.2"

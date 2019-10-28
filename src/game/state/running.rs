@@ -9,10 +9,9 @@ use amethyst::{
     window::DisplayConfig,
     winit::{Event, MouseScrollDelta, WindowEvent},
 };
-use log::info;
 use std::time::SystemTime;
 
-use core::Point3;
+use core::{log::info, Point3};
 use libdwarf::{resources::TaskQueue, trigger::TriggerType, world::WorldSim};
 use libterrain::TerrainGenerator;
 
