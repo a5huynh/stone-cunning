@@ -18,7 +18,7 @@ use libdwarf::systems;
 mod game;
 use game::{
     config::DwarfConfig,
-    state::RunningState,
+    state,
     systems::{
         ui::debug::DebugUI, ClickSystem, CursorSystem, MapMovementSystem, PlayerMovement,
         RenderNPCSystem, RenderObjectSystem,
@@ -85,7 +85,7 @@ fn main() -> amethyst::Result<()> {
             &["cursor", "player_movement"],
         );
 
-    let mut game = Application::build("./", RunningState::default())?
+    let mut game = Application::build("./", state::InitState::default())?
         .with_resource(config)
         .with_resource(game_config.game)
         .with_resource(game_config.player)

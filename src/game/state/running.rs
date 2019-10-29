@@ -1,6 +1,6 @@
 use amethyst::{
     core::{transform::Transform, Parent, Time},
-    ecs::{Join, Read, Write, WriteStorage},
+    ecs::{Join, Read, WriteStorage},
     input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
     renderer::{camera::Projection, Camera},
@@ -9,17 +9,10 @@ use amethyst::{
     window::DisplayConfig,
     winit::{Event, MouseScrollDelta, WindowEvent},
 };
-use std::time::SystemTime;
-
-use core::{log::info, Point3};
-use libdwarf::{resources::TaskQueue, trigger::TriggerType, world::WorldSim};
-use libterrain::TerrainGenerator;
 
 use crate::game::{
-    components::{CameraFollow, Cursor, CursorSelected, Object, Player},
-    config::GameConfig,
+    components::CameraFollow,
     render::MapRenderer,
-    sprite::SpriteSheetStorage,
 };
 
 pub struct RunningState {
@@ -35,45 +28,18 @@ impl Default for RunningState {
 impl SimpleState for RunningState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
-        world.register::<Object>();
-        world.register::<Player>();
-
-        let storage = SpriteSheetStorage::new(world);
-        world.insert(storage);
-
-        // Initialize simulation;
-        let (map_height, map_width) = {
-            let config = &world.read_resource::<GameConfig>();
-            (config.map_height, config.map_width)
+        // Initialize the camera
+        let point = {
+            let map_render = world.read_resource::<MapRenderer>();
+            map_render.place(8, 8, 42, 0.0)
         };
-
-        // Initialize simulation
-        info!("Generating map w/ dims: ({}, {})", map_width, map_height);
-        let now = SystemTime::now();
-        let terrain_gen = TerrainGenerator::new(map_width, map_height).build();
-        info!("Terrain gen took: {}ms", now.elapsed().unwrap().as_millis());
-
-        WorldSim::new(world, &terrain_gen.get_terrain(), map_width, map_height);
-        // Render map
-        let map_render = MapRenderer::initialize(world);
-        initialize_camera(world, map_render.place(8, 8, 42, 0.0), self.zoom);
-        world.insert(map_render);
-        // Initialize cursor sprite.
-        Cursor::initialize(world);
-        // Initialize player.
-        // Player::initialize(world);
-
-        world.insert(CursorSelected::default());
+        initialize_camera(world, point, self.zoom);
 
         // Create the ui
         world.exec(|mut creator: UiCreator<'_>| {
             creator.create("resources/ui/debug.ron", ());
         });
 
-        // Initialize workers
-        world.exec(|mut queue: Write<'_, TaskQueue>| {
-            queue.add_world(TriggerType::AddWorker(Point3::new(8, 8, 42)));
-        });
     }
 
     fn handle_event(
