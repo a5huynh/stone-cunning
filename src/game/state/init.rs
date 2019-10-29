@@ -1,27 +1,24 @@
+use core::{
+    amethyst::{ecs::Write, prelude::*},
+    log::info,
+    Point3,
+};
 /// Loading/initialization state.
 /// In this state, we're initializing the resources necessary to begin simulation.
 /// This can either be starting the terrain generation or loading the necessary
 /// terrain chunks from disk.
 ///
 use std::time::SystemTime;
-use core::{
-    amethyst::{
-        ecs::Write,
-        prelude::*,
-    },
-    log::info,
-    Point3,
-};
 
-use libdwarf::{resources::TaskQueue, trigger::TriggerType, world::WorldSim};
-use libterrain::TerrainGenerator;
 use crate::game::{
     components::{Cursor, CursorSelected, Object, Player},
     config::GameConfig,
     render::MapRenderer,
     sprite::SpriteSheetStorage,
-    state::RunningState
+    state::RunningState,
 };
+use libdwarf::{resources::TaskQueue, trigger::TriggerType, world::WorldSim};
+use libterrain::TerrainGenerator;
 
 pub struct InitState {
     finished: bool,
@@ -33,10 +30,10 @@ impl Default for InitState {
     }
 }
 
-
 impl SimpleState for InitState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
+        world.register::<Cursor>();
         world.register::<Object>();
         world.register::<Player>();
 
@@ -79,7 +76,7 @@ impl SimpleState for InitState {
 
     fn update(&mut self, _data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
         if self.finished {
-            return Trans::Push(Box::new(RunningState::default()));
+            return Trans::Switch(Box::new(RunningState::default()));
         }
 
         Trans::None

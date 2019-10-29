@@ -13,17 +13,8 @@ use amethyst::{
 };
 use amethyst_imgui::RenderImgui;
 
-use libdwarf::systems;
-
 mod game;
-use game::{
-    config::DwarfConfig,
-    state,
-    systems::{
-        ui::debug::DebugUI, ClickSystem, CursorSystem, MapMovementSystem, PlayerMovement,
-        RenderNPCSystem, RenderObjectSystem,
-    },
-};
+use game::{config::DwarfConfig, state};
 
 fn main() -> amethyst::Result<()> {
     amethyst::Logger::from_config(Default::default())
@@ -57,33 +48,7 @@ fn main() -> amethyst::Result<()> {
                 .with_plugin(RenderFlat2D::default())
                 .with_plugin(RenderUi::default())
                 .with_plugin(RenderImgui::<StringBindings>::default()),
-        )?
-        // Simulation systems.
-        .with(systems::WorkerSystem, "worker_sim", &[])
-        .with(systems::ObjectSystem, "object_sim", &[])
-        .with(
-            systems::WorldUpdateSystem::default(),
-            "world_updates",
-            &["worker_sim", "object_sim"],
-        )
-        .with(systems::TimeTickSystem, "game_tick", &["world_updates"])
-        // Render systems. Takes entities from the simulations and assigns sprites
-        // to them as they get added.
-        .with(RenderObjectSystem, "render_obj_system", &["world_updates"])
-        .with(RenderNPCSystem, "render_npc_system", &["world_updates"])
-        // Cursor selection
-        .with(CursorSystem, "cursor", &[])
-        // We handle click after the cursor is correctly transformed on the map.
-        .with(ClickSystem, "click", &["cursor"])
-        // Moving around the map
-        .with(MapMovementSystem, "map_movement", &[])
-        .with(PlayerMovement, "player_movement", &[])
-        // Should always be last so we have the most up-to-date info.
-        .with(
-            DebugUI::default(),
-            "debug_ui",
-            &["cursor", "player_movement"],
-        );
+        )?;
 
     let mut game = Application::build("./", state::InitState::default())?
         .with_resource(config)
