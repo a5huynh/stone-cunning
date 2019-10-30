@@ -61,8 +61,8 @@ impl<'s> System<'s> for CursorSystem {
         // Convert mouse position into scene coordinates.
         let (scene_x, scene_y) = {
             if let Some((mx, my)) = input.mouse_position() {
-                if let Some((_, camera)) = camera_transform {
-                    camera_to_world(mx, my, map_transform, &screen, camera)
+                if let Some((transform, camera)) = camera_transform {
+                    camera_to_world(mx, my, map_transform, &screen, camera, &transform.scale())
                 } else {
                     (0.0, 0.0)
                 }
