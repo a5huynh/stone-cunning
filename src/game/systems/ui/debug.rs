@@ -1,4 +1,4 @@
-use amethyst::ecs::{Entities, Join, ReadExpect, ReadStorage, System, Write};
+use core::amethyst::ecs::{Entities, Join, ReadExpect, ReadStorage, System, Write};
 use amethyst_imgui::imgui::{im_str, Condition, Window};
 
 use core::Point3;

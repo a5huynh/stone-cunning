@@ -1,5 +1,5 @@
 use crate::game::{config::GameConfig, sprite::SpriteSheetStorage};
-use amethyst::{
+use core::amethyst::{
     core::transform::Transform,
     prelude::*,
     renderer::{SpriteRender, Transparent},

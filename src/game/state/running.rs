@@ -1,4 +1,4 @@
-use amethyst::{
+use core::amethyst::{
     core::{transform::Transform, ArcThreadPool, Parent, SystemBundle, Time},
     ecs::{Dispatcher, DispatcherBuilder},
     input::{is_close_requested, is_key_down, VirtualKeyCode},

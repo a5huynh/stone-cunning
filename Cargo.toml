@@ -17,10 +17,6 @@ libdwarf = { path = "libdwarf" }
 # Terrain generation
 libterrain = { path = "libterrain" }
 
-[dependencies.amethyst]
-version = "0.13.2"
-features = ["metal"]
-
 [dependencies.amethyst-imgui]
 version = "0.5.2"
 # amethyst-imgui by default uses vulkan, however since we

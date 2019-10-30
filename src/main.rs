@@ -1,4 +1,5 @@
-use amethyst::{
+use core::amethyst;
+use core::amethyst::{
     core::{frame_limiter::FrameRateLimitStrategy, transform::TransformBundle},
     input::{InputBundle, StringBindings},
     prelude::*,

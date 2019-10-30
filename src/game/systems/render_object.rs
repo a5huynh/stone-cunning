@@ -1,4 +1,4 @@
-use amethyst::{
+use core::amethyst::{
     core::transform::Transform,
     ecs::{Entities, Entity, Join, ReadExpect, ReadStorage, System, WriteStorage},
     renderer::{SpriteRender, Transparent},

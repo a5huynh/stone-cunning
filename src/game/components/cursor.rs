@@ -1,5 +1,5 @@
 use crate::game::{components::PickInfo, sprite::SpriteSheetStorage};
-use amethyst::{
+use core::amethyst::{
     core::transform::Transform,
     ecs::prelude::{Component, DenseVecStorage, NullStorage},
     prelude::*,

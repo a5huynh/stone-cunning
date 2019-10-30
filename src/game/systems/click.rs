@@ -1,4 +1,4 @@
-use amethyst::{
+use core::amethyst::{
     core::Transform,
     ecs::{Entities, Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
     input::{InputHandler, StringBindings},

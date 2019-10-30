@@ -1,4 +1,4 @@
-use amethyst::{
+use core::amethyst::{
     core::transform::Transform,
     ecs::prelude::{Component, DenseVecStorage},
     prelude::*,

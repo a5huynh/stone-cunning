@@ -1,4 +1,4 @@
-use amethyst::ecs::prelude::{Component, DenseVecStorage};
+use core::amethyst::ecs::prelude::{Component, DenseVecStorage};
 use specs_derive::*;
 
 mod cursor;
