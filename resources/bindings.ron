@@ -15,7 +15,8 @@
         "player_y": Emulated(
             pos: Key(W),
             neg: Key(S),
-        )
+        ),
+        "zoom": MouseWheel( horizontal: false ),
     },
     actions: {
         "menu": [ [Key(M)], ],

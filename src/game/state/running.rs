@@ -1,21 +1,20 @@
 use amethyst::{
     core::{transform::Transform, ArcThreadPool, Parent, SystemBundle, Time},
-    ecs::{Dispatcher, DispatcherBuilder, Join, Read, WriteStorage},
+    ecs::{Dispatcher, DispatcherBuilder},
     input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
     renderer::{camera::Projection, Camera},
     ui::{UiCreator, UiFinder, UiText},
     utils::fps_counter::FpsCounter,
     window::DisplayConfig,
-    winit::{Event, MouseScrollDelta, WindowEvent},
 };
 
 use crate::game::{
     components::CameraFollow,
     render::MapRenderer,
     systems::{
-        ui::debug::DebugUI, ClickSystem, CursorSystem, MapMovementSystem, PlayerMovement,
-        RenderNPCSystem, RenderObjectSystem,
+        camera, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement, RenderNPCSystem,
+        RenderObjectSystem,
     },
 };
 use libdwarf::WorldSimBundle;
@@ -60,7 +59,8 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
         // We handle click after the cursor is correctly transformed on the map.
         input_db.add(ClickSystem, "click", &["cursor"]);
         // Moving around the map
-        input_db.add(MapMovementSystem, "map_movement", &[]);
+        input_db.add(camera::MapMovementSystem, "map_movement", &[]);
+        input_db.add(camera::CameraZoomSystem, "camera_zoom", &[]);
         input_db.add(PlayerMovement, "player_movement", &[]);
 
         let mut ui_db = DispatcherBuilder::new();
@@ -102,11 +102,9 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
 
     fn handle_event(
         &mut self,
-        data: StateData<'_, GameData<'_, '_>>,
+        _data: StateData<'_, GameData<'_, '_>>,
         event: StateEvent,
     ) -> SimpleTrans {
-        let world = data.world;
-
         if let StateEvent::Window(event) = &event {
             // Exit if the user hits escape
             if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) {
@@ -115,40 +113,6 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
 
             if is_key_down(&event, VirtualKeyCode::Space) {
                 self.paused = !self.paused;
-            }
-
-            // Detect
-            match event {
-                Event::WindowEvent {
-                    event:
-                        WindowEvent::MouseWheel {
-                            delta: MouseScrollDelta::LineDelta(_, scroll_y),
-                            ..
-                        },
-                    ..
-                } => {
-                    world.exec(
-                        |(mut cameras, display): (WriteStorage<Camera>, Read<DisplayConfig>)| {
-                            let camera = (&mut cameras).join().next().or(None);
-                            if let Some(camera) = camera {
-                                self.zoom = (self.zoom + scroll_y / 4.0).max(1.0).min(10.0);
-                                let (window_width, window_height) = display.dimensions.unwrap();
-                                let zoom_width = window_width as f32 / self.zoom;
-                                let zoom_height = window_height as f32 / self.zoom;
-
-                                *camera = Camera::from(Projection::orthographic(
-                                    -zoom_width,
-                                    zoom_width,
-                                    -zoom_height,
-                                    zoom_height,
-                                    -100.0,
-                                    100.0,
-                                ));
-                            }
-                        },
-                    );
-                }
-                _ => {}
             }
         }
 

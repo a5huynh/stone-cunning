@@ -15,5 +15,9 @@
         tile_offset: 0,
 
         map_move_speed: 500.0,
+
+        zoom_speed: 0.1,
+        zoom_min: 0.5,
+        zoom_max: 3.0,
     ),
 )
