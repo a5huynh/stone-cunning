@@ -31,7 +31,15 @@ impl<'a> System<'a> for WorkerSystem {
     ) {
         for (_entity, worker, position) in (&*entities, &mut workers, &mut positions).join() {
             // Regen worker energy.
-            worker.energy += config.worker_stamina * time.delta_seconds();
+            if worker.energy < config.worker_stamina {
+                // NOTE: This might need to be revisited. Pausing the simulation would
+                // mean a large `time.delta_seconds()` which immediately resets
+                // the worker energy, leading to a burst of actions for a couple frames
+                // before going back to normal.
+                worker.energy = (worker.energy + (config.worker_stamina * time.delta_seconds()))
+                    .min(config.worker_stamina);
+            }
+
             if worker.energy < config.action_cost {
                 continue;
             }
@@ -47,7 +55,7 @@ impl<'a> System<'a> for WorkerSystem {
                         position,
                         resource,
                     }) => {
-                        // Are we already nea\r the resource?
+                        // Are we already near the resource?
                         state.insert(
                             Condition::Near(resource.clone()),
                             is_near(&position, &current_pos),
