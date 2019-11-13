@@ -1,0 +1,89 @@
+#![enable(implicit_some)]
+Container(
+    transform: (
+        id: "background",
+        anchor: Middle,
+        stretch: XY(x_margin: 0., y_margin: 0., keep_aspect_ratio: false),
+        width: 20.0,
+        height: 20.0,
+    ),
+    children: [
+        Container(
+            transform: (
+                id: "toolbar",
+                anchor: BottomMiddle,
+                width: 240.0,
+                height: 96.0,
+                y: 48.0,
+            ),
+            background: SolidColor(1.0, 1.0, 1.0, 0.5),
+            children: [
+                Button(
+                    transform: (
+                        id: "play_pause_btn",
+                        x: 48.0,
+                        width: 64.,
+                        height: 64.,
+                        tab_order: 1,
+                        anchor: MiddleLeft,
+                        mouse_reactive: true,
+                    ),
+                    button: (
+                        text: "",
+                        font_size: 20.,
+                        normal_text_color: (0.0, 0.0, 0.0, 1.0),
+                        hover_text_color: (0.0, 0.0, 0.0, 1.0),
+                        press_text_color: (0.0, 0.0, 0.0, 1.0),
+                        normal_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
+                        press_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_sound: File("resources/audio/boop.ogg", ("OGG", ())),
+                    )
+                ),
+                Button(
+                    transform: (
+                        id: "half_speed",
+                        width: 64.,
+                        height: 64.,
+                        tab_order: 1,
+                        anchor: Middle,
+                        mouse_reactive: true,
+                    ),
+                    button: (
+                        text: "",
+                        font_size: 20.,
+                        normal_text_color: (0.0, 0.0, 0.0, 1.0),
+                        hover_text_color: (0.0, 0.0, 0.0, 1.0),
+                        press_text_color: (0.0, 0.0, 0.0, 1.0),
+                        normal_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
+                        press_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_sound: File("resources/audio/boop.ogg", ("OGG", ())),
+                    )
+                ),
+                Button(
+                    transform: (
+                        id: "double_speed",
+                        x: -48.0,
+                        width: 64.,
+                        height: 64.,
+                        tab_order: 1,
+                        anchor: MiddleRight,
+                        mouse_reactive: true,
+                    ),
+                    button: (
+                        text: "",
+                        font_size: 20.,
+                        normal_text_color: (0.0, 0.0, 0.0, 1.0),
+                        hover_text_color: (0.0, 0.0, 0.0, 1.0),
+                        press_text_color: (0.0, 0.0, 0.0, 1.0),
+                        normal_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
+                        press_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_sound: File("resources/audio/boop.ogg", ("OGG", ())),
+                    )
+                ),
+            ]
+        )
+    ],
+)

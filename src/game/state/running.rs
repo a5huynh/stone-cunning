@@ -17,6 +17,7 @@ use crate::game::{
         RenderObjectSystem,
     },
 };
+use core::log;
 use libdwarf::WorldSimBundle;
 
 pub struct RunningState<'a, 'b> {
@@ -97,6 +98,7 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
         // Create the ui
         world.exec(|mut creator: UiCreator<'_>| {
             creator.create("resources/ui/debug.ron", ());
+            creator.create("resources/ui/toolbar.ron", ());
         });
     }
 
@@ -105,15 +107,24 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
         _data: StateData<'_, GameData<'_, '_>>,
         event: StateEvent,
     ) -> SimpleTrans {
-        if let StateEvent::Window(event) = &event {
-            // Exit if the user hits escape
-            if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) {
-                return Trans::Quit;
-            }
+        match &event {
+            StateEvent::Window(event) => {
+                // Exit if the user hits escape
+                if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) {
+                    return Trans::Quit;
+                }
 
-            if is_key_down(&event, VirtualKeyCode::Space) {
-                self.paused = !self.paused;
+                if is_key_down(&event, VirtualKeyCode::Space) {
+                    self.paused = !self.paused;
+                }
             }
+            StateEvent::Ui(ui_event) => {
+                log::info!(
+                    "[HANDLE_EVENT] You just interacted with a ui element: {:?}",
+                    ui_event
+                );
+            }
+            _ => {}
         }
 
         Trans::None

@@ -16,7 +16,7 @@ pub struct WorldSimBundle;
 impl<'a, 'b> SystemBundle<'a, 'b> for WorldSimBundle {
     fn build(
         self,
-        world: &mut World,
+        _world: &mut World,
         builder: &mut DispatcherBuilder<'a, 'b>,
     ) -> Result<(), core::amethyst::Error> {
         builder.add(systems::WorkerSystem, "worker_sim", &[]);

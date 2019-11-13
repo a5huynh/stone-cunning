@@ -1,5 +1,7 @@
+use amethyst_imgui::RenderImgui;
 use core::amethyst;
 use core::amethyst::{
+    audio::AudioBundle,
     core::{frame_limiter::FrameRateLimitStrategy, transform::TransformBundle},
     input::{InputBundle, StringBindings},
     prelude::*,
@@ -12,7 +14,6 @@ use core::amethyst::{
     utils::{application_root_dir, fps_counter::FpsCounterBundle},
     window::DisplayConfig,
 };
-use amethyst_imgui::RenderImgui;
 
 mod game;
 use game::{config::DwarfConfig, state};
@@ -34,6 +35,7 @@ fn main() -> amethyst::Result<()> {
         InputBundle::<StringBindings>::new().with_bindings_from_file(binding_path)?;
 
     let game_data = GameDataBuilder::default()
+        .with_bundle(AudioBundle::default())?
         .with_bundle(TransformBundle::new())?
         .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(FpsCounterBundle::default())?
