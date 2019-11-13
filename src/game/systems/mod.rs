@@ -1,6 +1,7 @@
 pub mod camera;
 mod click;
 mod cursor;
+pub mod debug;
 mod player_movement;
 mod render_npc;
 mod render_object;

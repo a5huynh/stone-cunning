@@ -3,7 +3,7 @@ use core::amethyst::{
     ecs::{Dispatcher, DispatcherBuilder},
     input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
-    renderer::{camera::Projection, Camera},
+    renderer::{camera::Projection, debug_drawing::DebugLines, Camera},
     ui::{UiCreator, UiFinder, UiText},
     utils::fps_counter::FpsCounter,
     window::DisplayConfig,
@@ -13,8 +13,8 @@ use crate::game::{
     components::CameraFollow,
     render::MapRenderer,
     systems::{
-        camera, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement, RenderNPCSystem,
-        RenderObjectSystem,
+        camera, debug, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
+        RenderNPCSystem, RenderObjectSystem,
     },
 };
 use core::log;
@@ -43,6 +43,7 @@ impl Default for RunningState<'_, '_> {
 impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
     fn on_start(&mut self, mut data: StateData<'_, GameData<'_, '_>>) {
         let mut world = &mut data.world;
+        world.insert(DebugLines::new());
 
         let mut dispatcher_builder = DispatcherBuilder::new();
         WorldSimBundle::default()
@@ -66,6 +67,7 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
 
         let mut ui_db = DispatcherBuilder::new();
         // Should always be last so we have the most up-to-date info.
+        ui_db.add(debug::PathDebugSystem, "path_debug_ui", &[]);
         ui_db.add(DebugUI::default(), "debug_ui", &[]);
 
         let mut dispatcher = dispatcher_builder
