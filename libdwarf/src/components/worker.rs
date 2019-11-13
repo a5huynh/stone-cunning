@@ -93,7 +93,7 @@ impl Worker {
                                     target: *target_id,
                                     damage: 10,
                                 });
-                                finished = finished && false;
+                                finished = false;
                             }
                         }
                     }
@@ -127,7 +127,7 @@ impl Worker {
                                     let current_pos = map_pos.pos.clone();
                                     map_pos.pos = new_pt;
                                     map.move_worker(self.id, current_pos, new_pt);
-                                    finished = finished && false;
+                                    finished = false;
                                 }
                             }
                         }

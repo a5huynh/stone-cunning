@@ -65,7 +65,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                 TriggerType::Destroy(id) => {
                     // Remove from map
                     let entity = entities.entity(id);
-                    if let Some(_) = objects.get(entity) {
+                    if objects.get(entity).is_some() {
                         if let Some(map_pos) = positions.get(entity) {
                             map.remove_object(id, map_pos.pos);
                         }
@@ -75,7 +75,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                 }
                 TriggerType::Take { target, owner } => {
                     let target_entity = entities.entity(target);
-                    if let Some(_) = objects.get(target_entity) {
+                    if objects.get(target_entity).is_some() {
                         if let Some(worker) = workers.get_mut(entities.entity(owner)) {
                             worker.inventory.push(target);
                             if let Some(map_pos) = positions.get(target_entity) {

@@ -87,7 +87,7 @@ impl<'s> System<'s> for DebugUI {
                                 workers.get(entity)
                             })
                             .and_then(|worker| Some(format!("Worker: {}", worker.to_string())))
-                            .unwrap_or("Worker: N/A".to_string());
+                            .unwrap_or_else(|| "Worker: N/A".to_string());
                         ui.text(worker_label);
 
                         let object_label = pick_info
@@ -97,14 +97,14 @@ impl<'s> System<'s> for DebugUI {
                                 objects.get(entity)
                             })
                             .and_then(|object| Some(format!("Object: {}", object.to_string())))
-                            .unwrap_or("Object: N/A".to_string());
+                            .unwrap_or_else(|| "Object: N/A".to_string());
                         ui.text(object_label);
 
                         let terrain_label = pick_info
                             .terrain
                             .as_ref()
                             .and_then(|terrain| Some(format!("Terrain: {:?}", terrain)))
-                            .unwrap_or("Terrain: N/A".to_string());
+                            .unwrap_or_else(|| "Terrain: N/A".to_string());
                         ui.text(terrain_label);
 
                         let map_pos = pick_info
@@ -115,7 +115,7 @@ impl<'s> System<'s> for DebugUI {
                                     position.x, position.y, position.z
                                 ))
                             })
-                            .unwrap_or("Map Pos: N/A".to_string());
+                            .unwrap_or_else(|| "Map Pos: N/A".to_string());
                         ui.text(map_pos);
 
                         let mouse_pos = ui.io().mouse_pos;

@@ -73,7 +73,7 @@ impl<'a> System<'a> for WorkerSystem {
                             worker.queue.push_back(WorkerAction {
                                 target: Some(entity.id()),
                                 action: action.clone(),
-                                target_pos: position.clone(),
+                                target_pos: position,
                             });
                         }
                     }
