@@ -1,24 +1,41 @@
 (
-    texture_width: 640,
-    texture_height: 608,
+    texture_width: 128,
+    texture_height: 128,
     sprites: [
+        // Tree
         (
             x: 0,
             y: 0,
             width: 32,
             height: 32,
         ),
+        // Shrub
+        (
+            x: 32,
+            y: 0,
+            width: 32,
+            height: 32,
+        ),
+        // Logs
+        (
+            x: 64,
+            y: 0,
+            width: 32,
+            height: 32,
+        ),
+        // Lumber
+        (
+            x: 96,
+            y: 0,
+            width: 32,
+            height: 32
+        ),
+        // Selection
         (
             x: 0,
             y: 32,
             width: 32,
-            height: 32,
-        ),
-        (
-            x: 0,
-            y: 64,
-            width: 32,
-            height: 32,
+            height: 32
         ),
     ],
 )

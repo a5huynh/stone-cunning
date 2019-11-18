@@ -66,7 +66,7 @@ impl<'a> System<'a> for PathDebugSystem {
                             entity,
                             SpriteRender {
                                 sprite_sheet: sheets.object.clone(),
-                                sprite_number: 0,
+                                sprite_number: 4,
                             },
                         )
                         .unwrap();
