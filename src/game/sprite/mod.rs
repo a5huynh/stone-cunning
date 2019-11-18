@@ -1,4 +1,4 @@
-use amethyst::{
+use core::amethyst::{
     assets::{AssetStorage, Handle, Loader},
     prelude::*,
     renderer::{ImageFormat, SpriteSheet, SpriteSheetFormat, Texture},

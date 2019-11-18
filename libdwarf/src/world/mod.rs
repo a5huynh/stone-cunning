@@ -1,9 +1,9 @@
-use specs::prelude::*;
-use specs::World;
+use core::amethyst::ecs::{World, WorldExt};
 
 use crate::{
     components::{MapObject, MapPosition, Worker},
     config::{ResourceConfig, WorldConfig},
+    planner::Planner,
     resources::{time, Map, TaskQueue},
 };
 
@@ -16,6 +16,10 @@ impl WorldSim {
         world.register::<MapPosition>();
         world.register::<MapObject>();
         world.register::<Worker>();
+
+        // Initialize planner
+        let planner = Planner::load("./resources/data/actions.ron");
+        world.insert(planner);
 
         // Load resource configs
         let resources = ResourceConfig::load("./resources/data/resources.ron");

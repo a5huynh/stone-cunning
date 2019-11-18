@@ -1,11 +1,11 @@
-use amethyst::ecs::{Entities, Join, ReadExpect, ReadStorage, System, Write};
 use amethyst_imgui::imgui::{im_str, Condition, Window};
+use core::amethyst::ecs::{Entities, Join, ReadExpect, ReadStorage, System, Write};
 
+use core::Point3;
 use libdwarf::{
-    actions::Action,
     components::{MapObject, Worker},
     resources::TaskQueue,
-    Point3,
+    trigger::TriggerType,
 };
 
 use crate::game::components::CursorSelected;
@@ -49,7 +49,7 @@ impl<'s> System<'s> for DebugUI {
                         .build();
 
                     if ui.button(im_str!("Add Worker"), [0.0, 0.0]) {
-                        queue.add_world(Action::AddWorker(Point3::new(
+                        queue.add_world(TriggerType::AddWorker(Point3::new(
                             self.new_worker_pos[0] as u32,
                             self.new_worker_pos[1] as u32,
                             self.new_worker_pos[2] as u32,
@@ -65,7 +65,7 @@ impl<'s> System<'s> for DebugUI {
                         {
                             ui.text(&im_str!("inventory: {}", worker.inventory.len()));
                             if ui.collapsing_header(im_str!("Action Queue")).build() {
-                                for action in worker.actions.iter() {
+                                for action in worker.queue.iter() {
                                     ui.text(&im_str!("{:?}", action));
                                 }
                             }
@@ -87,7 +87,7 @@ impl<'s> System<'s> for DebugUI {
                                 workers.get(entity)
                             })
                             .and_then(|worker| Some(format!("Worker: {}", worker.to_string())))
-                            .unwrap_or("Worker: N/A".to_string());
+                            .unwrap_or_else(|| "Worker: N/A".to_string());
                         ui.text(worker_label);
 
                         let object_label = pick_info
@@ -97,14 +97,14 @@ impl<'s> System<'s> for DebugUI {
                                 objects.get(entity)
                             })
                             .and_then(|object| Some(format!("Object: {}", object.to_string())))
-                            .unwrap_or("Object: N/A".to_string());
+                            .unwrap_or_else(|| "Object: N/A".to_string());
                         ui.text(object_label);
 
                         let terrain_label = pick_info
                             .terrain
                             .as_ref()
                             .and_then(|terrain| Some(format!("Terrain: {:?}", terrain)))
-                            .unwrap_or("Terrain: N/A".to_string());
+                            .unwrap_or_else(|| "Terrain: N/A".to_string());
                         ui.text(terrain_label);
 
                         let map_pos = pick_info
@@ -115,7 +115,7 @@ impl<'s> System<'s> for DebugUI {
                                     position.x, position.y, position.z
                                 ))
                             })
-                            .unwrap_or("Map Pos: N/A".to_string());
+                            .unwrap_or_else(|| "Map Pos: N/A".to_string());
                         ui.text(map_pos);
 
                         let mouse_pos = ui.io().mouse_pos;

@@ -1,13 +1,17 @@
+use core::amethyst::{
+    ecs::{World, WorldExt},
+    prelude::*,
+};
 use std::collections::HashMap;
-
-use specs::prelude::*;
-use specs::World;
 
 use crate::{
     components::{MapObject, MapPosition},
     config::ResourceConfig,
 };
-use libterrain::{Biome, Object, Point3, TerrainChunk};
+
+use core::Point3;
+use libpath::find_path;
+use libterrain::{Biome, Object, Path, TerrainChunk};
 
 pub struct Map {
     // TODO: Support multiple objects per tile.
@@ -79,6 +83,17 @@ impl Map {
             }
         }
         results
+    }
+
+    pub fn find_path(&self, start: &Point3<u32>, end: &Point3<u32>) -> Path {
+        let (_, path) = find_path(
+            start.clone(),
+            end.clone(),
+            |node| TerrainChunk::heuristic(&node, start),
+            |pt| self.terrain.neighbors(pt),
+        );
+
+        path
     }
 
     pub fn has_collision(&self, pt: Point3<i32>) -> bool {

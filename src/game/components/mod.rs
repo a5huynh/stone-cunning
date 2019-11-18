@@ -1,4 +1,4 @@
-use amethyst::ecs::prelude::{Component, DenseVecStorage};
+use core::amethyst::ecs::prelude::{Component, DenseVecStorage};
 use specs_derive::*;
 
 mod cursor;
@@ -8,7 +8,7 @@ pub use cursor::*;
 pub use player::*;
 pub use terrain::*;
 
-use libdwarf::Point3;
+use core::Point3;
 use libterrain::Biome;
 
 #[derive(Component, Default)]

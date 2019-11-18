@@ -13,6 +13,12 @@ pub struct GameConfig {
     pub tile_offset: u32,
     /// How fast we move the camera around the map.
     pub map_move_speed: f32,
+    /// Minimum mouse zoom threshold
+    pub zoom_min: f32,
+    /// Maximum mouse zoom threshold
+    pub zoom_max: f32,
+    /// Zoom speed
+    pub zoom_speed: f32,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]

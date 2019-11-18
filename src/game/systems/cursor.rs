@@ -1,4 +1,4 @@
-use amethyst::{
+use core::amethyst::{
     core::Transform,
     ecs::{Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
     input::{InputHandler, StringBindings},
@@ -11,7 +11,8 @@ use crate::game::{
     render::MapRenderer,
     utils::camera_to_world,
 };
-use libdwarf::{resources::Map, Point3};
+use core::Point3;
+use libdwarf::resources::Map;
 
 pub struct CursorSystem;
 
@@ -60,8 +61,8 @@ impl<'s> System<'s> for CursorSystem {
         // Convert mouse position into scene coordinates.
         let (scene_x, scene_y) = {
             if let Some((mx, my)) = input.mouse_position() {
-                if let Some((_, camera)) = camera_transform {
-                    camera_to_world(mx, my, map_transform, &screen, camera)
+                if let Some((transform, camera)) = camera_transform {
+                    camera_to_world(mx, my, map_transform, &screen, camera, &transform.scale())
                 } else {
                     (0.0, 0.0)
                 }

@@ -5,6 +5,7 @@ authors = ["Andrew Huynh <a5thuynh@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-nalgebra = { version = "0.18.1", features = ["serde-serialize", "mint"] }
+core = { path = "../core" }
 noise = "0.6.0"
 rand = "0.7.2"
+libpath = { path = "../libpath" }

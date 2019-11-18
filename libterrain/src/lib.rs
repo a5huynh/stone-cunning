@@ -1,11 +1,13 @@
 use noise::{NoiseFn, Perlin};
 
 mod poisson;
-pub use nalgebra::Point3;
+use core::Point3;
 use poisson::PoissonDisk;
 
 mod chunk;
 pub use chunk::{Biome, Object, TerrainChunk};
+
+pub type Path = Vec<Point3<u32>>;
 
 #[derive(Clone)]
 pub struct TerrainGenerator {

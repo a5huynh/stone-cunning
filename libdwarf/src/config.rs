@@ -3,6 +3,7 @@ use serde::Deserialize;
 use std::{collections::HashMap, fs::File};
 
 use crate::components::ResourceType;
+use core::log;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct ResourceConfig {
@@ -15,7 +16,7 @@ impl ResourceConfig {
         let config: ResourceConfig = match from_reader(f) {
             Ok(x) => x,
             Err(e) => {
-                println!("Failed to load config: {}", e);
+                log::error!("Failed to load ResourceConfig: {}", e);
                 std::process::exit(1);
             }
         };
@@ -36,7 +37,7 @@ impl WorldConfig {
         let config: WorldConfig = match from_reader(f) {
             Ok(x) => x,
             Err(e) => {
-                println!("Failed to load config: {}", e);
+                log::error!("Failed to load WorldConfig: {}", e);
                 std::process::exit(1);
             }
         };

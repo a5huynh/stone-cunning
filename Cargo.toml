@@ -6,27 +6,27 @@ edition = "2018"
 publish = false
 
 [dependencies]
-log = "0.4.8"
+# Workaround metal compilation error
+objc = "=0.2.6"
 rand = "0.7.2"
 serde = "1.0.101"
 specs-derive = "0.4.0"
+core = { path = "core" }
 # Simulation code
 libdwarf = { path = "libdwarf" }
 # Terrain generation
 libterrain = { path = "libterrain" }
 
-[dependencies.amethyst]
-version = "0.13.0"
-features = ["metal"]
-
 [dependencies.amethyst-imgui]
-version = "0.5.1"
+version = "0.5.2"
 # amethyst-imgui by default uses vulkan, however since we
 # primarily work in OSX, we need to turn this off.
 default-features = false
 
 [workspace]
 members = [
+    # Core utilities used across all packages.
+    'core',
     # Worker/object sim.
     'libdwarf',
     # Terrain/biome generation.

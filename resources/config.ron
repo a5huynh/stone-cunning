@@ -7,13 +7,17 @@
     ),
     game: (
         tick_delta: 0.1,
-        map_height: 50,
-        map_width: 50,
+        map_height: 64,
+        map_width: 64,
 
         tile_height: 16,
         tile_width: 32,
         tile_offset: 0,
 
         map_move_speed: 500.0,
+
+        zoom_speed: 0.1,
+        zoom_min: 0.8,
+        zoom_max: 2.0,
     ),
 )

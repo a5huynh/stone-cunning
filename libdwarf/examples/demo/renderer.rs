@@ -1,11 +1,11 @@
+use core::amethyst::{ecs::Join, prelude::*};
 use crossterm::{cursor, terminal, ClearType, Terminal, TerminalCursor};
-use specs::{prelude::*, Join};
 
+use core::Point3;
 use libdwarf::{
     components::{MapObject, MapPosition, Worker},
     resources::Map,
 };
-use libterrain::Point3;
 
 pub struct AsciiRenderer {
     pub num_ticks: u16,
@@ -94,13 +94,19 @@ impl AsciiRenderer {
         let entities = world.entities();
         let workers = world.read_storage::<Worker>();
         for (entity, worker) in (&entities, &workers).join() {
+            print!("[W{}: Current Action]\n\r", entity.id());
+            print!("- {:?}\n\r", worker.current_action);
+
+            print!("[W{}: Current Path]\n\r", entity.id());
+            print!("- {:?}\n\r", worker.current_path);
+
             print!("[W{}: Inventory]\n\r", entity.id());
             for obj in worker.inventory.iter() {
                 print!("- {:?}\n\r", obj.to_string());
             }
 
             print!("[W{}: Task Queue]\n\r", entity.id());
-            for action in worker.actions.iter() {
+            for action in worker.queue.iter() {
                 print!("- {:?}\n\r", action);
             }
         }
@@ -116,9 +122,6 @@ impl AsciiRenderer {
                 (pos.pos.x, pos.pos.y),
                 entity.id()
             );
-            for action in object.actions.iter() {
-                print!("- {:?}\n\r", action);
-            }
         }
 
         // Render command prompt

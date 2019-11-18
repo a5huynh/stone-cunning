@@ -1,10 +1,13 @@
-use specs::{Entities, ReadExpect, System, WriteExpect, WriteStorage};
+use core::{
+    amethyst::ecs::{Entities, ReadExpect, System, WriteExpect, WriteStorage},
+    log,
+};
 
 use crate::{
-    actions::Action,
     components::{MapObject, MapPosition, Worker},
     config::ResourceConfig,
     resources::{Map, TaskQueue},
+    trigger::TriggerType,
 };
 
 #[derive(Default)]
@@ -28,8 +31,8 @@ impl<'a> System<'a> for WorldUpdateSystem {
         while let Some(event) = queue.pop_front() {
             match event {
                 // Add an object to the map.
-                Action::Add(pt, name) => {
-                    println!("[WUS] Adding object '{}' @ ({:?})", name, pt);
+                TriggerType::Add(pt, name) => {
+                    log::info!("Adding object '{}' @ ({:?})", name, pt);
                     let resource = resources.map.get(&name).unwrap().clone();
                     let new_entity = entities.create();
                     objects
@@ -40,25 +43,29 @@ impl<'a> System<'a> for WorldUpdateSystem {
                         .unwrap();
                     map.track_object(new_entity.id(), pt);
                 }
-                Action::AddWorker(pos) => {
-                    println!("[WUS] Adding worker @ ({:?})", pos);
+                TriggerType::AddWorker(pos) => {
+                    log::info!("Adding worker @ ({:?})", pos);
                     let entity = entities.create();
-                    workers.insert(entity, Worker::new()).unwrap();
+                    workers.insert(entity, Worker::new(entity.id())).unwrap();
                     positions.insert(entity, MapPosition { pos }).unwrap();
                     map.track_worker(entity.id(), pos);
                 }
                 // Deal damage to a particular object
-                Action::DealDamage(id, damage) => {
-                    let entity = entities.entity(id);
+                TriggerType::DealDamage {
+                    source: _,
+                    target,
+                    damage,
+                } => {
+                    let entity = entities.entity(target);
                     if let Some(object) = objects.get_mut(entity) {
                         object.health -= damage;
                     }
                 }
                 // Destroy an object.
-                Action::Destroy(id) => {
+                TriggerType::Destroy(id) => {
                     // Remove from map
                     let entity = entities.entity(id);
-                    if let Some(_) = objects.get(entity) {
+                    if objects.get(entity).is_some() {
                         if let Some(map_pos) = positions.get(entity) {
                             map.remove_object(id, map_pos.pos);
                         }
@@ -66,9 +73,9 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     // Remove from world
                     entities.delete(entity).unwrap();
                 }
-                Action::Take { target, owner } => {
+                TriggerType::Take { target, owner } => {
                     let target_entity = entities.entity(target);
-                    if let Some(_) = objects.get(target_entity) {
+                    if objects.get(target_entity).is_some() {
                         if let Some(worker) = workers.get_mut(entities.entity(owner)) {
                             worker.inventory.push(target);
                             if let Some(map_pos) = positions.get(target_entity) {

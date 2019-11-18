@@ -1,10 +1,10 @@
-use amethyst::{
+use core::amethyst::{
     core::{timing::Time, transform::Transform},
     ecs::{Join, Read, ReadExpect, ReadStorage, System, WriteStorage},
     input::{InputHandler, StringBindings},
 };
 
-use super::super::{components::CameraFollow, config::GameConfig};
+use crate::game::{components::CameraFollow, config::GameConfig};
 
 pub struct MapMovementSystem;
 

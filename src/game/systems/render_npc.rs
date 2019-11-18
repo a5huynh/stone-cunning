@@ -1,4 +1,4 @@
-use amethyst::{
+use core::amethyst::{
     core::transform::Transform,
     ecs::{Entities, Entity, Join, ReadExpect, ReadStorage, System, WriteStorage},
     renderer::{SpriteRender, Transparent},
@@ -64,7 +64,7 @@ impl<'a> System<'a> for RenderNPCSystem {
         // Update object positions
         for (_, map_pos, transform) in (&mut workers, &positions, &mut transforms).join() {
             let pos = map_pos.pos;
-            let new_transform = map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 1.0);
+            let new_transform = map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 0.9);
             transform.set_translation_xyz(
                 new_transform.translation().x,
                 new_transform.translation().y,

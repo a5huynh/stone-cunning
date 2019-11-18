@@ -1,9 +1,9 @@
-use specs::{Entities, Join, System, Write, WriteStorage};
+use core::amethyst::ecs::{Entities, Join, System, Write, WriteStorage};
 
 use crate::{
-    actions::Action,
     components::{MapObject, MapPosition, ResourceAttribute},
     resources::TaskQueue,
+    trigger::TriggerType,
 };
 
 pub struct ObjectSystem;
@@ -21,24 +21,17 @@ impl<'a> System<'a> for ObjectSystem {
             // Check object health. Queue destruction if <= 0.
             if object.health <= 0 {
                 // Destroy this object
-                tasks.add_world(Action::Destroy(entity.id()));
+                tasks.add_world(TriggerType::Destroy(entity.id()));
                 // Add any drops to world
                 for drop in &object.drop_table() {
                     match drop {
                         ResourceAttribute::Drops(name, _amount) => {
-                            tasks.add_world(Action::Add(current_pos, name.to_string()));
+                            tasks.add_world(TriggerType::Add(current_pos, name.to_string()));
                         }
                         _ => {}
                     }
                 }
                 continue;
-            }
-
-            // Otherwise, process any object specific actions.
-            while let Some(action) = object.actions.pop_front() {
-                match action {
-                    _ => {}
-                }
             }
         }
     }

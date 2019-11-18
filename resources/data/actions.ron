@@ -1,0 +1,33 @@
+(
+    actions: [
+        Action(
+            name: "harvest_wood",
+            cost: 1,
+            pre: {
+                Near("tree"): true
+            },
+            post: {
+                Destroy("tree"): true,
+                Near("wood"): true
+            }
+        ),
+        Action(
+            name: "find_wood",
+            cost: 1,
+            pre: {},
+            post: {
+                Near("tree"): true
+            }
+        ),
+        Action(
+            name: "pickup_wood",
+            cost: 1,
+            pre: {
+                Near("wood"): true
+            },
+            post: {
+                Has("wood"): true
+            }
+        )
+    ]
+)

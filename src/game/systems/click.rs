@@ -1,4 +1,4 @@
-use amethyst::{
+use core::amethyst::{
     core::Transform,
     ecs::{Entities, Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
     input::{InputHandler, StringBindings},
@@ -6,10 +6,11 @@ use amethyst::{
 };
 
 use crate::game::components::{Cursor, CursorDown, CursorSelected};
+use core::log;
 use libdwarf::{
-    actions::Action,
     components::{MapObject, MapPosition},
     resources::TaskQueue,
+    trigger::TriggerType,
 };
 
 pub struct ClickSystem;
@@ -67,13 +68,13 @@ impl<'s> System<'s> for ClickSystem {
 
                         if let Some(info) = obj_info {
                             if let Some(pos) = obj_pos {
-                                println!("click! {:?}", info);
+                                log::debug!("click! {:?}", info);
                                 // Add to task queue
-                                task_queue.add(Action::HarvestResource(
-                                    pos.pos,
-                                    String::from("tree"),
-                                    String::from("wood"),
-                                ));
+                                task_queue.add(TriggerType::HarvestResource {
+                                    target: obj_entity,
+                                    position: pos.pos,
+                                    resource: String::from("wood"),
+                                });
                             }
                         }
                     }

@@ -1,5 +1,7 @@
-use libterrain::Point3;
-use specs::{Component, VecStorage};
+use core::{
+    amethyst::ecs::{Component, VecStorage},
+    Point3,
+};
 
 mod object;
 mod resource;
