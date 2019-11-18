@@ -26,9 +26,17 @@ the idea that each individual library can be tested and run by itself without th
 Libraries can depend on each other and often refer to each other, e.g. `libpath`
 will need to refer to types in `libterrain` to make sure a path is unencumbered.
 
+### core
+
+Module used to hold shared dependencies and utility functions.
+
 ### libdwarf
 
 The core of `stone-cunning`, used to simulate the dwarfs and (eventually) monsters.
+
+### libpath
+
+Library used to pathfind.
 
 ### libterrain
 
@@ -38,7 +46,7 @@ maps, etc.
 ## Roadmap (TODOs)
 
 ### Core Mechanics
-- [ ] Pathing
+- [x] Pathing
 - [ ] Resource gathering
 - [ ] Mining
 - [ ] Buildings
