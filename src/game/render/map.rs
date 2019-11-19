@@ -13,19 +13,17 @@ use libterrain::Biome;
 pub struct MapRenderer {
     pub tile_width: f32,
     pub tile_height: f32,
-    pub tile_offset: f32,
 }
 
 impl MapRenderer {
     pub fn initialize(world: &mut World) -> Self {
-        let (tile_height, tile_width, tile_offset) = {
+        let (tile_height, tile_width) = {
             let config = &world.read_resource::<GameConfig>();
-            (config.tile_height, config.tile_width, config.tile_offset)
+            (config.tile_height, config.tile_width)
         };
 
         let map_render = MapRenderer {
             tile_height: tile_height as f32,
-            tile_offset: tile_offset as f32,
             tile_width: tile_width as f32,
         };
 
@@ -79,7 +77,7 @@ impl MapRenderer {
     pub fn to_map_coords(&self, x: f32, y: f32) -> (i32, i32) {
         // Convert position to cartesian coordinates
         let tw = self.tile_width;
-        let th = self.tile_height - self.tile_offset;
+        let th = self.tile_height;
 
         let mx = (x / tw) + (y / th);
         let my = (y / th) - (x / tw);
@@ -97,7 +95,7 @@ impl MapRenderer {
         let mut transform = Transform::default();
 
         let px = (x - y) as f32 * self.tile_width / 2.0;
-        let py = (x + y) as f32 * (self.tile_height - self.tile_offset) / 2.0
+        let py = (x + y) as f32 * self.tile_height / 2.0
             + ((z as f32) * self.tile_height);
         let pz = -(x + y) as f32 + zoffset;
 
