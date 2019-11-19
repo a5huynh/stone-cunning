@@ -20,5 +20,7 @@
     },
     actions: {
         "menu": [ [Key(M)], ],
+        "rotate_world_left": [ [Key(Comma)], ],
+        "rotate_world_right": [ [Key(Period)], ]
     },
 )
