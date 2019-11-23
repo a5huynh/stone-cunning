@@ -8,6 +8,13 @@ use core::amethyst::{
 use libdwarf::resources::Map;
 use libterrain::Biome;
 
+pub enum Direction {
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST
+}
+
 /// Map resource used to convert coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
 pub struct MapRenderer {
@@ -62,7 +69,7 @@ impl MapRenderer {
                         }
 
                         block
-                            .with(map_render.place(x as i32, y as i32, z as i32, 0.0))
+                            .with(map_render.place(x as i32, y as i32, z as i32, 0.0, Direction::NORTH))
                             .with(Transparent)
                             .build();
                     }
@@ -91,7 +98,14 @@ impl MapRenderer {
     ///
     /// The zoffset is a float, to allow for multiple objects coexisting
     /// on a single tile in a certain order.
-    pub fn place(&self, x: i32, y: i32, z: i32, zoffset: f32) -> Transform {
+    pub fn place(
+        &self,
+        x: i32,
+        y: i32,
+        z: i32,
+        zoffset: f32,
+        direction: Direction,
+    ) -> Transform {
         let mut transform = Transform::default();
 
         let px = (x - y) as f32 * self.tile_width / 2.0;
