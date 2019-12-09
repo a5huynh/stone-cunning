@@ -25,7 +25,6 @@ pub struct RunningState<'a, 'b> {
     input_dispatcher: Option<Dispatcher<'a, 'b>>,
     ui_dispatcher: Option<Dispatcher<'a, 'b>>,
     paused: bool,
-    zoom: f32,
 }
 
 impl Default for RunningState<'_, '_> {
@@ -35,7 +34,6 @@ impl Default for RunningState<'_, '_> {
             input_dispatcher: None,
             ui_dispatcher: None,
             paused: false,
-            zoom: 3.0,
         }
     }
 }
@@ -95,7 +93,8 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
             let map_render = world.read_resource::<MapRenderer>();
             map_render.place(&Point3::new(8, 8, 42), 0.0, Direction::NORTH)
         };
-        initialize_camera(world, point, self.zoom);
+
+        initialize_camera(world, point);
 
         // Create the ui
         world.exec(|mut creator: UiCreator<'_>| {
@@ -171,23 +170,20 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
     }
 }
 
-fn initialize_camera(world: &mut World, center: Transform, cam_zoom: f32) {
+fn initialize_camera(world: &mut World, center: Transform) {
     let (window_width, window_height) = {
         let display = world.read_resource::<DisplayConfig>();
         display.dimensions.unwrap()
     };
 
-    // Add an entity we can use to move around the camera.
-    let mut transform = center.clone();
-    transform.set_translation_z(10.0);
     let entity = world
         .create_entity()
         .with(CameraFollow::default())
-        .with(transform.clone())
+        .with(center.clone())
         .build();
 
-    let width = window_width as f32 / cam_zoom;
-    let height = window_height as f32 / cam_zoom;
+    let width = window_width as f32 / 2.0;
+    let height = window_height as f32 / 2.0;
 
     world
         .create_entity()
@@ -196,8 +192,8 @@ fn initialize_camera(world: &mut World, center: Transform, cam_zoom: f32) {
             width as f32,
             -(height as f32),
             height as f32,
-            -100.0,
-            100.0,
+            0.1,
+            2000.0,
         )))
         .with(Parent { entity })
         .with(Transform::default())
