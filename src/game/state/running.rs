@@ -1,5 +1,5 @@
 use core::amethyst::{
-    core::{transform::Transform, ArcThreadPool, Parent, SystemBundle, Time},
+    core::{math::Point3, transform::Transform, ArcThreadPool, Parent, SystemBundle, Time},
     ecs::{Dispatcher, DispatcherBuilder},
     input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
@@ -11,7 +11,7 @@ use core::amethyst::{
 
 use crate::game::{
     components::CameraFollow,
-    render::MapRenderer,
+    render::{Direction, MapRenderer},
     systems::{
         camera, debug, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
         RenderNPCSystem, RenderObjectSystem,
@@ -93,7 +93,7 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
         // Initialize the camera
         let point = {
             let map_render = world.read_resource::<MapRenderer>();
-            map_render.place(8, 8, 42, 0.0)
+            map_render.place(&Point3::new(8, 8, 42), 0.0, Direction::NORTH)
         };
         initialize_camera(world, point, self.zoom);
 

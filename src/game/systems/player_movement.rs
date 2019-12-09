@@ -4,7 +4,11 @@ use core::amethyst::{
     input::{InputHandler, StringBindings},
 };
 
-use crate::game::{components::Player, config::PlayerConfig, render::MapRenderer};
+use crate::game::{
+    components::Player,
+    config::PlayerConfig,
+    render::{Direction, MapRenderer},
+};
 use core::Point3;
 use libdwarf::resources::Map;
 
@@ -50,8 +54,13 @@ impl<'s> System<'s> for PlayerMovement {
                 (map_x + x_move as i32, map_y + y_move as i32)
             };
 
-            if !map.has_collision(Point3::new(new_x, new_y, 0)) {
-                let new_transform = map_render.place(new_x, new_y, 0, 1.0);
+            let pt = Point3::new(new_x, new_y, 0);
+            if !map.has_collision(pt) {
+                let new_transform = map_render.place(
+                    &Point3::new(pt.x as u32, pt.y as u32, pt.z as u32),
+                    1.0,
+                    Direction::NORTH,
+                );
                 transform.set_translation_x(new_transform.translation().x);
                 transform.set_translation_y(new_transform.translation().y);
                 transform.set_translation_z(new_transform.translation().z);

@@ -6,7 +6,10 @@ use core::amethyst::{
 
 use libdwarf::components::{MapPosition, Worker};
 
-use crate::game::{render::MapRenderer, sprite::SpriteSheetStorage};
+use crate::game::{
+    render::{Direction, MapRenderer},
+    sprite::SpriteSheetStorage,
+};
 
 pub struct RenderNPCSystem;
 impl<'a> System<'a> for RenderNPCSystem {
@@ -43,10 +46,7 @@ impl<'a> System<'a> for RenderNPCSystem {
             // Appply transformation
             let pos = map_pos.pos;
             transforms
-                .insert(
-                    entity,
-                    map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 1.0),
-                )
+                .insert(entity, map_render.place(&pos, 1.0, Direction::NORTH))
                 .unwrap();
             // Assign sprite to entity
             sprites
@@ -64,7 +64,7 @@ impl<'a> System<'a> for RenderNPCSystem {
         // Update object positions
         for (_, map_pos, transform) in (&mut workers, &positions, &mut transforms).join() {
             let pos = map_pos.pos;
-            let new_transform = map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 0.9);
+            let new_transform = map_render.place(&pos, 0.9, Direction::NORTH);
             transform.set_translation_xyz(
                 new_transform.translation().x,
                 new_transform.translation().y,

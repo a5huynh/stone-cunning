@@ -6,7 +6,10 @@ use core::amethyst::{
 
 use libdwarf::components::{MapObject, MapPosition};
 
-use crate::game::{render::MapRenderer, sprite::SpriteSheetStorage};
+use crate::game::{
+    render::{Direction, MapRenderer},
+    sprite::SpriteSheetStorage,
+};
 
 pub struct RenderObjectSystem;
 impl<'a> System<'a> for RenderObjectSystem {
@@ -43,10 +46,7 @@ impl<'a> System<'a> for RenderObjectSystem {
             // Appply transformation
             let pos = map_pos.pos;
             transforms
-                .insert(
-                    entity,
-                    map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 1.0),
-                )
+                .insert(entity, map_render.place(&pos, 1.0, Direction::NORTH))
                 .unwrap();
             // Assign sprite to entity
             sprites

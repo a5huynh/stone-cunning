@@ -1,6 +1,6 @@
 use crate::game::{config::GameConfig, sprite::SpriteSheetStorage};
 use core::amethyst::{
-    core::transform::Transform,
+    core::{math::Point3, transform::Transform},
     prelude::*,
     renderer::{SpriteRender, Transparent},
 };
@@ -12,7 +12,7 @@ pub enum Direction {
     NORTH,
     EAST,
     SOUTH,
-    WEST
+    WEST,
 }
 
 /// Map resource used to convert coordinates into map coordinates, check for
@@ -48,6 +48,7 @@ impl MapRenderer {
         for y in 0..height {
             for x in 0..width {
                 for z in 32..64 {
+                    let pt = Point3::new(x, y, z);
                     if let Some(biome) = terrain.get(x as u32, y as u32, z as u32) {
                         let mut block = world.create_entity();
                         if terrain.is_visible(x as u32, y as u32, z as u32) {
@@ -69,7 +70,7 @@ impl MapRenderer {
                         }
 
                         block
-                            .with(map_render.place(x as i32, y as i32, z as i32, 0.0, Direction::NORTH))
+                            .with(map_render.place(&pt, 0.0, Direction::NORTH))
                             .with(Transparent)
                             .build();
                     }
@@ -98,20 +99,33 @@ impl MapRenderer {
     ///
     /// The zoffset is a float, to allow for multiple objects coexisting
     /// on a single tile in a certain order.
-    pub fn place(
-        &self,
-        x: i32,
-        y: i32,
-        z: i32,
-        zoffset: f32,
-        direction: Direction,
-    ) -> Transform {
+    pub fn place(&self, pt: &Point3<u32>, zoffset: f32, direction: Direction) -> Transform {
         let mut transform = Transform::default();
 
-        let px = (x - y) as f32 * self.tile_width / 2.0;
-        let py = (x + y) as f32 * self.tile_height / 2.0
-            + ((z as f32) * self.tile_height);
-        let pz = -(x + y) as f32 + zoffset;
+        let fx = pt.x as f32;
+        let fy = pt.y as f32;
+        let fz = pt.z as f32;
+
+        let mut px = 0.0;
+        let mut py = 0.0;
+
+        match direction {
+            Direction::NORTH => {
+                px = (fx - fy) * self.tile_width / 2.0;
+                py = (fx + fy) * self.tile_height / 2.0 + (fz * self.tile_height);
+            }
+            Direction::EAST => {
+                px = (fx - fy) * self.tile_width / 2.0;
+                py = (fx + fy) * self.tile_height / 2.0 + (fz * self.tile_height);
+            }
+            Direction::SOUTH => {
+                px = (fx - fy) * self.tile_width / 2.0;
+                py = (fx + fy) * self.tile_height / 2.0 + (fz * self.tile_height);
+            }
+            _ => {}
+        };
+
+        let pz = -(fx + fy) + zoffset;
 
         transform.set_translation_xyz(px, py, pz);
         transform
