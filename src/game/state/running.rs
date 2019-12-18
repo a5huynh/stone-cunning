@@ -10,8 +10,8 @@ use core::amethyst::{
 };
 
 use crate::game::{
-    components::CameraFollow,
-    render::{Direction, MapRenderer},
+    components::{CameraFollow, Direction},
+    resources::MapRenderer,
     systems::{
         camera, debug, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
         RenderNPCSystem, RenderObjectSystem,
@@ -41,6 +41,7 @@ impl Default for RunningState<'_, '_> {
 impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
     fn on_start(&mut self, mut data: StateData<'_, GameData<'_, '_>>) {
         let mut world = &mut data.world;
+
         world.insert(DebugLines::new());
 
         let mut dispatcher_builder = DispatcherBuilder::new();
@@ -59,8 +60,9 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
         // We handle click after the cursor is correctly transformed on the map.
         input_db.add(ClickSystem, "click", &["cursor"]);
         // Moving around the map
-        input_db.add(camera::MapMovementSystem, "map_movement", &[]);
         input_db.add(camera::CameraZoomSystem, "camera_zoom", &[]);
+        input_db.add(camera::MapMovementSystem, "map_movement", &[]);
+        input_db.add(camera::MapRotateSystem, "map_rotate", &[]);
         input_db.add(PlayerMovement, "player_movement", &[]);
 
         let mut ui_db = DispatcherBuilder::new();
@@ -89,12 +91,15 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
         self.ui_dispatcher = Some(ui_dispatcher);
 
         // Initialize the camera
-        let point = {
+        let mut cam_transform = {
             let map_render = world.read_resource::<MapRenderer>();
             map_render.place(&Point3::new(8, 8, 42), 0.0, Direction::NORTH)
         };
 
-        initialize_camera(world, point);
+        // let mut transform = Transform::default();
+        // transform.set_translation_xyz(0.0, 0.0, 2000.0);
+        cam_transform.set_translation_z(0.0);
+        initialize_camera(world, cam_transform);
 
         // Create the ui
         world.exec(|mut creator: UiCreator<'_>| {
@@ -193,7 +198,7 @@ fn initialize_camera(world: &mut World, center: Transform) {
             -(height as f32),
             height as f32,
             0.1,
-            2000.0,
+            10000.0,
         )))
         .with(Parent { entity })
         .with(Transform::default())

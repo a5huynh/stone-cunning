@@ -6,10 +6,7 @@ use core::amethyst::{
 
 use libdwarf::components::{MapPosition, Worker};
 
-use crate::game::{
-    render::{Direction, MapRenderer},
-    sprite::SpriteSheetStorage,
-};
+use crate::game::{components::Direction, resources::MapRenderer, sprite::SpriteSheetStorage};
 
 pub struct RenderNPCSystem;
 impl<'a> System<'a> for RenderNPCSystem {
@@ -42,6 +39,7 @@ impl<'a> System<'a> for RenderNPCSystem {
             (&*entities, &mut workers, &positions, !&sprites)
                 .join()
                 .collect();
+
         for (entity, _, map_pos, _) in invisible {
             // Appply transformation
             let pos = map_pos.pos;

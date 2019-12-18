@@ -7,8 +7,8 @@ use core::amethyst::{
 };
 
 use crate::game::{
-    components::{CameraFollow, Cursor, CursorSelected, PickInfo},
-    render::{Direction, MapRenderer},
+    components::{CameraFollow, Cursor, CursorSelected, Direction, PickInfo},
+    resources::MapRenderer,
     utils::camera_to_world,
 };
 use core::Point3;

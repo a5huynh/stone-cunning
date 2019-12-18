@@ -1,19 +1,14 @@
-use crate::game::{config::GameConfig, sprite::SpriteSheetStorage};
+use crate::game::{components::Direction, config::GameConfig, sprite::SpriteSheetStorage};
+
 use core::amethyst::{
-    core::{math::Point3, transform::Transform},
+    core::{math::Point3, transform::Transform, Hidden},
     prelude::*,
     renderer::{SpriteRender, Transparent},
 };
+use std::f32::consts::{FRAC_PI_2, PI};
 
-use libdwarf::resources::Map;
+use libdwarf::{components::MapPosition, resources::Map};
 use libterrain::Biome;
-
-pub enum Direction {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST,
-}
 
 /// Map resource used to convert coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
@@ -51,28 +46,33 @@ impl MapRenderer {
                     let pt = Point3::new(x, y, z);
                     if let Some(biome) = terrain.get(x as u32, y as u32, z as u32) {
                         let mut block = world.create_entity();
-                        if terrain.is_visible(x as u32, y as u32, z as u32) {
-                            let sprite_idx = match biome {
-                                Biome::TAIGA => 0,
-                                Biome::SNOW | Biome::TUNDRA => 1,
-                                Biome::GRASSLAND => 2,
-                                Biome::OCEAN => 3,
-                                Biome::BEACH => 4,
-                                Biome::ROCK => 5,
-                            };
+                        let sprite_idx = match biome {
+                            Biome::TAIGA => 0,
+                            Biome::SNOW | Biome::TUNDRA => 1,
+                            Biome::GRASSLAND => 2,
+                            Biome::OCEAN => 3,
+                            Biome::BEACH => 4,
+                            Biome::ROCK => 5,
+                        };
 
-                            let terrain_render = SpriteRender {
-                                sprite_sheet: sprite_sheet.clone(),
-                                sprite_number: sprite_idx,
-                            };
+                        let terrain_render = SpriteRender {
+                            sprite_sheet: sprite_sheet.clone(),
+                            sprite_number: sprite_idx,
+                        };
 
-                            block = block.with(terrain_render);
+                        block = block
+                            .with(terrain_render)
+                            // Grid position
+                            .with(MapPosition { pos: pt })
+                            // Rendered position
+                            .with(map_render.place(&pt, 0.0, Direction::NORTH))
+                            .with(Transparent);
+
+                        if !terrain.is_visible(x as u32, y as u32, z as u32) {
+                            block = block.with(Hidden);
                         }
 
-                        block
-                            .with(map_render.place(&pt, 0.0, Direction::NORTH))
-                            .with(Transparent)
-                            .build();
+                        block.build();
                     }
                 }
             }
@@ -97,6 +97,8 @@ impl MapRenderer {
     /// Creates a transform that would place an object on the map using
     /// map coordinates at <x, y, z> w/ zindex.
     ///
+    /// Given a Direction, uses a rotation matrix to rotate the coordinates.
+    ///
     /// The zoffset is a float, to allow for multiple objects coexisting
     /// on a single tile in a certain order.
     pub fn place(&self, pt: &Point3<u32>, zoffset: f32, direction: Direction) -> Transform {
@@ -106,28 +108,29 @@ impl MapRenderer {
         let fy = pt.y as f32;
         let fz = pt.z as f32;
 
-        let mut px = 0.0;
-        let mut py = 0.0;
-
-        match direction {
-            Direction::NORTH => {
-                px = (fx - fy) * self.tile_width / 2.0;
-                py = (fx + fy) * self.tile_height / 2.0 + (fz * self.tile_height);
-            }
-            Direction::EAST => {
-                px = (fx - fy) * self.tile_width / 2.0;
-                py = (fx + fy) * self.tile_height / 2.0 + (fz * self.tile_height);
-            }
-            Direction::SOUTH => {
-                px = (fx - fy) * self.tile_width / 2.0;
-                py = (fx + fy) * self.tile_height / 2.0 + (fz * self.tile_height);
-            }
-            _ => {}
+        // Determine how we should rotate the coordinates
+        let rotation: f32 = match direction {
+            Direction::NORTH => 0.0,
+            Direction::EAST => FRAC_PI_2,
+            Direction::SOUTH => PI,
+            Direction::WEST => -FRAC_PI_2,
         };
 
-        let pz = -(fx + fy) + zoffset;
+        let cos_rot = rotation.cos();
+        let sin_rot = rotation.sin();
 
-        transform.set_translation_xyz(px, py, pz);
+        // Center in window, rotate around new origin, and then translate back.
+        // TODO: keep track of window
+        let px = ((fx - 32.0) * cos_rot) - ((fy - 32.0) * sin_rot) + 32.0;
+        let py = ((fx - 32.0) * sin_rot) + ((fy - 32.0) * cos_rot) + 32.0;
+
+        // Scale and convert to iso coordinates
+        let tx = (px - py) * self.tile_width / 2.0;
+        let ty = (px + py) * self.tile_height / 2.0 + (fz * self.tile_height);
+        let tz = -(px + py) + zoffset;
+
+        // Set translation
+        transform.set_translation_xyz(tx, ty, tz);
         transform
     }
 }

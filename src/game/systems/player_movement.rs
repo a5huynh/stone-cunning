@@ -5,9 +5,9 @@ use core::amethyst::{
 };
 
 use crate::game::{
-    components::Player,
+    components::{Direction, Player},
     config::PlayerConfig,
-    render::{Direction, MapRenderer},
+    resources::MapRenderer,
 };
 use core::Point3;
 use libdwarf::resources::Map;

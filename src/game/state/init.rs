@@ -13,7 +13,7 @@ use std::time::SystemTime;
 use crate::game::{
     components::{Cursor, CursorSelected, Object, Player},
     config::GameConfig,
-    render::MapRenderer,
+    resources::{CameraWindow, MapRenderer},
     sprite::SpriteSheetStorage,
     state::RunningState,
 };
@@ -55,6 +55,7 @@ impl SimpleState for InitState {
         WorldSim::new(world, &terrain_gen.get_terrain(), map_width, map_height);
 
         // Render map
+        world.insert(CameraWindow::default());
         let map_render = MapRenderer::initialize(world);
         world.insert(map_render);
 

@@ -1,20 +1,14 @@
-use core::amethyst::ecs::prelude::{Component, DenseVecStorage};
-use specs_derive::*;
-
+mod camera;
 mod cursor;
 mod player;
 mod terrain;
+pub use camera::*;
 pub use cursor::*;
 pub use player::*;
 pub use terrain::*;
 
 use core::Point3;
 use libterrain::Biome;
-
-#[derive(Component, Default)]
-#[storage(DenseVecStorage)]
-/// Used to move the camera and to follow around other entities
-pub struct CameraFollow;
 
 #[derive(Clone, Debug, Default)]
 pub struct PickInfo {

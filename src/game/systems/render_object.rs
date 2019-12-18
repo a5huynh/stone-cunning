@@ -6,10 +6,7 @@ use core::amethyst::{
 
 use libdwarf::components::{MapObject, MapPosition};
 
-use crate::game::{
-    render::{Direction, MapRenderer},
-    sprite::SpriteSheetStorage,
-};
+use crate::game::{components::Direction, resources::MapRenderer, sprite::SpriteSheetStorage};
 
 pub struct RenderObjectSystem;
 impl<'a> System<'a> for RenderObjectSystem {

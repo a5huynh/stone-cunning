@@ -8,10 +8,7 @@ use core::amethyst::{
 };
 use specs_derive::*;
 
-use crate::game::{
-    render::{Direction, MapRenderer},
-    sprite::SpriteSheetStorage,
-};
+use crate::game::{components::Direction, resources::MapRenderer, sprite::SpriteSheetStorage};
 use libdwarf::components::Worker;
 
 #[derive(Component, Default)]
