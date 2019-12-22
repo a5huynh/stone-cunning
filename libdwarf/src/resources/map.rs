@@ -5,7 +5,7 @@ use core::amethyst::{
 use std::collections::HashMap;
 
 use crate::{
-    components::{MapObject, MapPosition},
+    components::{EntityInfo, MapObject},
     config::ResourceConfig,
 };
 
@@ -43,7 +43,10 @@ impl Map {
                 }
             };
 
-            entity_builder = entity_builder.with(MapPosition { pos: *pos });
+            entity_builder = entity_builder.with(EntityInfo {
+                pos: *pos,
+                z_offset: 1.0,
+            });
             let entity = entity_builder.build();
             object_map.insert(*pos, entity.id());
         }
@@ -87,8 +90,8 @@ impl Map {
 
     pub fn find_path(&self, start: &Point3<u32>, end: &Point3<u32>) -> Path {
         let (_, path) = find_path(
-            start.clone(),
-            end.clone(),
+            *start,
+            *end,
             |node| TerrainChunk::heuristic(&node, start),
             |pt| self.terrain.neighbors(pt),
         );

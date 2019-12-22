@@ -13,6 +13,7 @@ pub use worker::*;
 
 #[derive(Clone, Component, Debug)]
 #[storage(VecStorage)]
-pub struct MapPosition {
+pub struct EntityInfo {
     pub pos: Point3<u32>,
+    pub z_offset: f32,
 }

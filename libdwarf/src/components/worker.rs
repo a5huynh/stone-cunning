@@ -6,7 +6,7 @@ use core::{utils::is_near, Point3};
 use libterrain::Path;
 
 use crate::{
-    components::{MapObject, MapPosition},
+    components::{EntityInfo, MapObject},
     planner::{Action, Condition, State},
     resources::{Map, TaskQueue},
     trigger::TriggerType,
@@ -68,7 +68,7 @@ impl Worker {
         &mut self,
         tasks: &mut TaskQueue,
         map: &mut Map,
-        map_pos: &mut MapPosition,
+        entity_info: &mut EntityInfo,
         target_obj: Option<&MapObject>,
     ) {
         // An action will be marked as finished once all it's conditions are
@@ -109,23 +109,24 @@ impl Worker {
                     // Path closer to this entity
                     Condition::Near(_) => {
                         // Does this worker have a path?
-                        if self.current_path.is_none() && !is_near(&map_pos.pos, &action.target_pos)
+                        if self.current_path.is_none()
+                            && !is_near(&entity_info.pos, &action.target_pos)
                         {
                             // If not, path from it's current position to the entity.
                             self.current_path =
-                                Some(map.find_path(&map_pos.pos, &action.target_pos));
+                                Some(map.find_path(&entity_info.pos, &action.target_pos));
                         }
 
                         // Move worker to next location in path!
                         if let Some(path) = self.current_path.as_mut() {
                             if let Some(new_pt) = path.pop() {
-                                if is_near(&map_pos.pos, &action.target_pos) {
+                                if is_near(&entity_info.pos, &action.target_pos) {
                                     // Finished!
                                     finished = finished && true;
                                 } else {
                                     // Move laong path.
-                                    let current_pos = map_pos.pos.clone();
-                                    map_pos.pos = new_pt;
+                                    let current_pos = entity_info.pos.clone();
+                                    entity_info.pos = new_pt;
                                     map.move_worker(self.id, current_pos, new_pt);
                                     finished = false;
                                 }

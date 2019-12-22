@@ -10,7 +10,7 @@ use core::amethyst::{
 };
 
 use crate::game::{
-    components::{CameraFollow, Direction},
+    components::CameraFollow,
     resources::MapRenderer,
     systems::{
         camera, debug, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
@@ -93,7 +93,7 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
         // Initialize the camera
         let mut cam_transform = {
             let map_render = world.read_resource::<MapRenderer>();
-            map_render.place(&Point3::new(8, 8, 42), 0.0, Direction::NORTH)
+            map_render.place(&Point3::new(8, 8, 42), 0.0)
         };
 
         // let mut transform = Transform::default();

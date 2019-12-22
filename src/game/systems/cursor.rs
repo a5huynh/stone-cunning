@@ -7,7 +7,7 @@ use core::amethyst::{
 };
 
 use crate::game::{
-    components::{CameraFollow, Cursor, CursorSelected, Direction, PickInfo},
+    components::{CameraFollow, Cursor, CursorSelected, PickInfo},
     resources::MapRenderer,
     utils::camera_to_world,
 };
@@ -104,7 +104,6 @@ impl<'s> System<'s> for CursorSystem {
             let new_transform = map_render.place(
                 &Point3::new(map_pt.x as u32, map_pt.y as u32, map_pt.z as u32),
                 0.0,
-                Direction::NORTH,
             );
             cursor_transform.set_translation_x(new_transform.translation().x);
             cursor_transform.set_translation_y(new_transform.translation().y);

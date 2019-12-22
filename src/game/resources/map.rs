@@ -7,12 +7,16 @@ use core::amethyst::{
 };
 use std::f32::consts::{FRAC_PI_2, PI};
 
-use libdwarf::{components::MapPosition, resources::Map};
+use libdwarf::{components::EntityInfo, resources::Map};
 use libterrain::Biome;
 
 /// Map resource used to convert coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
 pub struct MapRenderer {
+    /// rotation - which direction along the map the camera is looking.
+    pub rotation: Direction,
+    pub rotate_cooldown: bool,
+
     pub tile_width: f32,
     pub tile_height: f32,
 }
@@ -25,6 +29,8 @@ impl MapRenderer {
         };
 
         let map_render = MapRenderer {
+            rotation: Direction::NORTH,
+            rotate_cooldown: false,
             tile_height: tile_height as f32,
             tile_width: tile_width as f32,
         };
@@ -63,9 +69,12 @@ impl MapRenderer {
                         block = block
                             .with(terrain_render)
                             // Grid position
-                            .with(MapPosition { pos: pt })
+                            .with(EntityInfo {
+                                pos: pt,
+                                z_offset: 0.0,
+                            })
                             // Rendered position
-                            .with(map_render.place(&pt, 0.0, Direction::NORTH))
+                            .with(map_render.place(&pt, 0.0))
                             .with(Transparent);
 
                         if !terrain.is_visible(x as u32, y as u32, z as u32) {
@@ -79,6 +88,30 @@ impl MapRenderer {
         }
 
         map_render
+    }
+
+    pub fn rotate_left(&mut self) {
+        let new_rotation = match self.rotation {
+            Direction::NORTH => Direction::EAST,
+            Direction::EAST => Direction::SOUTH,
+            Direction::SOUTH => Direction::WEST,
+            Direction::WEST => Direction::NORTH,
+        };
+
+        self.rotate_cooldown = true;
+        self.rotation = new_rotation;
+    }
+
+    pub fn rotate_right(&mut self) {
+        let new_rotation = match self.rotation {
+            Direction::NORTH => Direction::WEST,
+            Direction::WEST => Direction::SOUTH,
+            Direction::SOUTH => Direction::EAST,
+            Direction::EAST => Direction::NORTH,
+        };
+
+        self.rotate_cooldown = true;
+        self.rotation = new_rotation;
     }
 
     /// Converts some point <x, y> into map coordinates.
@@ -101,7 +134,7 @@ impl MapRenderer {
     ///
     /// The zoffset is a float, to allow for multiple objects coexisting
     /// on a single tile in a certain order.
-    pub fn place(&self, pt: &Point3<u32>, zoffset: f32, direction: Direction) -> Transform {
+    pub fn place(&self, pt: &Point3<u32>, zoffset: f32) -> Transform {
         let mut transform = Transform::default();
 
         let fx = pt.x as f32;
@@ -109,7 +142,7 @@ impl MapRenderer {
         let fz = pt.z as f32;
 
         // Determine how we should rotate the coordinates
-        let rotation: f32 = match direction {
+        let rotation: f32 = match self.rotation {
             Direction::NORTH => 0.0,
             Direction::EAST => FRAC_PI_2,
             Direction::SOUTH => PI,

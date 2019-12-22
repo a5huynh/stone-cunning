@@ -4,16 +4,16 @@ use core::amethyst::{
     renderer::{SpriteRender, Transparent},
 };
 
-use libdwarf::components::{MapObject, MapPosition};
+use libdwarf::components::{EntityInfo, MapObject};
 
-use crate::game::{components::Direction, resources::MapRenderer, sprite::SpriteSheetStorage};
+use crate::game::{resources::MapRenderer, sprite::SpriteSheetStorage};
 
 pub struct RenderObjectSystem;
 impl<'a> System<'a> for RenderObjectSystem {
     type SystemData = (
         Entities<'a>,
         WriteStorage<'a, MapObject>,
-        ReadStorage<'a, MapPosition>,
+        ReadStorage<'a, EntityInfo>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, SpriteRender>,
         WriteStorage<'a, Transparent>,
@@ -35,7 +35,7 @@ impl<'a> System<'a> for RenderObjectSystem {
         ): Self::SystemData,
     ) {
         // Find objects that don't have a sprite and give it one.
-        let invisible: Vec<(Entity, &mut MapObject, &MapPosition, ())> =
+        let invisible: Vec<(Entity, &mut MapObject, &EntityInfo, ())> =
             (&*entities, &mut objects, &positions, !&sprites)
                 .join()
                 .collect();
@@ -43,7 +43,7 @@ impl<'a> System<'a> for RenderObjectSystem {
             // Appply transformation
             let pos = map_pos.pos;
             transforms
-                .insert(entity, map_render.place(&pos, 1.0, Direction::NORTH))
+                .insert(entity, map_render.place(&pos, 1.0))
                 .unwrap();
             // Assign sprite to entity
             sprites

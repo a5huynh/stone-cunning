@@ -3,7 +3,7 @@ use core::amethyst::ecs::{
 };
 
 use crate::{
-    components::{MapObject, MapPosition, Worker, WorkerAction},
+    components::{EntityInfo, MapObject, Worker, WorkerAction},
     config::WorldConfig,
     planner::{Condition, Planner, State},
     resources::{time::Time, Map, TaskQueue},
@@ -17,7 +17,7 @@ impl<'a> System<'a> for WorkerSystem {
         Entities<'a>,
         WriteStorage<'a, Worker>,
         ReadStorage<'a, MapObject>,
-        WriteStorage<'a, MapPosition>,
+        WriteStorage<'a, EntityInfo>,
         WriteExpect<'a, Map>,
         WriteExpect<'a, Planner>,
         Write<'a, TaskQueue>,
@@ -27,9 +27,19 @@ impl<'a> System<'a> for WorkerSystem {
 
     fn run(
         &mut self,
-        (entities, mut workers, objects, mut positions, mut map, planner, mut tasks, time, config): Self::SystemData,
+        (
+            entities,
+            mut workers,
+            objects,
+            mut entity_infos,
+            mut map,
+            planner,
+            mut tasks,
+            time,
+            config,
+        ): Self::SystemData,
     ) {
-        for (_entity, worker, position) in (&*entities, &mut workers, &mut positions).join() {
+        for (_entity, worker, entity_info) in (&*entities, &mut workers, &mut entity_infos).join() {
             // Regen worker energy.
             if worker.energy < config.worker_stamina {
                 // NOTE: This might need to be revisited. Pausing the simulation would
@@ -46,7 +56,7 @@ impl<'a> System<'a> for WorkerSystem {
 
             // Assign new task if the current action was completed.
             if worker.current_action.is_none() {
-                let current_pos = &position.pos;
+                let current_pos = &entity_info.pos;
                 let mut state = State::new();
                 worker.add_state(&mut state);
                 match tasks.worker.pop_front() {
@@ -92,7 +102,7 @@ impl<'a> System<'a> for WorkerSystem {
                     target_obj = objects.get(entity);
                 }
 
-                worker.do_work(&mut tasks, &mut map, position, target_obj);
+                worker.do_work(&mut tasks, &mut map, entity_info, target_obj);
             }
 
             worker.energy -= config.action_cost;

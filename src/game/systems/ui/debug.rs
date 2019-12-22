@@ -1,5 +1,5 @@
 use amethyst_imgui::imgui::{im_str, Condition, Window};
-use core::amethyst::ecs::{Entities, Join, Read, ReadExpect, ReadStorage, System, Write};
+use core::amethyst::ecs::{Entities, Join, ReadExpect, ReadStorage, System, Write};
 
 use core::Point3;
 use libdwarf::{
@@ -8,7 +8,7 @@ use libdwarf::{
     trigger::TriggerType,
 };
 
-use crate::game::{components::CursorSelected, resources::CameraWindow};
+use crate::game::{components::CursorSelected, resources::MapRenderer};
 
 #[derive(Default)]
 pub struct DebugUI {
@@ -21,13 +21,13 @@ impl<'s> System<'s> for DebugUI {
         ReadStorage<'s, MapObject>,
         ReadStorage<'s, Worker>,
         ReadExpect<'s, CursorSelected>,
-        Read<'s, CameraWindow>,
+        ReadExpect<'s, MapRenderer>,
         Write<'s, TaskQueue>,
     );
 
     fn run(
         &mut self,
-        (entities, objects, workers, cursor_selected, camera_window, mut queue): Self::SystemData,
+        (entities, objects, workers, cursor_selected, map, mut queue): Self::SystemData,
     ) {
         amethyst_imgui::with(|ui| {
             Window::new(im_str!("Tasks"))
@@ -82,7 +82,7 @@ impl<'s> System<'s> for DebugUI {
             Window::new(im_str!("Hover"))
                 .size([300.0, 100.0], Condition::FirstUseEver)
                 .build(ui, || {
-                    let rotation_label = format!("Map Rotation: {:?}", camera_window.rotation);
+                    let rotation_label = format!("Map Rotation: {:?}", map.rotation);
                     ui.text(rotation_label);
 
                     let selected = &cursor_selected.hover_selected;
