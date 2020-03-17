@@ -7,11 +7,10 @@ use core::amethyst::{
 };
 
 use crate::game::{
-    components::{CameraFollow, Cursor, CursorSelected, PickInfo},
+    components::{Cursor, CursorSelected, PickInfo},
     resources::MapRenderer,
-    utils::camera_to_world,
 };
-use core::Point3;
+use core::{Point3, Vector2};
 use libdwarf::resources::Map;
 
 pub struct CursorSystem;
@@ -23,7 +22,6 @@ impl<'s> System<'s> for CursorSystem {
         Read<'s, InputHandler<StringBindings>>,
         WriteStorage<'s, Transform>,
         ReadStorage<'s, Camera>,
-        ReadStorage<'s, CameraFollow>,
         ReadExpect<'s, ScreenDimensions>,
         ReadExpect<'s, Map>,
         ReadExpect<'s, MapRenderer>,
@@ -37,32 +35,26 @@ impl<'s> System<'s> for CursorSystem {
             input,
             mut transforms,
             cameras,
-            follow,
             screen,
             map,
             map_render,
         ): Self::SystemData,
     ) {
         // Grab the transform from map movement.
-        let camera_follow = (&transforms, &follow).join().next().or(None);
-        let map_transform = {
-            if let Some((follow_transform, _)) = camera_follow {
-                (
-                    follow_transform.translation().x,
-                    follow_transform.translation().y,
-                )
-            } else {
-                (0.0, 0.0)
-            }
-        };
+        let screen_dimensions = Vector2::new(screen.width(), screen.height());
 
         // Grab the zoom level of the camera
         let camera_transform = (&transforms, &cameras).join().next().or(None);
-        // Convert mouse position into scene coordinates.
         let (scene_x, scene_y) = {
-            if let Some((mx, my)) = input.mouse_position() {
+            if let Some(mouse_pos) = input.mouse_position() {
                 if let Some((transform, camera)) = camera_transform {
-                    camera_to_world(mx, my, map_transform, &screen, camera, &transform.scale())
+                    let world_point = camera.projection().screen_to_world_point(
+                        Point3::new(mouse_pos.0, mouse_pos.1, transform.translation().z),
+                        screen_dimensions,
+                        transform,
+                    );
+
+                    (world_point.x, world_point.y)
                 } else {
                     (0.0, 0.0)
                 }
@@ -103,10 +95,10 @@ impl<'s> System<'s> for CursorSystem {
             // Move cursor to new position.
             let new_transform = map_render.place(
                 &Point3::new(map_pt.x as u32, map_pt.y as u32, map_pt.z as u32),
-                0.0,
+                0.0
             );
-            cursor_transform.set_translation_x(new_transform.translation().x);
-            cursor_transform.set_translation_y(new_transform.translation().y);
+
+            *cursor_transform = new_transform;
 
             // If there are worker/objects at this location, show debug info about
             // those

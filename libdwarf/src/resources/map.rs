@@ -47,6 +47,7 @@ impl Map {
                 pos: *pos,
                 z_offset: 1.0,
             });
+
             let entity = entity_builder.build();
             object_map.insert(*pos, entity.id());
         }

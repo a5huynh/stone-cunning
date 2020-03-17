@@ -4,4 +4,3 @@ pub mod resources;
 pub mod sprite;
 pub mod state;
 pub mod systems;
-pub mod utils;

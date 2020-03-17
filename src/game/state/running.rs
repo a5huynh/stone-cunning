@@ -190,6 +190,10 @@ fn initialize_camera(world: &mut World, center: Transform) {
     let width = window_width as f32 / 2.0;
     let height = window_height as f32 / 2.0;
 
+    // Move camera back so we can see the origin.
+    let mut transform = Transform::default();
+    transform.set_translation_xyz(0.0, 0.0, 1.0);
+
     world
         .create_entity()
         .with(Camera::from(Projection::orthographic(
@@ -201,6 +205,6 @@ fn initialize_camera(world: &mut World, center: Transform) {
             10000.0,
         )))
         .with(Parent { entity })
-        .with(Transform::default())
+        .with(transform)
         .build();
 }
