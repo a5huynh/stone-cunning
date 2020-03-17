@@ -103,8 +103,8 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
 
         // Create the ui
         world.exec(|mut creator: UiCreator<'_>| {
-            creator.create("resources/ui/debug.ron", ());
-            creator.create("resources/ui/toolbar.ron", ());
+            creator.create("ui/debug.ron", ());
+            creator.create("ui/toolbar.ron", ());
         });
     }
 

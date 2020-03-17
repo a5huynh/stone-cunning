@@ -5,8 +5,8 @@ authors = ["Andrew Huynh <a5thuynh@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-rand = "0.7.2"
-indexmap = "1.3.0"
+rand = "0.7.3"
+indexmap = "1.3.2"
 
 [dev-dependencies]
 core = { path = "../core" }

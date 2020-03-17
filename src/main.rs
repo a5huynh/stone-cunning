@@ -24,28 +24,27 @@ fn main() -> amethyst::Result<()> {
         .start();
 
     let app_root = application_root_dir()?;
+    let assets_dir = app_root.join("resources");
 
-    let display_config_path = app_root.join("resources").join("display_config.ron");
-    let binding_path = app_root.join("resources").join("bindings.ron");
-    let config_path = app_root.join("resources").join("config.ron");
+    let display_config_path = assets_dir.join("display_config.ron");
+    let binding_path = assets_dir.join("bindings.ron");
+    let config_path = assets_dir.join("config.ron");
 
-    let config = DisplayConfig::load(&display_config_path);
-    let game_config = DwarfConfig::load(&config_path);
+    let config = DisplayConfig::load(&display_config_path)?;
+    let game_config = DwarfConfig::load(&config_path)?;
     let input_bundle =
         InputBundle::<StringBindings>::new().with_bindings_from_file(binding_path)?;
 
     let game_data = GameDataBuilder::default()
         .with_bundle(AudioBundle::default())?
         .with_bundle(TransformBundle::new())?
+        .with_bundle(input_bundle)?
         .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(FpsCounterBundle::default())?
-        // Register the systems, give it a name, and specify any
-        // dependencies for that system.
-        .with_bundle(input_bundle)?
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
                 .with_plugin(
-                    RenderToWindow::from_config_path(display_config_path)
+                    RenderToWindow::from_config_path(display_config_path)?
                         .with_clear([0.0, 0.0, 0.0, 1.0]),
                 )
                 .with_plugin(RenderFlat2D::default())
@@ -53,7 +52,7 @@ fn main() -> amethyst::Result<()> {
                 .with_plugin(RenderImgui::<StringBindings>::default()),
         )?;
 
-    let mut game = Application::build("./", state::InitState::default())?
+    let mut game = Application::build(assets_dir, state::InitState::default())?
         .with_resource(config)
         .with_resource(game_config.game)
         .with_resource(game_config.player)

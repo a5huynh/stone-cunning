@@ -7,5 +7,5 @@ edition = "2018"
 [dependencies]
 core = { path = "../core" }
 noise = "0.6.0"
-rand = "0.7.2"
+rand = "0.7.3"
 libpath = { path = "../libpath" }

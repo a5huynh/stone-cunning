@@ -6,11 +6,10 @@ edition = "2018"
 publish = false
 
 [dependencies]
-# Workaround metal compilation error
-objc = "=0.2.6"
-rand = "0.7.2"
-serde = "1.0.101"
-specs-derive = "0.4.0"
+objc = "0.2.7"
+rand = "0.7.3"
+serde = "1.0.104"
+specs-derive = "0.4.1"
 core = { path = "core" }
 # Simulation code
 libdwarf = { path = "libdwarf" }
@@ -18,7 +17,9 @@ libdwarf = { path = "libdwarf" }
 libterrain = { path = "libterrain" }
 
 [dependencies.amethyst-imgui]
-version = "0.5.2"
+# Using forked repo until mainline is updated to amethyst 0.15
+git = "https://github.com/a5huynh/amethyst-imgui"
+# version = "0.6.1"
 # amethyst-imgui by default uses vulkan, however since we
 # primarily work in OSX, we need to turn this off.
 default-features = false
@@ -34,6 +35,10 @@ members = [
     # Pathing library
     'libpath',
 ]
+
+[profile.dev]
+opt-level = 3
+incremental = true
 
 [profile.release]
 debug = true

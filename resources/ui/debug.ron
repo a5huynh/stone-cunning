@@ -30,7 +30,7 @@ Container(
                     ),
                     text: (
                         text: "",
-                        font: File("resources/fonts/PxPlus_IBM_VGA8.ttf", ("TTF", ())),
+                        font: File("fonts/PxPlus_IBM_VGA8.ttf", ("TTF", ())),
                         font_size: 24.,
                         color: (0.0, 0.0, 0.0, 1.0),
                     )
