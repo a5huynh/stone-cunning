@@ -1,5 +1,5 @@
 use core::amethyst::{
-    core::{transform::Transform, ArcThreadPool, Parent, SystemBundle, Time},
+    core::{math::Point3, transform::Transform, ArcThreadPool, Parent, SystemBundle, Time},
     ecs::{Dispatcher, DispatcherBuilder},
     input::{is_close_requested, is_key_down, VirtualKeyCode},
     prelude::*,
@@ -11,7 +11,7 @@ use core::amethyst::{
 
 use crate::game::{
     components::CameraFollow,
-    render::MapRenderer,
+    resources::MapRenderer,
     systems::{
         camera, debug, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
         RenderNPCSystem, RenderObjectSystem,
@@ -25,7 +25,6 @@ pub struct RunningState<'a, 'b> {
     input_dispatcher: Option<Dispatcher<'a, 'b>>,
     ui_dispatcher: Option<Dispatcher<'a, 'b>>,
     paused: bool,
-    zoom: f32,
 }
 
 impl Default for RunningState<'_, '_> {
@@ -35,7 +34,6 @@ impl Default for RunningState<'_, '_> {
             input_dispatcher: None,
             ui_dispatcher: None,
             paused: false,
-            zoom: 3.0,
         }
     }
 }
@@ -43,6 +41,7 @@ impl Default for RunningState<'_, '_> {
 impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
     fn on_start(&mut self, mut data: StateData<'_, GameData<'_, '_>>) {
         let mut world = &mut data.world;
+
         world.insert(DebugLines::new());
 
         let mut dispatcher_builder = DispatcherBuilder::new();
@@ -61,8 +60,9 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
         // We handle click after the cursor is correctly transformed on the map.
         input_db.add(ClickSystem, "click", &["cursor"]);
         // Moving around the map
-        input_db.add(camera::MapMovementSystem, "map_movement", &[]);
         input_db.add(camera::CameraZoomSystem, "camera_zoom", &[]);
+        input_db.add(camera::MapMovementSystem, "map_movement", &[]);
+        input_db.add(camera::MapRotateSystem, "map_rotate", &[]);
         input_db.add(PlayerMovement, "player_movement", &[]);
 
         let mut ui_db = DispatcherBuilder::new();
@@ -91,16 +91,20 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
         self.ui_dispatcher = Some(ui_dispatcher);
 
         // Initialize the camera
-        let point = {
+        let mut cam_transform = {
             let map_render = world.read_resource::<MapRenderer>();
-            map_render.place(8, 8, 42, 0.0)
+            map_render.place(&Point3::new(8, 8, 42), 0.0)
         };
-        initialize_camera(world, point, self.zoom);
+
+        // let mut transform = Transform::default();
+        // transform.set_translation_xyz(0.0, 0.0, 2000.0);
+        cam_transform.set_translation_z(0.0);
+        initialize_camera(world, cam_transform);
 
         // Create the ui
         world.exec(|mut creator: UiCreator<'_>| {
-            creator.create("resources/ui/debug.ron", ());
-            creator.create("resources/ui/toolbar.ron", ());
+            creator.create("ui/debug.ron", ());
+            creator.create("ui/toolbar.ron", ());
         });
     }
 
@@ -171,23 +175,24 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
     }
 }
 
-fn initialize_camera(world: &mut World, center: Transform, cam_zoom: f32) {
+fn initialize_camera(world: &mut World, center: Transform) {
     let (window_width, window_height) = {
         let display = world.read_resource::<DisplayConfig>();
         display.dimensions.unwrap()
     };
 
-    // Add an entity we can use to move around the camera.
-    let mut transform = center.clone();
-    transform.set_translation_z(10.0);
     let entity = world
         .create_entity()
         .with(CameraFollow::default())
-        .with(transform.clone())
+        .with(center.clone())
         .build();
 
-    let width = window_width as f32 / cam_zoom;
-    let height = window_height as f32 / cam_zoom;
+    let width = window_width as f32 / 2.0;
+    let height = window_height as f32 / 2.0;
+
+    // Move camera back so we can see the origin.
+    let mut transform = Transform::default();
+    transform.set_translation_xyz(0.0, 0.0, 1.0);
 
     world
         .create_entity()
@@ -196,10 +201,10 @@ fn initialize_camera(world: &mut World, center: Transform, cam_zoom: f32) {
             width as f32,
             -(height as f32),
             height as f32,
-            -100.0,
-            100.0,
+            0.1,
+            10000.0,
         )))
         .with(Parent { entity })
-        .with(Transform::default())
+        .with(transform)
         .build();
 }

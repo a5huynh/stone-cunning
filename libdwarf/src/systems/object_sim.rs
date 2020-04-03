@@ -1,7 +1,7 @@
 use core::amethyst::ecs::{Entities, Join, System, Write, WriteStorage};
 
 use crate::{
-    components::{MapObject, MapPosition, ResourceAttribute},
+    components::{EntityInfo, MapObject, ResourceAttribute},
     resources::TaskQueue,
     trigger::TriggerType,
 };
@@ -11,13 +11,13 @@ impl<'a> System<'a> for ObjectSystem {
     type SystemData = (
         Entities<'a>,
         WriteStorage<'a, MapObject>,
-        WriteStorage<'a, MapPosition>,
+        WriteStorage<'a, EntityInfo>,
         Write<'a, TaskQueue>,
     );
 
-    fn run(&mut self, (entities, mut objects, mut positions, mut tasks): Self::SystemData) {
-        for (entity, object, position) in (&*entities, &mut objects, &mut positions).join() {
-            let current_pos = position.pos;
+    fn run(&mut self, (entities, mut objects, mut entity_infos, mut tasks): Self::SystemData) {
+        for (entity, object, entity_info) in (&*entities, &mut objects, &mut entity_infos).join() {
+            let current_pos = entity_info.pos;
             // Check object health. Queue destruction if <= 0.
             if object.health <= 0 {
                 // Destroy this object

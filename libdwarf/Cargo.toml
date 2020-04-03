@@ -6,8 +6,8 @@ edition = "2018"
 
 [dependencies]
 ron = "0.5.1"
-serde = "1.0.101"
-specs-derive = "0.4.0"
+serde = "1.0.104"
+specs-derive = "0.4.1"
 core = { path = "../core" }
 libterrain = { path = "../libterrain" }
 libpath = { path = "../libpath" }

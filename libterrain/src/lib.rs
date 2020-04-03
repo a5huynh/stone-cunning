@@ -1,4 +1,5 @@
 use noise::{NoiseFn, Perlin};
+use std::cmp::Ordering;
 
 mod poisson;
 use core::Point3;
@@ -75,13 +76,11 @@ impl TerrainGenerator {
                                 self.terrain.set(idx, Some(Biome::ROCK));
                             }
                         }
-                        _ => {
-                            if z == terrain_height {
-                                self.terrain.set(idx, Some(biome.clone()));
-                            } else if z < terrain_height {
-                                self.terrain.set(idx, Some(Biome::ROCK));
-                            }
-                        }
+                        _ => match z.cmp(&terrain_height) {
+                            Ordering::Equal => self.terrain.set(idx, Some(biome.clone())),
+                            Ordering::Less => self.terrain.set(idx, Some(Biome::ROCK)),
+                            _ => {}
+                        },
                     }
                 }
             }

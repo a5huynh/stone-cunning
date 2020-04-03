@@ -51,7 +51,7 @@ where
     let mut parents: IndexMap<N, (usize, usize)> = IndexMap::new();
     // Node -> (parent node index, cost)
     // The parent node is which node visited this node w/ the least cost.
-    parents.insert(start.clone(), (0, std::usize::MAX));
+    parents.insert(start, (0, std::usize::MAX));
 
     while let Some(State { cost, position }) = frontier.pop() {
         let (node, &(_parent, _path_cost)) = parents.get_index(position).unwrap();

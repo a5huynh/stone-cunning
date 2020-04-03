@@ -10,7 +10,6 @@ pub struct GameConfig {
     /// Tile width/height differs from the actual sprite width/height.
     pub tile_height: u32,
     pub tile_width: u32,
-    pub tile_offset: u32,
     /// How fast we move the camera around the map.
     pub map_move_speed: f32,
     /// Minimum mouse zoom threshold

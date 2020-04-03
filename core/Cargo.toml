@@ -8,6 +8,6 @@ edition = "2018"
 log = "0.4.8"
 
 [dependencies.amethyst]
-version = "0.13.2"
+version = "0.15.0"
 default-features = false
-features = ["audio", "metal", "renderer"]
+features = ["audio", "metal", "renderer", "no-slow-safety-checks"]

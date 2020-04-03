@@ -1,18 +1,8 @@
-(
+Grid((
     texture_width: 32,
     texture_height: 64,
-    sprites: [
-        (
-            x: 0,
-            y: 0,
-            width: 32,
-            height: 32,
-        ),
-        (
-            x: 0,
-            y: 32,
-            width: 32,
-            height: 32,
-        )
-    ],
-)
+    columns: 1,
+    rows: Some(2),
+    sprite_count: Some(2),
+    cell_size: Some((32, 32)),
+))

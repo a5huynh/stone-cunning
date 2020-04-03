@@ -34,10 +34,10 @@ Container(
                         normal_text_color: (0.0, 0.0, 0.0, 1.0),
                         hover_text_color: (0.0, 0.0, 0.0, 1.0),
                         press_text_color: (0.0, 0.0, 0.0, 1.0),
-                        normal_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
-                        hover_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
-                        press_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
-                        hover_sound: File("resources/audio/boop.ogg", ("OGG", ())),
+                        normal_image: Texture(File("textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_image: Texture(File("textures/logo_transparent.png", ("IMAGE", ()))),
+                        press_image: Texture(File("textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_sound: File("audio/boop.ogg", ("OGG", ())),
                     )
                 ),
                 Button(
@@ -55,10 +55,10 @@ Container(
                         normal_text_color: (0.0, 0.0, 0.0, 1.0),
                         hover_text_color: (0.0, 0.0, 0.0, 1.0),
                         press_text_color: (0.0, 0.0, 0.0, 1.0),
-                        normal_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
-                        hover_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
-                        press_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
-                        hover_sound: File("resources/audio/boop.ogg", ("OGG", ())),
+                        normal_image: Texture(File("textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_image: Texture(File("textures/logo_transparent.png", ("IMAGE", ()))),
+                        press_image: Texture(File("textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_sound: File("audio/boop.ogg", ("OGG", ())),
                     )
                 ),
                 Button(
@@ -77,10 +77,10 @@ Container(
                         normal_text_color: (0.0, 0.0, 0.0, 1.0),
                         hover_text_color: (0.0, 0.0, 0.0, 1.0),
                         press_text_color: (0.0, 0.0, 0.0, 1.0),
-                        normal_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
-                        hover_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
-                        press_image: Texture(File("resources/textures/logo_transparent.png", ("IMAGE", ()))),
-                        hover_sound: File("resources/audio/boop.ogg", ("OGG", ())),
+                        normal_image: Texture(File("textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_image: Texture(File("textures/logo_transparent.png", ("IMAGE", ()))),
+                        press_image: Texture(File("textures/logo_transparent.png", ("IMAGE", ()))),
+                        hover_sound: File("audio/boop.ogg", ("OGG", ())),
                     )
                 ),
             ]

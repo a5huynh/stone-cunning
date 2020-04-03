@@ -3,7 +3,7 @@ use crossterm::{cursor, terminal, ClearType, Terminal, TerminalCursor};
 
 use core::Point3;
 use libdwarf::{
-    components::{MapObject, MapPosition, Worker},
+    components::{EntityInfo, MapObject, Worker},
     resources::Map,
 };
 
@@ -27,9 +27,9 @@ impl AsciiRenderer {
         let map = world.read_resource::<Map>();
         let entities = world.entities();
         let objects = world.read_storage::<MapObject>();
-        let positions = world.read_storage::<MapPosition>();
-        for (_, object, pos) in (&entities, &objects, &positions).join() {
-            let idx = (pos.pos.y * map.width + pos.pos.x) as usize;
+        let infos = world.read_storage::<EntityInfo>();
+        for (_, object, info) in (&entities, &objects, &infos).join() {
+            let idx = (info.pos.y * map.width + info.pos.x) as usize;
             let tile = match object.resource_type.name.as_ref() {
                 "tree" => 'T',
                 "wood" => 'l',
@@ -57,10 +57,10 @@ impl AsciiRenderer {
     // Add workers to cells
     pub fn render_workers(&mut self, world: &World, cells: &mut Vec<char>) {
         let map = world.read_resource::<Map>();
-        let positions = world.read_storage::<MapPosition>();
+        let infos = world.read_storage::<EntityInfo>();
         let workers = world.read_storage::<Worker>();
-        for (pos, _) in (&positions, &workers).join() {
-            let idx = (pos.pos.y * map.width + pos.pos.x) as usize;
+        for (info, _) in (&infos, &workers).join() {
+            let idx = (info.pos.y * map.width + info.pos.x) as usize;
             cells[idx] = 'w';
         }
     }
@@ -114,12 +114,12 @@ impl AsciiRenderer {
         // Render objects & object queue
         print!("\n\rWorld Objects\n\r--------------\n\r");
         let objects = world.read_storage::<MapObject>();
-        let positions = world.read_storage::<MapPosition>();
-        for (entity, object, pos) in (&entities, &objects, &positions).join() {
+        let infos = world.read_storage::<EntityInfo>();
+        for (entity, object, info) in (&entities, &objects, &infos).join() {
             print!(
                 "{} [pos: {:?} id: {}]\n\r",
                 object.to_string(),
-                (pos.pos.x, pos.pos.y),
+                (info.pos.x, info.pos.y),
                 entity.id()
             );
         }

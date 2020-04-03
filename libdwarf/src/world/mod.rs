@@ -1,7 +1,7 @@
 use core::amethyst::ecs::{World, WorldExt};
 
 use crate::{
-    components::{MapObject, MapPosition, Worker},
+    components::{EntityInfo, MapObject, Worker},
     config::{ResourceConfig, WorldConfig},
     planner::Planner,
     resources::{time, Map, TaskQueue},
@@ -13,7 +13,7 @@ use libterrain::TerrainChunk;
 pub struct WorldSim;
 impl WorldSim {
     pub fn new(world: &mut World, terrain: &TerrainChunk, width: u32, height: u32) -> Self {
-        world.register::<MapPosition>();
+        world.register::<EntityInfo>();
         world.register::<MapObject>();
         world.register::<Worker>();
 

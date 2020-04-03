@@ -8,7 +8,7 @@ use core::amethyst::{
 use crate::game::components::{Cursor, CursorDown, CursorSelected};
 use core::log;
 use libdwarf::{
-    components::{MapObject, MapPosition},
+    components::{EntityInfo, MapObject},
     resources::TaskQueue,
     trigger::TriggerType,
 };
@@ -22,7 +22,7 @@ impl<'s> System<'s> for ClickSystem {
         WriteStorage<'s, CursorDown>,
         ReadExpect<'s, CursorSelected>,
         ReadStorage<'s, MapObject>,
-        ReadStorage<'s, MapPosition>,
+        ReadStorage<'s, EntityInfo>,
         Read<'s, InputHandler<StringBindings>>,
         WriteStorage<'s, Transform>,
         Write<'s, TaskQueue>,

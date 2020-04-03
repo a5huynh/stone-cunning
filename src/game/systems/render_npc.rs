@@ -4,16 +4,16 @@ use core::amethyst::{
     renderer::{SpriteRender, Transparent},
 };
 
-use libdwarf::components::{MapPosition, Worker};
+use libdwarf::components::{EntityInfo, Worker};
 
-use crate::game::{render::MapRenderer, sprite::SpriteSheetStorage};
+use crate::game::{resources::MapRenderer, sprite::SpriteSheetStorage};
 
 pub struct RenderNPCSystem;
 impl<'a> System<'a> for RenderNPCSystem {
     type SystemData = (
         Entities<'a>,
         WriteStorage<'a, Worker>,
-        ReadStorage<'a, MapPosition>,
+        ReadStorage<'a, EntityInfo>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, SpriteRender>,
         WriteStorage<'a, Transparent>,
@@ -35,18 +35,16 @@ impl<'a> System<'a> for RenderNPCSystem {
         ): Self::SystemData,
     ) {
         // Find objects that don't have a sprite and give it one.
-        let invisible: Vec<(Entity, &mut Worker, &MapPosition, ())> =
+        let invisible: Vec<(Entity, &mut Worker, &EntityInfo, ())> =
             (&*entities, &mut workers, &positions, !&sprites)
                 .join()
                 .collect();
+
         for (entity, _, map_pos, _) in invisible {
             // Appply transformation
             let pos = map_pos.pos;
             transforms
-                .insert(
-                    entity,
-                    map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 1.0),
-                )
+                .insert(entity, map_render.place(&pos, 1.0))
                 .unwrap();
             // Assign sprite to entity
             sprites
@@ -64,7 +62,7 @@ impl<'a> System<'a> for RenderNPCSystem {
         // Update object positions
         for (_, map_pos, transform) in (&mut workers, &positions, &mut transforms).join() {
             let pos = map_pos.pos;
-            let new_transform = map_render.place(pos.x as i32, pos.y as i32, pos.z as i32, 0.9);
+            let new_transform = map_render.place(&pos, 0.9);
             transform.set_translation_xyz(
                 new_transform.translation().x,
                 new_transform.translation().y,

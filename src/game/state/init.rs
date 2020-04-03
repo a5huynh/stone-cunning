@@ -13,7 +13,7 @@ use std::time::SystemTime;
 use crate::game::{
     components::{Cursor, CursorSelected, Object, Player},
     config::GameConfig,
-    render::MapRenderer,
+    resources::MapRenderer,
     sprite::SpriteSheetStorage,
     state::RunningState,
 };

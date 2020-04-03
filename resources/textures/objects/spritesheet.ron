@@ -1,41 +1,8 @@
-(
+Grid((
     texture_width: 128,
     texture_height: 128,
-    sprites: [
-        // Tree
-        (
-            x: 0,
-            y: 0,
-            width: 32,
-            height: 32,
-        ),
-        // Shrub
-        (
-            x: 32,
-            y: 0,
-            width: 32,
-            height: 32,
-        ),
-        // Logs
-        (
-            x: 64,
-            y: 0,
-            width: 32,
-            height: 32,
-        ),
-        // Lumber
-        (
-            x: 96,
-            y: 0,
-            width: 32,
-            height: 32
-        ),
-        // Selection
-        (
-            x: 0,
-            y: 32,
-            width: 32,
-            height: 32
-        ),
-    ],
-)
+    columns: 4,
+    rows: Some(2),
+    sprite_count: Some(5),
+    cell_size: Some((32, 32)),
+))

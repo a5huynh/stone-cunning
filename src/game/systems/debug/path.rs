@@ -8,7 +8,7 @@ use core::amethyst::{
 };
 use specs_derive::*;
 
-use crate::game::{render::MapRenderer, sprite::SpriteSheetStorage};
+use crate::game::{resources::MapRenderer, sprite::SpriteSheetStorage};
 use libdwarf::components::Worker;
 
 #[derive(Component, Default)]
@@ -54,12 +54,7 @@ impl<'a> System<'a> for PathDebugSystem {
             if let Some(path) = &worker.current_path {
                 for pos in path.iter() {
                     let entity = entities.create();
-                    transforms
-                        .insert(
-                            entity,
-                            map.place(pos.x as i32, pos.y as i32, pos.z as i32, 0.0),
-                        )
-                        .unwrap();
+                    transforms.insert(entity, map.place(&pos, 0.0)).unwrap();
 
                     sprites
                         .insert(

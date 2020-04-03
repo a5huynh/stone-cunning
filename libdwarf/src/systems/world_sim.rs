@@ -4,7 +4,7 @@ use core::{
 };
 
 use crate::{
-    components::{MapObject, MapPosition, Worker},
+    components::{EntityInfo, MapObject, Worker},
     config::ResourceConfig,
     resources::{Map, TaskQueue},
     trigger::TriggerType,
@@ -17,7 +17,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
         Entities<'a>,
         WriteStorage<'a, Worker>,
         WriteStorage<'a, MapObject>,
-        WriteStorage<'a, MapPosition>,
+        WriteStorage<'a, EntityInfo>,
         WriteExpect<'a, TaskQueue>,
         WriteExpect<'a, Map>,
         ReadExpect<'a, ResourceConfig>,
@@ -25,7 +25,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
 
     fn run(
         &mut self,
-        (entities, mut workers, mut objects, mut positions, mut tasks, mut map, resources): Self::SystemData,
+        (entities, mut workers, mut objects, mut entity_infos, mut tasks, mut map, resources): Self::SystemData,
     ) {
         let queue = &mut tasks.world;
         while let Some(event) = queue.pop_front() {
@@ -38,8 +38,14 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     objects
                         .insert(new_entity, MapObject::new(&resource))
                         .unwrap();
-                    positions
-                        .insert(new_entity, MapPosition { pos: pt })
+                    entity_infos
+                        .insert(
+                            new_entity,
+                            EntityInfo {
+                                pos: pt,
+                                z_offset: 1.0,
+                            },
+                        )
                         .unwrap();
                     map.track_object(new_entity.id(), pt);
                 }
@@ -47,7 +53,9 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     log::info!("Adding worker @ ({:?})", pos);
                     let entity = entities.create();
                     workers.insert(entity, Worker::new(entity.id())).unwrap();
-                    positions.insert(entity, MapPosition { pos }).unwrap();
+                    entity_infos
+                        .insert(entity, EntityInfo { pos, z_offset: 1.0 })
+                        .unwrap();
                     map.track_worker(entity.id(), pos);
                 }
                 // Deal damage to a particular object
@@ -66,8 +74,8 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     // Remove from map
                     let entity = entities.entity(id);
                     if objects.get(entity).is_some() {
-                        if let Some(map_pos) = positions.get(entity) {
-                            map.remove_object(id, map_pos.pos);
+                        if let Some(entity_info) = entity_infos.get(entity) {
+                            map.remove_object(id, entity_info.pos);
                         }
                     }
                     // Remove from world
@@ -78,9 +86,9 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     if objects.get(target_entity).is_some() {
                         if let Some(worker) = workers.get_mut(entities.entity(owner)) {
                             worker.inventory.push(target);
-                            if let Some(map_pos) = positions.get(target_entity) {
-                                map.remove_object(target_entity.id(), map_pos.pos);
-                                positions.remove(target_entity);
+                            if let Some(entity_info) = entity_infos.get(target_entity) {
+                                map.remove_object(target_entity.id(), entity_info.pos);
+                                entity_infos.remove(target_entity);
                             }
                         }
                     }
