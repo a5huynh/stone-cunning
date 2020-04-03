@@ -93,7 +93,7 @@ impl<'s> System<'s> for DebugUI {
                                 let entity = entities.entity(worker_id);
                                 workers.get(entity)
                             })
-                            .and_then(|worker| Some(format!("Worker: {}", worker.to_string())))
+                            .map(|worker| format!("Worker: {}", worker.to_string()))
                             .unwrap_or_else(|| "Worker: N/A".to_string());
                         ui.text(worker_label);
 
@@ -103,33 +103,28 @@ impl<'s> System<'s> for DebugUI {
                                 let entity = entities.entity(object_id);
                                 objects.get(entity)
                             })
-                            .and_then(|object| Some(format!("Object: {}", object.to_string())))
+                            .map(|object| format!("Object: {}", object.to_string()))
                             .unwrap_or_else(|| "Object: N/A".to_string());
                         ui.text(object_label);
 
                         let terrain_label = pick_info
                             .terrain
                             .as_ref()
-                            .and_then(|terrain| Some(format!("Terrain: {:?}", terrain)))
+                            .map(|terrain| format!("Terrain: {:?}", terrain))
                             .unwrap_or_else(|| "Terrain: N/A".to_string());
                         ui.text(terrain_label);
 
                         let map_pos = pick_info
                             .position
-                            .and_then(|position| {
-                                Some(format!(
-                                    "Map Pos: ({}, {}, {})",
-                                    position.x, position.y, position.z
-                                ))
+                            .map(|position| {
+                                format!("Map Pos: ({}, {}, {})", position.x, position.y, position.z)
                             })
                             .unwrap_or_else(|| "Map Pos: N/A".to_string());
                         ui.text(map_pos);
 
                         let world_pos = pick_info
                             .world_pos
-                            .and_then(|position| {
-                                Some(format!("World Pos: ({}, {})", position.x, position.y))
-                            })
+                            .map(|position| format!("World Pos: ({}, {})", position.x, position.y))
                             .unwrap_or_else(|| "World Pos: N/A".to_string());
                         ui.text(world_pos);
 

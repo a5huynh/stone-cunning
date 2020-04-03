@@ -59,35 +59,34 @@ impl<'a> System<'a> for WorkerSystem {
                 let current_pos = &entity_info.pos;
                 let mut state = State::new();
                 worker.add_state(&mut state);
-                match tasks.worker.pop_front() {
-                    Some(TriggerType::HarvestResource {
-                        target,
-                        position,
-                        resource,
-                    }) => {
-                        // Are we already near the resource?
-                        state.insert(
-                            Condition::Near(resource.clone()),
-                            is_near(&position, &current_pos),
-                        );
 
-                        // Create the desired state
-                        let mut desired_state = State::new();
-                        desired_state.insert(Condition::Has(resource.clone()), true);
+                if let Some(TriggerType::HarvestResource {
+                    target,
+                    position,
+                    resource,
+                }) = tasks.worker.pop_front()
+                {
+                    // Are we already near the resource?
+                    state.insert(
+                        Condition::Near(resource.clone()),
+                        is_near(&position, &current_pos),
+                    );
 
-                        // Plan stuff
-                        let mut planned = planner.plan(&state, &desired_state);
-                        while let Some(action) = planned.pop() {
-                            // Convert planned actions into actions for the worker.
-                            let entity = entities.entity(target);
-                            worker.queue.push_back(WorkerAction {
-                                target: Some(entity.id()),
-                                action: action.clone(),
-                                target_pos: position,
-                            });
-                        }
+                    // Create the desired state
+                    let mut desired_state = State::new();
+                    desired_state.insert(Condition::Has(resource.clone()), true);
+
+                    // Plan stuff
+                    let mut planned = planner.plan(&state, &desired_state);
+                    while let Some(action) = planned.pop() {
+                        // Convert planned actions into actions for the worker.
+                        let entity = entities.entity(target);
+                        worker.queue.push_back(WorkerAction {
+                            target: Some(entity.id()),
+                            action: action.clone(),
+                            target_pos: position,
+                        });
                     }
-                    _ => {}
                 }
 
                 worker.current_action = worker.queue.pop_front();
