@@ -120,10 +120,25 @@ impl MapRenderer {
         let tw = self.tile_width;
         let th = self.tile_height;
 
-        let mx = (x / tw) + (y / th);
-        let my = (y / th) - (x / tw);
+        let px = (x / tw) + (y / th);
+        let py = (y / th) - (x / tw);
 
-        // Convert cartesian coordinates to map coordinates.
+        // Determine how we should rotate the coordinates.
+        // This should be the opposite of what we use to place
+        // the points.
+        let rotation: f32 = match self.rotation {
+            Direction::NORTH => 0.0,
+            Direction::EAST => -FRAC_PI_2,
+            Direction::SOUTH => PI,
+            Direction::WEST => FRAC_PI_2,
+        };
+
+        let cos_rot = rotation.cos();
+        let sin_rot = rotation.sin();
+
+        let mx = ((px - 32.0) * cos_rot) - ((py - 32.0) * sin_rot) + 32.0;
+        let my = ((px - 32.0) * sin_rot) + ((py - 32.0) * cos_rot) + 32.0;
+
         (mx.trunc() as i32, my.trunc() as i32)
     }
 

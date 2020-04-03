@@ -7,7 +7,7 @@ use core::amethyst::{
 };
 
 use crate::game::{
-    components::{Cursor, CursorSelected, PickInfo},
+    components::{Cursor, CursorSelected, Direction, PickInfo},
     resources::MapRenderer,
 };
 use core::{Point3, Vector2};
@@ -40,10 +40,8 @@ impl<'s> System<'s> for CursorSystem {
             map_render,
         ): Self::SystemData,
     ) {
-        // Grab the transform from map movement.
         let screen_dimensions = Vector2::new(screen.width(), screen.height());
-
-        // Grab the zoom level of the camera
+        // Convert screen point to world point
         let camera_transform = (&transforms, &cameras).join().next().or(None);
         let (scene_x, scene_y) = {
             if let Some(mouse_pos) = input.mouse_position() {
@@ -74,37 +72,74 @@ impl<'s> System<'s> for CursorSystem {
 
             // From the view port, the tallest z level from lower (x,y) coordinates will
             // show up over ones from higher ones.
-            let mut map_pt = Point3::new(map_x - 63, map_y - 63, 0);
-            for z in (0..64).rev() {
-                map_pt.z = z;
-                // Loop until we find the first piece of terrain.
-                if map.is_inside_map(map_pt) {
-                    let biome = map.terrain_at(map_pt);
-                    if biome.is_some() {
+            let mut current_pt = Point3::new(map_x, map_y, 0);
+            let mut above_pt = Point3::new(0, 0, 0);
+            let mut valid_pt = current_pt.clone();
+
+            // Start at the highest point
+            for z in 0..64 {
+                current_pt.z = z;
+
+                // Pointer to terrain above the current tile.
+                above_pt.x = current_pt.x;
+                above_pt.y = current_pt.y;
+                above_pt.z = z + 1;
+
+                // Loop until we find the first piece of visible terrain.
+                if map.is_inside_map(current_pt) && map.is_inside_map(above_pt) {
+                    let biome = map.terrain_at(current_pt);
+                    let above = map.terrain_at(above_pt);
+
+                    if biome.is_some() && above.is_none() {
                         pick_info.terrain = biome;
-                        break;
+                        // Last valid point we've seen.
+                        valid_pt.x = current_pt.x;
+                        valid_pt.y = current_pt.y;
+                        valid_pt.z = current_pt.z;
                     }
                 }
 
-                map_pt.x += 1;
-                map_pt.y += 1;
+                // Based on the current rotation, we'll want to search for the
+                // correct z-level in different ways.
+                match map_render.rotation {
+                    Direction::NORTH => {
+                        current_pt.x -= 1;
+                        current_pt.y -= 1;
+                    }
+                    Direction::EAST => {
+                        current_pt.x -= 1;
+                        current_pt.y += 1;
+                    }
+                    Direction::SOUTH => {
+                        current_pt.x += 1;
+                        current_pt.y += 1;
+                    }
+                    Direction::WEST => {
+                        current_pt.x += 1;
+                        current_pt.y -= 1;
+                    }
+                }
             }
 
-            pick_info.position = Some(map_pt);
+            pick_info.world_pos = Some(Point3::new(scene_x, scene_y, 0.0));
+            pick_info.position = Some(valid_pt);
 
             // Move cursor to new position.
             let new_transform = map_render.place(
-                &Point3::new(map_pt.x as u32, map_pt.y as u32, map_pt.z as u32),
-                0.0
+                &Point3::new(valid_pt.x as u32, valid_pt.y as u32, valid_pt.z as u32),
+                0.1,
             );
 
             *cursor_transform = new_transform;
 
             // If there are worker/objects at this location, show debug info about
             // those
-            map_pt.z += 1;
-            pick_info.worker = map.worker_at(map_pt);
-            pick_info.object = map.objects_at(map_pt);
+            valid_pt.z += 1;
+            if map.is_inside_map(valid_pt) {
+                pick_info.worker = map.worker_at(valid_pt);
+                pick_info.object = map.objects_at(valid_pt);
+            }
+
             cursor_selected.hover_selected = Some(pick_info);
         }
     }

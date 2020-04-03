@@ -15,5 +15,6 @@ pub struct PickInfo {
     pub worker: Option<u32>,
     pub object: Option<u32>,
     pub terrain: Option<Biome>,
+    pub world_pos: Option<Point3<f32>>,
     pub position: Option<Point3<i32>>,
 }

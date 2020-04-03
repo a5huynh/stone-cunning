@@ -125,6 +125,14 @@ impl<'s> System<'s> for DebugUI {
                             .unwrap_or_else(|| "Map Pos: N/A".to_string());
                         ui.text(map_pos);
 
+                        let world_pos = pick_info
+                            .world_pos
+                            .and_then(|position| {
+                                Some(format!("World Pos: ({}, {})", position.x, position.y))
+                            })
+                            .unwrap_or_else(|| "World Pos: N/A".to_string());
+                        ui.text(world_pos);
+
                         let mouse_pos = ui.io().mouse_pos;
                         ui.text(im_str!(
                             "Mouse Pos: ({:.1},{:.1})",

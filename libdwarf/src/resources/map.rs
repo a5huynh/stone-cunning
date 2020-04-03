@@ -62,7 +62,12 @@ impl Map {
     }
 
     pub fn is_inside_map(&self, pt: Point3<i32>) -> bool {
-        pt.x >= 0 && pt.x < self.width as i32 && pt.y >= 0 && pt.y < self.height as i32
+        pt.x >= 0
+            && pt.x < self.width as i32
+            && pt.y >= 0
+            && pt.y < self.height as i32
+            && pt.z >= 0
+            && pt.z < 64 as i32
     }
 
     /// Find the north, east, south, west neighboring objects for some
