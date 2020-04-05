@@ -7,6 +7,7 @@ The origin of the name "[stonecunning](https://roll20.net/compendium/dnd5e/Dwarf
 ## Media
 
 ![In-game screenshot](docs/screenshot.png)
+*In-game screen shot as of 2019-09-30*
 
 ## Building & Running
 
@@ -18,8 +19,9 @@ command in the project root directory:
 
 ## Development
 
-Stone cunning is divided up using [Cargo workspaces][cargo-workspaces], with
-the idea that each individual library can be tested and run by itself without the need to run the entire game.
+Stone cunning is divided up using [Cargo workspaces][cargo-workspaces],
+with the idea that each individual library can be tested and run by itself
+without the need to run the entire game.
 
 [cargo-workspaces]: https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html
 
@@ -32,7 +34,8 @@ Module used to hold shared dependencies and utility functions.
 
 ### libdwarf
 
-The core of `stone-cunning`, used to simulate the dwarfs and (eventually) monsters.
+The simulation module of `stone-cunning`, used to simulate the dwarfs and eventually
+monsters.
 
 ### libpath
 
