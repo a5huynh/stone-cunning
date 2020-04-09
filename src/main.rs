@@ -52,7 +52,7 @@ fn main() -> amethyst::Result<()> {
                 .with_plugin(RenderImgui::<StringBindings>::default()),
         )?;
 
-    let mut game = Application::build(assets_dir, state::InitState::default())?
+    let mut game = Application::build(assets_dir, state::MenuState::default())?
         .with_resource(config)
         .with_resource(game_config.game)
         .with_resource(game_config.player)
