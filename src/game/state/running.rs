@@ -184,7 +184,7 @@ fn initialize_camera(world: &mut World, center: Transform) {
     let entity = world
         .create_entity()
         .with(CameraFollow::default())
-        .with(center.clone())
+        .with(center)
         .build();
 
     let width = window_width as f32 / 2.0;

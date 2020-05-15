@@ -55,18 +55,18 @@ impl SimpleState for MenuState {
                 if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) {
                     return Trans::Quit;
                 }
-            },
+            }
             StateEvent::Ui(UiEvent {
                 event_type: UiEventType::Click,
                 target,
             }) => {
                 if Some(*target) == self.btn_exit {
-                    return Trans::Quit
+                    return Trans::Quit;
                 }
 
                 if Some(*target) == self.btn_start {
                     println!("start");
-                    return Trans::Switch(Box::new(state::InitState::default()))
+                    return Trans::Switch(Box::new(state::InitState::default()));
                 }
 
                 if Some(*target) == self.btn_load {
@@ -76,9 +76,8 @@ impl SimpleState for MenuState {
                 if Some(*target) == self.btn_opts {
                     println!("options");
                 }
-            },
+            }
             _ => {}
-
         }
         Trans::None
     }
@@ -89,7 +88,8 @@ impl SimpleState for MenuState {
         if self.btn_exit.is_none()
             || self.btn_start.is_none()
             || self.btn_load.is_none()
-            || self.btn_opts.is_none() {
+            || self.btn_opts.is_none()
+        {
             world.exec(|ui_finder: UiFinder<'_>| {
                 self.btn_exit = ui_finder.find(BTN_EXIT);
                 self.btn_load = ui_finder.find(BTN_LOAD);

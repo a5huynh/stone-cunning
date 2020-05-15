@@ -64,6 +64,11 @@ impl Worker {
         state.insert(Condition::Has("axe".to_string()), true);
     }
 
+    //  - `unecessary_unwrap` is ignored since we are unable to do multiple
+    //    if let Some(yyy) = xxx on a single line.
+    //
+    //  - `nonminimal_bool` disabled due to false positive.
+    #[allow(clippy::unnecessary_unwrap, clippy::nonminimal_bool)]
     pub fn do_work(
         &mut self,
         tasks: &mut TaskQueue,
@@ -125,7 +130,7 @@ impl Worker {
                                     finished = finished && true;
                                 } else {
                                     // Move laong path.
-                                    let current_pos = entity_info.pos.clone();
+                                    let current_pos = entity_info.pos;
                                     entity_info.pos = new_pt;
                                     map.move_worker(self.id, current_pos, new_pt);
                                     finished = false;
@@ -144,8 +149,10 @@ impl Worker {
             self.current_path = None;
         }
     }
+}
 
-    pub fn to_string(&self) -> String {
-        format!("({})", self.energy)
+impl fmt::Display for Worker {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({})", self.energy)
     }
 }

@@ -49,7 +49,7 @@ impl PartialEq for Action {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Default, Deserialize)]
 pub struct Planner {
     /// List of all actions
     actions: Vec<Action>,
@@ -116,7 +116,7 @@ impl Planner {
         self.actions.push(action);
     }
 
-    pub fn next_actions<'a>(&self, plan: &PlanNode) -> Vec<(PlanNode, usize)> {
+    pub fn next_actions(&self, plan: &PlanNode) -> Vec<(PlanNode, usize)> {
         let mut potential = Vec::new();
 
         for action in self.actions.iter() {

@@ -1,4 +1,5 @@
 use core::amethyst::ecs::{Component, VecStorage};
+use std::fmt;
 
 use crate::components::{ResourceAttribute, ResourceType};
 
@@ -14,11 +15,8 @@ impl MapObject {
     pub fn new(resource_type: &ResourceType) -> Self {
         let mut default_health = 1;
         for attribute in &resource_type.attributes {
-            match attribute {
-                ResourceAttribute::Health(health) => {
-                    default_health = *health as i32;
-                }
-                _ => {}
+            if let ResourceAttribute::Health(health) = attribute {
+                default_health = *health as i32;
             }
         }
 
@@ -39,8 +37,10 @@ impl MapObject {
             .filter(|x| x.is_drop())
             .collect()
     }
+}
 
-    pub fn to_string(&self) -> String {
-        format!("{} ({})", self.resource_type.name, self.health)
+impl fmt::Display for MapObject {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} ({})", self.resource_type.name, self.health)
     }
 }

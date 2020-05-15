@@ -74,7 +74,7 @@ impl<'s> System<'s> for CursorSystem {
             // show up over ones from higher ones.
             let mut current_pt = Point3::new(map_x, map_y, 0);
             let mut above_pt = Point3::new(0, 0, 0);
-            let mut valid_pt = current_pt.clone();
+            let mut valid_pt = current_pt;
 
             // Start at the highest point
             for z in 0..64 {

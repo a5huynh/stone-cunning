@@ -16,6 +16,8 @@ pub struct Player {
 }
 
 impl Player {
+    // Might one day bring this back, so lets ignore clippy/lints
+    #[allow(dead_code)]
     pub fn initialize(world: &mut World) {
         let sprite_sheet = {
             let sheets = world.read_resource::<SpriteSheetStorage>();
@@ -32,7 +34,7 @@ impl Player {
 
         world
             .create_entity()
-            .with(sprite_render.clone())
+            .with(sprite_render)
             .with(Player::default())
             .with(player_transform)
             .with(Transparent)

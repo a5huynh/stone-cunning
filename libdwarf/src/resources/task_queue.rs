@@ -11,10 +11,10 @@ pub struct TaskQueue {
 
 impl TaskQueue {
     pub fn add(&mut self, action: TriggerType) {
-        self.worker.push_back(action.clone());
+        self.worker.push_back(action);
     }
 
     pub fn add_world(&mut self, action: TriggerType) {
-        self.world.push_back(action.clone());
+        self.world.push_back(action);
     }
 }

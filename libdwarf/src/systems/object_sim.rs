@@ -24,11 +24,8 @@ impl<'a> System<'a> for ObjectSystem {
                 tasks.add_world(TriggerType::Destroy(entity.id()));
                 // Add any drops to world
                 for drop in &object.drop_table() {
-                    match drop {
-                        ResourceAttribute::Drops(name, _amount) => {
-                            tasks.add_world(TriggerType::Add(current_pos, name.to_string()));
-                        }
-                        _ => {}
+                    if let ResourceAttribute::Drops(name, _amount) = drop {
+                        tasks.add_world(TriggerType::Add(current_pos, name.to_string()));
                     }
                 }
                 continue;

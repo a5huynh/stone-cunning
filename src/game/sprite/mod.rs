@@ -15,11 +15,11 @@ pub struct SpriteSheetStorage {
 impl SpriteSheetStorage {
     pub fn new(world: &mut World) -> Self {
         SpriteSheetStorage {
-            cursor: load_sprite_sheet(world, "cursor").clone(),
-            object: load_sprite_sheet(world, "objects").clone(),
-            terrain: load_sprite_sheet(world, "terrain").clone(),
-            player: load_sprite_sheet(world, "player").clone(),
-            npc: load_sprite_sheet(world, "npc").clone(),
+            cursor: load_sprite_sheet(world, "cursor"),
+            object: load_sprite_sheet(world, "objects"),
+            terrain: load_sprite_sheet(world, "terrain"),
+            player: load_sprite_sheet(world, "player"),
+            npc: load_sprite_sheet(world, "npc"),
         }
     }
 }
