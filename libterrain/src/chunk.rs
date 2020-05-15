@@ -1,4 +1,4 @@
-use super::Point3;
+use core::Point3;
 use std::collections::HashMap;
 
 // TODO: Load from config file

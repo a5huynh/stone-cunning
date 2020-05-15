@@ -1,7 +1,7 @@
-use rand::{self, Rng};
 use std::f64::consts::PI;
 
-use crate::Point3;
+use core::Point3;
+use rand::{self, Rng};
 
 pub struct PoissonDisk {
     min_dist: usize,
