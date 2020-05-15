@@ -18,7 +18,7 @@ use crate::game::{
     state::RunningState,
 };
 use libdwarf::{resources::TaskQueue, trigger::TriggerType, world::WorldSim};
-use libterrain::TerrainGenerator;
+use libterrain::TerrainLoader;
 
 pub struct InitState {
     finished: bool,
@@ -41,18 +41,19 @@ impl SimpleState for InitState {
         world.insert(storage);
 
         // Initialize simulation;
-        let (map_height, map_width) = {
+        let (chunk_height, chunk_width) = {
             let config = &world.read_resource::<GameConfig>();
-            (config.map_height, config.map_width)
+            (config.chunk_height, config.chunk_width)
         };
 
         // Initialize simulation
-        info!("Generating map w/ dims: ({}, {})", map_width, map_height);
+        info!("Generating map w/ dims: ({}, {})", chunk_width, chunk_height);
         let now = SystemTime::now();
-        let terrain_gen = TerrainGenerator::new(map_width, map_height).build();
+        let terloader = TerrainLoader::new(chunk_width, chunk_height);
+        let chunk = terloader.get_chunk(0, 0);
         info!("Terrain gen took: {}ms", now.elapsed().unwrap().as_millis());
 
-        WorldSim::new(world, &terrain_gen.get_terrain(), map_width, map_height);
+        WorldSim::new(world, &chunk, chunk_width, chunk_height);
 
         // Render map
         let map_render = MapRenderer::initialize(world);

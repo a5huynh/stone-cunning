@@ -23,11 +23,20 @@ impl TerrainLoader {
         }
     }
 
-    pub fn get_chunk(&self, x: i32, y: i32) -> Vec<Option<Biome>> {
+    pub fn get_chunk(&self, x: i32, y: i32) -> TerrainChunk {
         // TODO: Have you loaded this chunk already? Load from memory / disk
         let tergen = TerrainGenerator::new(self.chunk_width, self.chunk_height)
             .chunk_coord(x, y)
             .build();
-        tergen.topo.clone()
+
+        tergen.get_terrain()
+    }
+
+    pub fn get_topo(&self, x: i32, y: i32) -> Vec<Option<Biome>> {
+        let tergen = TerrainGenerator::new(self.chunk_width, self.chunk_height)
+            .chunk_coord(x, y)
+            .build();
+
+        tergen.topo
     }
 }

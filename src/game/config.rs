@@ -5,8 +5,10 @@ pub struct GameConfig {
     /// Time between each action/event/etc. Used to synchronize things independently
     /// of frame rate.
     pub tick_delta: f32,
-    pub map_height: u32,
-    pub map_width: u32,
+    /// Chunk height
+    pub chunk_height: u32,
+    /// Chunk width
+    pub chunk_width: u32,
     /// Tile width/height differs from the actual sprite width/height.
     pub tile_height: u32,
     pub tile_width: u32,

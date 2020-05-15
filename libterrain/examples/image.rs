@@ -26,7 +26,7 @@ fn main() -> Result<(), std::io::Error> {
 
     for my in 0..num_y_chunks {
         for mx in 0..num_x_chunks {
-            let chunk = terloader.get_chunk(mx as i32, my as i32);
+            let chunk = terloader.get_topo(mx as i32, my as i32);
 
             for y in 0..chunk_height {
                 for x in 0..chunk_width {

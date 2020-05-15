@@ -7,8 +7,8 @@
     ),
     game: (
         tick_delta: 0.1,
-        map_height: 64,
-        map_width: 64,
+        chunk_height: 64,
+        chunk_width: 64,
 
         tile_height: 16,
         tile_width: 32,
