@@ -11,12 +11,12 @@ pub struct PoissonDisk {
     grid_width: f64,
     grid_height: f64,
 
-    grid: Vec<Option<Point3<u32>>>,
-    active: Vec<Point3<u32>>,
-    pub samples: Vec<Point3<u32>>,
+    grid: Vec<Option<Point3<i32>>>,
+    active: Vec<Point3<i32>>,
+    pub samples: Vec<Point3<i32>>,
 }
 
-fn distance(a: Point3<u32>, b: Point3<u32>) -> f64 {
+fn distance(a: Point3<i32>, b: Point3<i32>) -> f64 {
     let dx = f64::from(a.x) - f64::from(b.x);
     let dy = f64::from(a.y) - f64::from(b.y);
 
@@ -46,8 +46,8 @@ impl PoissonDisk {
         // Generates a random point
         let mut rng = rand::thread_rng();
         let point = Point3::new(
-            rng.gen_range(0, width - 1) as u32,
-            rng.gen_range(0, height - 1) as u32,
+            rng.gen_range(0, width - 1) as i32,
+            rng.gen_range(0, height - 1) as i32,
             0,
         );
         disk.insert_point(point);
@@ -56,7 +56,7 @@ impl PoissonDisk {
         disk
     }
 
-    fn is_valid(&self, point: Point3<u32>) -> bool {
+    fn is_valid(&self, point: Point3<i32>) -> bool {
         let xidx = (f64::from(point.x) / self.grid_size).floor();
         let yidx = (f64::from(point.y) / self.grid_size).floor();
 
@@ -80,7 +80,7 @@ impl PoissonDisk {
         true
     }
 
-    fn insert_point(&mut self, point: Point3<u32>) {
+    fn insert_point(&mut self, point: Point3<i32>) {
         let cell_x = (f64::from(point.x) / self.grid_size).floor();
         let cell_y = (f64::from(point.y) / self.grid_size).floor();
 
@@ -90,7 +90,7 @@ impl PoissonDisk {
         self.grid[cell_idx] = Some(point);
     }
 
-    fn generate_around(&mut self, point: Point3<u32>) -> Point3<u32> {
+    fn generate_around(&mut self, point: Point3<i32>) -> Point3<i32> {
         let mut rng = rand::thread_rng();
         // Random angle
         let angle = 2.0 * PI * rng.gen::<f64>();
@@ -101,8 +101,8 @@ impl PoissonDisk {
         let new_y = f64::from(point.y) + (radius * angle.sin());
 
         Point3::new(
-            new_x.max(0.0).min(self.width as f64 - 1.0) as u32,
-            new_y.max(0.0).min(self.height as f64 - 1.0) as u32,
+            new_x.max(0.0).min(self.width as f64 - 1.0) as i32,
+            new_y.max(0.0).min(self.height as f64 - 1.0) as i32,
             0,
         )
     }

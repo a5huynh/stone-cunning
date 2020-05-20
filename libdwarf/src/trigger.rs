@@ -8,7 +8,7 @@ use core::Point3;
 use libterrain::Path;
 
 type EntityId = u32;
-type MapPosition = Point3<u32>;
+type MapPosition = Point3<i32>;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum TriggerType {

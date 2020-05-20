@@ -24,7 +24,7 @@ pub enum Object {
 #[derive(Clone)]
 pub struct TerrainChunk {
     /// TODO: Handle multiple objects per tile.
-    pub objects: HashMap<Point3<u32>, Object>,
+    pub objects: HashMap<Point3<i32>, Object>,
     grid: Vec<Option<Biome>>,
     pub height: u32,
     pub width: u32,
@@ -40,12 +40,6 @@ impl TerrainChunk {
             grid: vec![None; (width * height * ZLEVELS) as usize],
             objects: HashMap::new(),
         }
-    }
-
-    pub fn heuristic(a: &Point3<u32>, b: &Point3<u32>) -> usize {
-        (a.x as i32 - b.x as i32).abs() as usize
-            + (a.y as i32 - b.y as i32).abs() as usize
-            + (a.z as i32 - b.z as i32).abs() as usize
     }
 
     fn idx(&self, x: u32, y: u32, z: u32) -> usize {
@@ -103,7 +97,7 @@ impl TerrainChunk {
         self.grid[idx] = biome;
     }
 
-    pub fn set_object(&mut self, pt: &Point3<u32>, obj: Object) {
+    pub fn set_object(&mut self, pt: &Point3<i32>, obj: Object) {
         self.objects.insert(*pt, obj);
     }
 }

@@ -14,6 +14,6 @@ pub use worker::*;
 #[derive(Clone, Component, Debug)]
 #[storage(VecStorage)]
 pub struct EntityInfo {
-    pub pos: Point3<u32>,
+    pub pos: Point3<i32>,
     pub z_offset: f32,
 }

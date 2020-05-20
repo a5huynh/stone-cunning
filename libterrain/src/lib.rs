@@ -9,9 +9,16 @@ pub use generator::TerrainGenerator;
 mod poisson;
 
 use core::Point3;
-pub type Path = Vec<Point3<u32>>;
+pub type Path = Vec<Point3<i32>>;
+
+pub fn heuristic(a: &Point3<i32>, b: &Point3<i32>) -> usize {
+    (a.x as i32 - b.x as i32).abs() as usize
+        + (a.y as i32 - b.y as i32).abs() as usize
+        + (a.z as i32 - b.z as i32).abs() as usize
+}
 
 // Loads terrain
+#[derive(Clone)]
 pub struct TerrainLoader {
     chunk_width: u32,
     chunk_height: u32,
@@ -89,6 +96,7 @@ impl TerrainLoader {
         let pt_below = Point3::new(pt.x, pt.y, pt.z - 1);
         self.get_terrain(pt).is_none() && self.get_terrain(&pt_below).is_some()
     }
+
     /// Find neighboring points
     pub fn neighbors(&mut self, pt: &Point3<i32>) -> Vec<(Point3<i32>, usize)> {
         let mut results = Vec::new();
@@ -113,7 +121,7 @@ impl TerrainLoader {
             .collect()
     }
 
-    pub fn neighbors_for_level(&self, neighbors: &mut Vec<Point3<i32>>, pt: &Point3<i32>, zlevel: u32) {
+    fn neighbors_for_level(&self, neighbors: &mut Vec<Point3<i32>>, pt: &Point3<i32>, zlevel: u32) {
         let (x, y) = (pt.x, pt.y);
 
         neighbors.push(Point3::new(x, y - 1, zlevel as i32));

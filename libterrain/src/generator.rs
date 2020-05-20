@@ -108,10 +108,10 @@ impl TerrainGenerator {
 
         for pt in &mut poisson.samples {
             // Get the terrain height at this location
-            let idx = pt.y * self.width as u32 + pt.x;
+            let idx = pt.y * self.width as i32 + pt.x;
             if let Some(data) = &heightmap[idx as usize] {
                 if data.1 != Biome::OCEAN {
-                    pt.z = data.0 + 1;
+                    pt.z = (data.0 + 1) as i32;
                     self.terrain.set_object(&pt, Object::TREE);
                 }
             }

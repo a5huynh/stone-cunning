@@ -66,7 +66,7 @@ pub fn main() {
     }
 }
 
-pub fn direction(pt: (u32, u32, u32), start: &Point3<u32>) -> String {
+pub fn direction(pt: (u32, u32, u32), start: &Point3<i32>) -> String {
     let xdir = pt.0 as i32 - start.x as i32;
     let ydir = pt.1 as i32 - start.y as i32;
     let zdir = pt.2 as i32 - start.z as i32;

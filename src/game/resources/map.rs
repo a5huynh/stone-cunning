@@ -149,7 +149,7 @@ impl MapRenderer {
     ///
     /// The zoffset is a float, to allow for multiple objects coexisting
     /// on a single tile in a certain order.
-    pub fn place(&self, pt: &Point3<u32>, zoffset: f32) -> Transform {
+    pub fn place(&self, pt: &Point3<i32>, zoffset: f32) -> Transform {
         let mut transform = Transform::default();
 
         let fx = pt.x as f32;

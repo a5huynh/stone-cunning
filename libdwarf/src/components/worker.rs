@@ -16,7 +16,7 @@ use crate::{
 pub struct WorkerAction {
     pub action: Action,
     pub target: Option<u32>,
-    pub target_pos: Point3<u32>,
+    pub target_pos: Point3<i32>,
 }
 
 impl fmt::Debug for WorkerAction {
