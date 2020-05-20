@@ -47,13 +47,17 @@ impl SimpleState for InitState {
         };
 
         // Initialize simulation
-        info!("Generating map w/ dims: ({}, {})", chunk_width, chunk_height);
+        info!(
+            "Generating map w/ dims: ({}, {})",
+            chunk_width, chunk_height
+        );
         let now = SystemTime::now();
+        // Initialize terrain loader
         let terloader = TerrainLoader::new(chunk_width, chunk_height);
+
         let chunk = terloader.get_chunk(0, 0);
         info!("Terrain gen took: {}ms", now.elapsed().unwrap().as_millis());
-
-        WorldSim::new(world, &chunk, chunk_width, chunk_height);
+        WorldSim::new(world, &terloader, chunk_width, chunk_height);
 
         // Render map
         let map_render = MapRenderer::initialize(world);
