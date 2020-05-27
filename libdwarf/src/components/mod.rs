@@ -1,6 +1,6 @@
 use core::{
     amethyst::ecs::{Component, VecStorage},
-    Point3,
+    WorldPos,
 };
 
 mod object;
@@ -14,6 +14,6 @@ pub use worker::*;
 #[derive(Clone, Component, Debug)]
 #[storage(VecStorage)]
 pub struct EntityInfo {
-    pub pos: Point3<i32>,
+    pub pos: WorldPos,
     pub z_offset: f32,
 }

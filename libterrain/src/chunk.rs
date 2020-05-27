@@ -1,4 +1,4 @@
-use core::Point3;
+use core::WorldPos;
 use std::collections::HashMap;
 
 // TODO: Load from config file
@@ -24,7 +24,7 @@ pub enum Object {
 #[derive(Clone)]
 pub struct TerrainChunk {
     /// TODO: Handle multiple objects per tile.
-    pub objects: HashMap<Point3<i32>, Object>,
+    pub objects: HashMap<WorldPos, Object>,
     grid: Vec<Option<Biome>>,
     pub height: u32,
     pub width: u32,
@@ -97,7 +97,7 @@ impl TerrainChunk {
         self.grid[idx] = biome;
     }
 
-    pub fn set_object(&mut self, pt: &Point3<i32>, obj: Object) {
+    pub fn set_object(&mut self, pt: &WorldPos, obj: Object) {
         self.objects.insert(*pt, obj);
     }
 }

@@ -1,6 +1,9 @@
-use core::amethyst::{
-    ecs::{World, WorldExt},
-    prelude::*,
+use core::{
+    amethyst::{
+        ecs::{World, WorldExt},
+        prelude::*,
+    },
+    WorldPos
 };
 use std::collections::HashMap;
 
@@ -15,13 +18,13 @@ use libterrain::{Biome, Object, Path, TerrainChunk};
 
 pub struct Map {
     // TODO: Support multiple objects per tile.
-    pub object_map: HashMap<Point3<u32>, u32>,
+    pub object_map: HashMap<WorldPos, u32>,
     /// Location map of all the workers.
-    pub worker_map: HashMap<Point3<u32>, u32>,
     pub terrain: TerrainChunk,
     // World dimensions
     pub width: u32,
     pub height: u32,
+    pub worker_map: HashMap<WorldPos, u32>,
 }
 
 impl Map {
@@ -72,7 +75,7 @@ impl Map {
 
     /// Find the north, east, south, west neighboring objects for some
     /// point <x, y>.
-    pub fn find_neighbors(&self, pt: Point3<u32>) -> Vec<&u32> {
+    pub fn find_neighbors(&self, pt: WorldPos) -> Vec<&u32> {
         // Generate the coordinates for the neighbors
         let mut neighbor_idx = Vec::with_capacity(4);
         neighbor_idx.push(Point3::new(pt.x, pt.y + 1, pt.z));
@@ -94,7 +97,7 @@ impl Map {
         results
     }
 
-    pub fn find_path(&self, start: &Point3<u32>, end: &Point3<u32>) -> Path {
+    pub fn find_path(&mut self, start: &WorldPos, end: &WorldPos) -> Path {
         let (_, path) = find_path(
             *start,
             *end,
@@ -105,59 +108,47 @@ impl Map {
         path
     }
 
-    pub fn has_collision(&self, pt: Point3<i32>) -> bool {
-        if self.is_inside_map(pt) {
-            let key = Point3::new(pt.x as u32, pt.y as u32, pt.z as u32);
-            return self.object_map.contains_key(&key) || self.worker_map.contains_key(&key);
-        }
-
-        false
+    pub fn has_collision(&self, pt: WorldPos) -> bool {
+        let key = Point3::new(pt.x, pt.y, pt.z);
+        return self.object_map.contains_key(&key) || self.worker_map.contains_key(&key);
     }
 
-    pub fn objects_at(&self, pt: Point3<i32>) -> Option<u32> {
-        if self.is_inside_map(pt) {
-            let key = Point3::new(pt.x as u32, pt.y as u32, pt.z as u32);
-            if let Some(id) = self.object_map.get(&key) {
-                return Some(*id);
-            }
+    pub fn objects_at(&self, pt: WorldPos) -> Option<u32> {
+        let key = Point3::new(pt.x, pt.y, pt.z);
+        if let Some(id) = self.object_map.get(&key) {
+            return Some(*id);
         }
 
         None
     }
 
-    pub fn terrain_at(&self, pt: Point3<i32>) -> Option<Biome> {
-        if self.is_inside_map(pt) {
-            self.terrain.get(pt.x as u32, pt.y as u32, pt.z as u32)
-        } else {
-            None
-        }
+    pub fn terrain_at(&mut self, pt: WorldPos) -> Option<Biome> {
+        self.terrain.get_terrain(&pt)
     }
 
-    pub fn worker_at(&self, pt: Point3<i32>) -> Option<u32> {
-        if self.is_inside_map(pt) {
-            let key = Point3::new(pt.x as u32, pt.y as u32, pt.z as u32);
-            if let Some(id) = self.worker_map.get(&key) {
-                return Some(*id);
-            }
+    pub fn worker_at(&self, pt: WorldPos) -> Option<u32> {
+        let key = Point3::new(pt.x, pt.y, pt.z);
+        if let Some(id) = self.worker_map.get(&key) {
+            return Some(*id);
         }
 
         None
     }
 
-    pub fn move_worker(&mut self, entity: u32, old_pt: Point3<u32>, new_pt: Point3<u32>) {
+    pub fn move_worker(&mut self, entity: u32, old_pt: WorldPos, new_pt: WorldPos) {
         self.worker_map.remove(&old_pt);
         self.track_worker(entity, new_pt);
     }
 
-    pub fn remove_object(&mut self, _entity: u32, pt: Point3<u32>) {
+    pub fn remove_object(&mut self, _entity: u32, pt: WorldPos) {
         self.object_map.remove(&pt);
     }
 
-    pub fn track_object(&mut self, entity: u32, pt: Point3<u32>) {
+    pub fn track_object(&mut self, entity: u32, pt: WorldPos) {
         self.object_map.insert(pt, entity);
     }
 
-    pub fn track_worker(&mut self, entity: u32, pt: Point3<u32>) {
+    pub fn track_worker(&mut self, entity: u32, pt: WorldPos) {
         self.worker_map.insert(pt, entity);
     }
 }

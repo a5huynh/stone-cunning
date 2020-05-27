@@ -4,11 +4,10 @@
 /// - Minimizes the amount of processing the agents need to do to respond
 ///   to these events.
 ///
-use core::Point3;
+use core::WorldPos;
 use libterrain::Path;
 
 type EntityId = u32;
-type MapPosition = Point3<i32>;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum TriggerType {
@@ -19,15 +18,15 @@ pub enum TriggerType {
         damage: i32,
     },
     /// Adds a new entity to the world.
-    Add(MapPosition, String),
+    Add(WorldPos, String),
     /// Adds a new worker to the world.
-    AddWorker(MapPosition),
+    AddWorker(WorldPos),
     /// Destroys entities and drops items. Should only be handled by the World.
     Destroy(EntityId),
     // Harvest a resource, e.g. chopping wood.
     HarvestResource {
         target: EntityId,
-        position: MapPosition,
+        position: WorldPos,
         resource: String,
     },
     /// Take an object and place into inventory.
@@ -36,7 +35,7 @@ pub enum TriggerType {
     /// Move along path
     Move(Path),
     /// Move to some location.
-    MoveTo(MapPosition),
+    MoveTo(WorldPos),
 }
 
 pub enum TriggerPriority {

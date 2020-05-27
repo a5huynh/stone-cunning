@@ -2,7 +2,7 @@ use core::amethyst::ecs::{Component, VecStorage};
 use std::collections::VecDeque;
 use std::fmt;
 
-use core::{utils::is_near, Point3};
+use core::{utils::is_near, WorldPos};
 use libterrain::Path;
 
 use crate::{
@@ -16,7 +16,7 @@ use crate::{
 pub struct WorkerAction {
     pub action: Action,
     pub target: Option<u32>,
-    pub target_pos: Point3<i32>,
+    pub target_pos: WorldPos,
 }
 
 impl fmt::Debug for WorkerAction {
