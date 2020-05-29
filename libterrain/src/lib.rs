@@ -9,6 +9,8 @@ pub use generator::TerrainGenerator;
 mod poisson;
 
 use core::{Point3, WorldPos};
+use crate::chunk::ChunkPos;
+
 pub type Path = Vec<WorldPos>;
 
 pub fn heuristic(a: &WorldPos, b: &WorldPos) -> usize {
@@ -20,10 +22,10 @@ pub fn heuristic(a: &WorldPos, b: &WorldPos) -> usize {
 // Loads terrain
 #[derive(Clone)]
 pub struct TerrainLoader {
-    chunk_width: u32,
-    chunk_height: u32,
-    half_width: f32,
-    half_height: f32,
+    pub chunk_width: u32,
+    pub chunk_height: u32,
+    pub half_width: f32,
+    pub half_height: f32,
     /// Currently loaded chunks
     pub chunks: HashMap<(i32, i32), TerrainChunk>,
 }
@@ -65,17 +67,14 @@ impl TerrainLoader {
         let chunk = self.get_chunk(coord.0, coord.1);
 
         // Transform world coordinate to chunk coordinate
-        let chunk_coord: WorldPos = Point3::new(
-            (pt.x as f32 + self.half_width) as i32,
-            (pt.y as f32 + self.half_height) as i32,
-            pt.z,
+        let chunk_coord: ChunkPos = Point3::new(
+            (pt.x as f32 + self.half_width) as u32,
+            (pt.y as f32 + self.half_height) as u32,
+            pt.z as u32,
         );
 
-        chunk.get(
-            chunk_coord.x as u32,
-            chunk_coord.y as u32,
-            chunk_coord.z as u32,
-        )
+
+        chunk.get(&chunk_coord)
     }
 
     pub fn get_topo(&self, x: i32, y: i32) -> Vec<Option<Biome>> {

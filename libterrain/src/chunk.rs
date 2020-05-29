@@ -1,5 +1,6 @@
-use core::WorldPos;
+use core::Point3;
 use std::collections::HashMap;
+
 
 // TODO: Load from config file
 #[derive(Clone, Debug, PartialEq)]
@@ -21,10 +22,13 @@ pub enum Object {
     TREE,
 }
 
+// Position inside
+pub type ChunkPos = Point3<u32>;
+
 #[derive(Clone)]
 pub struct TerrainChunk {
     /// TODO: Handle multiple objects per tile.
-    pub objects: HashMap<WorldPos, Object>,
+    pub objects: HashMap<ChunkPos, Object>,
     grid: Vec<Option<Biome>>,
     pub height: u32,
     pub width: u32,
@@ -42,8 +46,8 @@ impl TerrainChunk {
         }
     }
 
-    fn idx(&self, x: u32, y: u32, z: u32) -> usize {
-        (z * (self.width * self.height) as u32 + y * self.width as u32 + x) as usize
+    fn idx(&self, pt: &ChunkPos) -> usize {
+        (pt.z * (self.width * self.height) as u32 + pt.y * self.width as u32 + pt.x) as usize
     }
 
     /// Determines whether the block @ (x, y, z) is visible.
@@ -76,7 +80,8 @@ impl TerrainChunk {
         for ix in start_x..=end_x {
             for iy in start_y..=end_y {
                 for iz in start_z..=end_z {
-                    if self.get(ix, iy, iz).is_none() {
+                    let pt = Point3::new(ix, iy, iz);
+                    if self.get(&pt).is_none() {
                         return true;
                     }
                 }
@@ -87,17 +92,17 @@ impl TerrainChunk {
     }
 
     /// Get chunk data at a specific position
-    pub fn get(&self, x: u32, y: u32, z: u32) -> Option<Biome> {
-        self.grid[self.idx(x, y, z)].clone()
+    pub fn get(&self, pt: &ChunkPos) -> Option<Biome> {
+        self.grid[self.idx(pt)].clone()
     }
 
     /// Set chunk data at a specific position
-    pub fn set(&mut self, pt: (u32, u32, u32), biome: Option<Biome>) {
-        let idx = self.idx(pt.0, pt.1, pt.2);
+    pub fn set(&mut self, pt: &ChunkPos, biome: Option<Biome>) {
+        let idx = self.idx(&pt);
         self.grid[idx] = biome;
     }
 
-    pub fn set_object(&mut self, pt: &WorldPos, obj: Object) {
+    pub fn set_object(&mut self, pt: &ChunkPos, obj: Object) {
         self.objects.insert(*pt, obj);
     }
 }
