@@ -1,6 +1,4 @@
 use core::Point3;
-use std::collections::HashMap;
-
 
 // TODO: Load from config file
 #[derive(Clone, Debug, PartialEq)]
@@ -18,8 +16,15 @@ pub enum Biome {
 
 // TODO: Load from config file
 #[derive(Clone, Debug)]
-pub enum Object {
+pub enum ObjectType {
     TREE,
+}
+
+#[derive(Clone, Debug)]
+pub enum ChunkEntity {
+    Terrain(Biome),
+    /// TODO: Handle multiple objects per tile.
+    Object(ObjectType),
 }
 
 // Position inside
@@ -27,9 +32,7 @@ pub type ChunkPos = Point3<u32>;
 
 #[derive(Clone)]
 pub struct TerrainChunk {
-    /// TODO: Handle multiple objects per tile.
-    pub objects: HashMap<ChunkPos, Object>,
-    grid: Vec<Option<Biome>>,
+    grid: Vec<Option<ChunkEntity>>,
     pub height: u32,
     pub width: u32,
 }
@@ -42,7 +45,6 @@ impl TerrainChunk {
             width,
             height,
             grid: vec![None; (width * height * ZLEVELS) as usize],
-            objects: HashMap::new(),
         }
     }
 
@@ -51,6 +53,7 @@ impl TerrainChunk {
     }
 
     /// Determines whether the block @ (x, y, z) is visible.
+    /// TODO: Store visibility as part of ChunkEntity
     pub fn is_visible(&self, x: u32, y: u32, z: u32) -> bool {
         // Top level is always exposed.
         if z == ZLEVELS - 1 {
@@ -92,17 +95,13 @@ impl TerrainChunk {
     }
 
     /// Get chunk data at a specific position
-    pub fn get(&self, pt: &ChunkPos) -> Option<Biome> {
+    pub fn get(&self, pt: &ChunkPos) -> Option<ChunkEntity> {
         self.grid[self.idx(pt)].clone()
     }
 
     /// Set chunk data at a specific position
-    pub fn set(&mut self, pt: &ChunkPos, biome: Option<Biome>) {
+    pub fn set(&mut self, pt: &ChunkPos, entity: ChunkEntity) {
         let idx = self.idx(&pt);
-        self.grid[idx] = biome;
-    }
-
-    pub fn set_object(&mut self, pt: &ChunkPos, obj: Object) {
-        self.objects.insert(*pt, obj);
+        self.grid[idx] = Some(entity);
     }
 }

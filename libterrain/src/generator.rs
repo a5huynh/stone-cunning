@@ -1,8 +1,7 @@
-use core::Point3;
 use noise::{NoiseFn, Perlin};
 use std::cmp::Ordering;
 
-use crate::chunk::{Biome, Object, TerrainChunk};
+use crate::chunk::{Biome, ChunkEntity, ChunkPos, ObjectType, TerrainChunk};
 use crate::poisson::PoissonDisk;
 
 #[derive(Clone)]
@@ -82,20 +81,24 @@ impl TerrainGenerator {
                 //  * Less hilly?
                 //  * place trees correctly on 3d map
                 for z in 0..ZLEVELS {
-                    let idx = Point3::new(x as u32, y as u32, z as u32);
+                    let idx = ChunkPos::new(x as u32, y as u32, z as u32);
                     match biome {
                         // For water biomes, the height is always the same, but the
                         // depth of the water will change.
                         Biome::OCEAN => {
                             if z >= terrain_height && z <= WATER_HEIGHT {
-                                self.terrain.set(&idx, Some(biome.clone()));
+                                self.terrain.set(&idx, ChunkEntity::Terrain(biome.clone()));
                             } else if z < terrain_height {
-                                self.terrain.set(&idx, Some(Biome::ROCK));
+                                self.terrain.set(&idx, ChunkEntity::Terrain(Biome::ROCK));
                             }
                         }
                         _ => match z.cmp(&terrain_height) {
-                            Ordering::Equal => self.terrain.set(&idx, Some(biome.clone())),
-                            Ordering::Less => self.terrain.set(&idx, Some(Biome::ROCK)),
+                            Ordering::Equal => {
+                                self.terrain.set(&idx, ChunkEntity::Terrain(biome.clone()))
+                            }
+                            Ordering::Less => {
+                                self.terrain.set(&idx, ChunkEntity::Terrain(Biome::ROCK))
+                            }
                             _ => {}
                         },
                     }
@@ -111,9 +114,9 @@ impl TerrainGenerator {
             // Get the terrain height at this location
             let idx = pt.y * self.width as u32 + pt.x;
             if let Some(data) = &heightmap[idx as usize] {
-                if data.1 != Biome::OCEAN {
+                if data.1 != Biome::OCEAN && data.0 < (ZLEVELS - 1) {
                     pt.z = data.0 + 1;
-                    self.terrain.set_object(pt, Object::TREE);
+                    self.terrain.set(pt, ChunkEntity::Object(ObjectType::TREE));
                 }
             }
         }

@@ -1,15 +1,15 @@
 use std::collections::HashMap;
 
 mod chunk;
-pub use chunk::{Biome, Object, TerrainChunk, ZLEVELS};
+pub use chunk::{Biome, ChunkEntity, ObjectType, TerrainChunk, ZLEVELS};
 
 mod generator;
 pub use generator::TerrainGenerator;
 
 mod poisson;
 
-use core::{Point3, WorldPos};
 use crate::chunk::ChunkPos;
+use core::{Point3, WorldPos};
 
 pub type Path = Vec<WorldPos>;
 
@@ -61,19 +61,13 @@ impl TerrainLoader {
         chunk.clone()
     }
 
-    pub fn get_terrain(&mut self, pt: &WorldPos) -> Option<Biome> {
+    pub fn get(&mut self, pt: &WorldPos) -> Option<ChunkEntity> {
         // Grab the chunk this point would be in.
         let coord = self.to_chunk_coord(pt);
         let chunk = self.get_chunk(coord.0, coord.1);
 
         // Transform world coordinate to chunk coordinate
-        let chunk_coord: ChunkPos = Point3::new(
-            (pt.x as f32 + self.half_width) as u32,
-            (pt.y as f32 + self.half_height) as u32,
-            pt.z as u32,
-        );
-
-
+        let chunk_coord = self._world_to_chunk(pt);
         chunk.get(&chunk_coord)
     }
 
@@ -89,11 +83,11 @@ impl TerrainLoader {
     /// A space is passable if there is no block there and a block below.
     pub fn is_walkable(&mut self, pt: &WorldPos) -> bool {
         if pt.z == 0 {
-            return self.get_terrain(pt).is_none();
+            return self.get(pt).is_none();
         }
 
         let pt_below = WorldPos::new(pt.x, pt.y, pt.z - 1);
-        self.get_terrain(pt).is_none() && self.get_terrain(&pt_below).is_some()
+        self.get(pt).is_none() && self.get(&pt_below).is_some()
     }
 
     /// Find neighboring points
@@ -135,5 +129,13 @@ impl TerrainLoader {
         let chunk_y = (pt.y as f32 / self.half_height) as i32;
 
         (chunk_x as i32, chunk_y as i32)
+    }
+
+    fn _world_to_chunk(&self, pt: &WorldPos) -> ChunkPos {
+        ChunkPos::new(
+            (pt.x as f32 + self.half_width) as u32,
+            (pt.y as f32 + self.half_height) as u32,
+            pt.z as u32,
+        )
     }
 }
