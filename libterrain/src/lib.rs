@@ -1,14 +1,13 @@
 use std::collections::HashMap;
 
 mod chunk;
-pub use chunk::{Biome, ChunkEntity, ObjectType, TerrainChunk, ZLEVELS};
+pub use chunk::{Biome, ChunkEntity, ChunkPos, ObjectType, TerrainChunk, ZLEVELS};
 
 mod generator;
 pub use generator::TerrainGenerator;
 
 mod poisson;
 
-use crate::chunk::ChunkPos;
 use core::{Point3, WorldPos};
 
 pub type Path = Vec<WorldPos>;
@@ -64,10 +63,11 @@ impl TerrainLoader {
     pub fn get(&mut self, pt: &WorldPos) -> Option<ChunkEntity> {
         // Grab the chunk this point would be in.
         let coord = self.to_chunk_coord(pt);
-        let chunk = self.get_chunk(coord.0, coord.1);
 
         // Transform world coordinate to chunk coordinate
-        let chunk_coord = self._world_to_chunk(pt);
+        let chunk = self.get_chunk(coord.0, coord.1);
+        let chunk_coord = self.world_to_chunk(pt);
+
         chunk.get(&chunk_coord)
     }
 
@@ -90,18 +90,49 @@ impl TerrainLoader {
         self.get(pt).is_none() && self.get(&pt_below).is_some()
     }
 
+    /// Determines whether the block @ (x, y, z) is visible.
+    /// TODO: Store visibility as part of ChunkEntity
+    pub fn is_visible(&mut self, pt: &WorldPos) -> bool {
+        // Top level is always exposed.
+        if pt.z == (ZLEVELS - 1) as i32 {
+            return true;
+        }
+
+        let start_x = pt.x - 1;
+        let start_y = pt.y - 1;
+        let start_z = pt.z - 1;
+
+        let end_x = pt.x + 1;
+        let end_y = pt.y + 1;
+        let end_z = (pt.z + 1).min((ZLEVELS - 1) as i32);
+
+        // If any side is exposed to air, the block is visible.
+        for ix in start_x..=end_x {
+            for iy in start_y..=end_y {
+                for iz in start_z..=end_z {
+                    let pt = Point3::new(ix, iy, iz);
+                    if self.get(&pt).is_none() {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        false
+    }
+
     /// Find neighboring points
     pub fn neighbors(&mut self, pt: &WorldPos) -> Vec<(WorldPos, usize)> {
         let mut results = Vec::new();
 
         if pt.z > 0 {
-            self.neighbors_for_level(&mut results, pt, (pt.z - 1) as u32);
+            self.neighbors_for_level(&mut results, pt, pt.z - 1);
         }
 
-        self.neighbors_for_level(&mut results, pt, pt.z as u32);
+        self.neighbors_for_level(&mut results, pt, pt.z);
 
         if pt.z < ZLEVELS as i32 {
-            self.neighbors_for_level(&mut results, pt, (pt.z + 1) as u32);
+            self.neighbors_for_level(&mut results, pt, pt.z + 1);
         }
 
         results
@@ -114,27 +145,44 @@ impl TerrainLoader {
             .collect()
     }
 
-    fn neighbors_for_level(&self, neighbors: &mut Vec<WorldPos>, pt: &WorldPos, zlevel: u32) {
+    fn neighbors_for_level(&self, neighbors: &mut Vec<WorldPos>, pt: &WorldPos, zlevel: i32) {
         let (x, y) = (pt.x, pt.y);
 
-        neighbors.push(Point3::new(x, y - 1, zlevel as i32));
-        neighbors.push(Point3::new(x - 1, y, zlevel as i32));
-        neighbors.push(Point3::new(x + 1, y, zlevel as i32));
-        neighbors.push(Point3::new(x, y + 1, zlevel as i32));
+        neighbors.push(WorldPos::new(x, y - 1, zlevel));
+        neighbors.push(WorldPos::new(x - 1, y, zlevel));
+        neighbors.push(WorldPos::new(x + 1, y, zlevel));
+        neighbors.push(WorldPos::new(x, y + 1, zlevel));
     }
 
     pub fn to_chunk_coord(&self, pt: &WorldPos) -> (i32, i32) {
         // world point to chunk coordinate
-        let chunk_x = (pt.x as f32 / self.half_width) as i32;
-        let chunk_y = (pt.y as f32 / self.half_height) as i32;
+        let mut chunk_x = pt.x / self.chunk_width as i32;
+        if (pt.x % self.chunk_width as i32) < 0 {
+            chunk_x -= 1;
+        }
 
-        (chunk_x as i32, chunk_y as i32)
+        let mut chunk_y = pt.y / self.chunk_height as i32;
+        if (pt.y % self.chunk_height as i32) < 0 {
+            chunk_y -= 1;
+        }
+
+        (chunk_x, chunk_y)
     }
 
-    fn _world_to_chunk(&self, pt: &WorldPos) -> ChunkPos {
+    pub fn world_to_chunk(&self, pt: &WorldPos) -> ChunkPos {
+        let mut local_x = pt.x % self.chunk_width as i32;
+        if local_x < 0 {
+            local_x += self.chunk_width as i32;
+        }
+
+        let mut local_y = pt.y % self.chunk_height as i32;
+        if local_y < 0 {
+            local_y += self.chunk_height as i32;
+        }
+
         ChunkPos::new(
-            (pt.x as f32 + self.half_width) as u32,
-            (pt.y as f32 + self.half_height) as u32,
+            local_x as u32,
+            local_y as u32,
             pt.z as u32,
         )
     }
