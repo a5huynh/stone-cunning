@@ -4,15 +4,13 @@ use crate::{
     components::{EntityInfo, MapObject, Worker},
     config::{ResourceConfig, WorldConfig},
     planner::Planner,
-    resources::{time, Map, TaskQueue},
+    resources::{time, TaskQueue},
 };
-
-use libterrain::TerrainChunk;
 
 #[derive(Default)]
 pub struct WorldSim;
 impl WorldSim {
-    pub fn new(world: &mut World, terrain: &TerrainChunk, width: u32, height: u32) -> Self {
+    pub fn new(world: &mut World) -> Self {
         world.register::<EntityInfo>();
         world.register::<MapObject>();
         world.register::<Worker>();
@@ -28,10 +26,6 @@ impl WorldSim {
         // Load sim config
         let world_config = WorldConfig::load("./resources/sim_config.ron");
         world.insert(world_config);
-
-        // Initialize map.
-        let map = Map::initialize(world, terrain, width, height);
-        world.insert(map);
 
         // Initialize task queue.
         world.insert(TaskQueue::default());

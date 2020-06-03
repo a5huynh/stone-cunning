@@ -6,9 +6,11 @@ use core::{
 use crate::{
     components::{EntityInfo, MapObject, Worker},
     config::ResourceConfig,
-    resources::{Map, TaskQueue},
+    resources::TaskQueue,
     trigger::TriggerType,
 };
+
+use libterrain::TerrainLoader;
 
 #[derive(Default)]
 pub struct WorldUpdateSystem;
@@ -19,7 +21,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
         WriteStorage<'a, MapObject>,
         WriteStorage<'a, EntityInfo>,
         WriteExpect<'a, TaskQueue>,
-        WriteExpect<'a, Map>,
+        WriteExpect<'a, TerrainLoader>,
         ReadExpect<'a, ResourceConfig>,
     );
 

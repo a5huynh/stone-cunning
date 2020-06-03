@@ -12,11 +12,7 @@ fn test_chunk_coord() {
     let coords = vec![(0, 0), (0, 1), (1, 0), (1, 1), (0, -1), (-1, 0), (-1, -1)];
 
     for coord in coords {
-        let pt = Point3::new(
-            coord.0 * chunk_width,
-            coord.1 * chunk_height,
-            0,
-        );
+        let pt = Point3::new(coord.0 * chunk_width, coord.1 * chunk_height, 0);
         let calcd = terloader.to_chunk_coord(&pt);
         assert_eq!(coord, calcd);
     }

@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    time::SystemTime,
+};
 
 mod chunk;
 pub use chunk::{Biome, ChunkEntity, ChunkPos, ObjectType, TerrainChunk, ZLEVELS};
@@ -8,7 +11,8 @@ pub use generator::TerrainGenerator;
 
 mod poisson;
 
-use core::{Point3, WorldPos};
+use core::{log::info, Point3, WorldPos};
+use libpath::find_path;
 
 pub type Path = Vec<WorldPos>;
 
@@ -25,6 +29,11 @@ pub struct TerrainLoader {
     pub chunk_height: u32,
     pub half_width: f32,
     pub half_height: f32,
+    /// TODO: REMOVE THESE MAPS
+    pub object_map: HashMap<WorldPos, u32>,
+    /// Location map of all the workers.
+    pub worker_map: HashMap<WorldPos, u32>,
+    /// ENDTODO ----
     /// Currently loaded chunks
     pub chunks: HashMap<(i32, i32), TerrainChunk>,
 }
@@ -37,7 +46,20 @@ impl TerrainLoader {
             half_width: chunk_width as f32 / 2.0,
             half_height: chunk_height as f32 / 2.0,
             chunks: HashMap::new(),
+            object_map: HashMap::new(),
+            worker_map: HashMap::new(),
         }
+    }
+
+    pub fn find_path(&mut self, start: &WorldPos, end: &WorldPos) -> Path {
+        let (_, path) = find_path(
+            *start,
+            *end,
+            |node| heuristic(&node, start),
+            |pt| self.neighbors(pt),
+        );
+
+        path
     }
 
     pub fn get_chunk(&mut self, x: i32, y: i32) -> TerrainChunk {
@@ -50,12 +72,14 @@ impl TerrainLoader {
         //     return chunk.clone();
         // }
 
+        let now = SystemTime::now();
         let tergen = TerrainGenerator::new(self.chunk_width, self.chunk_height)
             .chunk_coord(x, y)
             .build();
 
         let chunk = tergen.get_terrain();
         self.chunks.insert((x, y), chunk.clone());
+        info!("Terrain gen took: {}ms", now.elapsed().unwrap().as_millis());
 
         chunk.clone()
     }
@@ -180,10 +204,23 @@ impl TerrainLoader {
             local_y += self.chunk_height as i32;
         }
 
-        ChunkPos::new(
-            local_x as u32,
-            local_y as u32,
-            pt.z as u32,
-        )
+        ChunkPos::new(local_x as u32, local_y as u32, pt.z as u32)
+    }
+
+    pub fn move_worker(&mut self, entity: u32, old_pt: WorldPos, new_pt: WorldPos) {
+        self.worker_map.remove(&old_pt);
+        self.track_worker(entity, new_pt);
+    }
+
+    pub fn remove_object(&mut self, _entity: u32, pt: WorldPos) {
+        self.object_map.remove(&pt);
+    }
+
+    pub fn track_object(&mut self, entity: u32, pt: WorldPos) {
+        self.object_map.insert(pt, entity);
+    }
+
+    pub fn track_worker(&mut self, entity: u32, pt: WorldPos) {
+        self.worker_map.insert(pt, entity);
     }
 }

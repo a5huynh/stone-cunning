@@ -2,13 +2,13 @@ use core::amethyst::ecs::{Component, VecStorage};
 use std::collections::VecDeque;
 use std::fmt;
 
-use core::{utils::is_near, WorldPos};
-use libterrain::Path;
+use core::{log::info, utils::is_near, WorldPos};
+use libterrain::{Path, TerrainLoader, ChunkEntity};
 
 use crate::{
     components::{EntityInfo, MapObject},
     planner::{Action, Condition, State},
-    resources::{Map, TaskQueue},
+    resources::TaskQueue,
     trigger::TriggerType,
 };
 
@@ -72,7 +72,7 @@ impl Worker {
     pub fn do_work(
         &mut self,
         tasks: &mut TaskQueue,
-        map: &mut Map,
+        map: &mut TerrainLoader,
         entity_info: &mut EntityInfo,
         target_obj: Option<&MapObject>,
     ) {
@@ -105,11 +105,15 @@ impl Worker {
                     // Pickup item
                     Condition::Has(_) => {
                         // Queue picking up this resource
-                        let resource = map.object_map.get(&action.target_pos).unwrap();
-                        tasks.add_world(TriggerType::Take {
-                            target: *resource,
-                            owner: self.id,
-                        });
+                        let resource = map.get(&action.target_pos);
+                        if let Some(ChunkEntity::Object(resource)) = resource {
+                            tasks.add_world(TriggerType::Take {
+                                target: 1,
+                                owner: self.id,
+                            });
+                        } else {
+                            info!("Unable to pickup item");
+                        }
                     }
                     // Path closer to this entity
                     Condition::Near(_) => {
@@ -132,7 +136,7 @@ impl Worker {
                                     // Move laong path.
                                     let current_pos = entity_info.pos;
                                     entity_info.pos = new_pt;
-                                    map.move_worker(self.id, current_pos, new_pt);
+                                    // map.move_worker(self.id, current_pos, new_pt);
                                     finished = false;
                                 }
                             }

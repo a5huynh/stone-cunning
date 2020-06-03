@@ -6,10 +6,11 @@ use crate::{
     components::{EntityInfo, MapObject, Worker, WorkerAction},
     config::WorldConfig,
     planner::{Condition, Planner, State},
-    resources::{time::Time, Map, TaskQueue},
+    resources::{time::Time, TaskQueue},
     trigger::TriggerType,
 };
 use core::utils::is_near;
+use libterrain::TerrainLoader;
 
 pub struct WorkerSystem;
 impl<'a> System<'a> for WorkerSystem {
@@ -18,7 +19,7 @@ impl<'a> System<'a> for WorkerSystem {
         WriteStorage<'a, Worker>,
         ReadStorage<'a, MapObject>,
         WriteStorage<'a, EntityInfo>,
-        WriteExpect<'a, Map>,
+        WriteExpect<'a, TerrainLoader>,
         WriteExpect<'a, Planner>,
         Write<'a, TaskQueue>,
         ReadExpect<'a, Time>,

@@ -10,12 +10,13 @@ const MAP_HEIGHT: u32 = 10;
 
 use core::Point3;
 use libdwarf::{
-    resources::{Map, TaskQueue},
+    resources::TaskQueue,
     systems,
     trigger::TriggerType,
     world::WorldSim,
 };
-use libterrain::TerrainChunk;
+
+use libterrain::{TerrainChunk, TerrainLoader};
 
 fn main() {
     // Setup ascii renderer
@@ -25,8 +26,11 @@ fn main() {
     let mut world = World::new();
 
     // Initialize the world.
-    let terrain = TerrainChunk::new(MAP_WIDTH, MAP_HEIGHT);
-    WorldSim::new(&mut world, &terrain, MAP_WIDTH, MAP_HEIGHT);
+    let mut terrain = TerrainLoader::new(MAP_WIDTH, MAP_HEIGHT);
+    let chunk = TerrainChunk::new(MAP_WIDTH, MAP_HEIGHT);
+    terrain.chunks.insert((0, 0), chunk);
+    world.insert(terrain);
+    WorldSim::new(&mut world);
 
     let mut dispatcher = DispatcherBuilder::new()
         .with(systems::WorkerSystem, "worker_sim", &[])
@@ -55,7 +59,7 @@ fn main() {
             // Add a task to the task queue.
             'a' => {
                 world.exec(
-                    |(mut queue, map): (ecs::Write<TaskQueue>, ecs::ReadExpect<Map>)| {
+                    |(mut queue, map): (ecs::Write<TaskQueue>, ecs::WriteExpect<TerrainLoader>)| {
                         let entity_id = map.object_map.get(&Point3::new(9, 9, 0)).unwrap();
                         queue.add(TriggerType::HarvestResource {
                             target: *entity_id,
