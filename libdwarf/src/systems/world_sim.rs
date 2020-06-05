@@ -1,6 +1,7 @@
 use core::{
     amethyst::ecs::{Entities, ReadExpect, System, WriteExpect, WriteStorage},
     log,
+    Uuid
 };
 
 use crate::{
@@ -10,7 +11,7 @@ use crate::{
     trigger::TriggerType,
 };
 
-use libterrain::TerrainLoader;
+use libterrain::{ChunkEntity, TerrainLoader, ObjectType};
 
 #[derive(Default)]
 pub struct WorldUpdateSystem;
@@ -36,7 +37,10 @@ impl<'a> System<'a> for WorldUpdateSystem {
                 TriggerType::Add(pt, name) => {
                     log::info!("Adding object '{}' @ ({:?})", name, pt);
                     let resource = resources.map.get(&name).unwrap().clone();
+
                     let new_entity = entities.create();
+                    let uuid = Uuid::new_v4();
+
                     objects
                         .insert(new_entity, MapObject::new(&resource))
                         .unwrap();
@@ -44,21 +48,26 @@ impl<'a> System<'a> for WorldUpdateSystem {
                         .insert(
                             new_entity,
                             EntityInfo {
+                                uuid,
                                 pos: pt,
                                 z_offset: 1.0,
                             },
                         )
                         .unwrap();
-                    map.track_object(new_entity.id(), pt);
+
+                    map.set(&pt, Some(ChunkEntity::Object(uuid, ObjectType::TREE)));
                 }
                 TriggerType::AddWorker(pos) => {
                     log::info!("Adding worker @ ({:?})", pos);
                     let entity = entities.create();
+                    let uuid = Uuid::new_v4();
+
                     workers.insert(entity, Worker::new(entity.id())).unwrap();
                     entity_infos
-                        .insert(entity, EntityInfo { pos, z_offset: 1.0 })
+                        .insert(entity, EntityInfo { uuid, pos, z_offset: 1.0 })
                         .unwrap();
-                    map.track_worker(entity.id(), pos);
+
+                    map.set(&pos, Some(ChunkEntity::Worker(uuid)));
                 }
                 // Deal damage to a particular object
                 TriggerType::DealDamage {
@@ -77,7 +86,7 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     let entity = entities.entity(id);
                     if objects.get(entity).is_some() {
                         if let Some(entity_info) = entity_infos.get(entity) {
-                            map.remove_object(id, entity_info.pos);
+                            map.set(&entity_info.pos, None);
                         }
                     }
                     // Remove from world

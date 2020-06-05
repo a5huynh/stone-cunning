@@ -1,4 +1,4 @@
-use core::Point3;
+use core::{Point3, Uuid};
 
 // TODO: Load from config file
 #[derive(Clone, Debug, PartialEq)]
@@ -24,7 +24,8 @@ pub enum ObjectType {
 pub enum ChunkEntity {
     Terrain(Biome),
     /// TODO: Handle multiple objects per tile.
-    Object(ObjectType),
+    Object(Uuid, ObjectType),
+    Worker(Uuid),
 }
 
 // Position inside
@@ -58,8 +59,8 @@ impl TerrainChunk {
     }
 
     /// Set chunk data at a specific position
-    pub fn set(&mut self, pt: &ChunkPos, entity: ChunkEntity) {
+    pub fn set(&mut self, pt: &ChunkPos, entity: Option<ChunkEntity>) {
         let idx = self.idx(&pt);
-        self.grid[idx] = Some(entity);
+        self.grid[idx] = entity;
     }
 }

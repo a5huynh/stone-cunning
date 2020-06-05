@@ -1,6 +1,6 @@
 use core::amethyst::{
     core::Transform,
-    ecs::{Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
+    ecs::{Join, Read, ReadExpect, ReadStorage, System, Write, WriteExpect, WriteStorage},
     input::{InputHandler, StringBindings},
     renderer::Camera,
     window::ScreenDimensions,
@@ -10,8 +10,8 @@ use crate::game::{
     components::{Cursor, CursorSelected, Direction, PickInfo},
     resources::MapRenderer,
 };
-use core::{Point3, Vector2};
-use libdwarf::resources::Map;
+use core::{Point3, Vector2, WorldPos};
+use libterrain::{ChunkEntity, TerrainLoader};
 
 pub struct CursorSystem;
 
@@ -23,7 +23,7 @@ impl<'s> System<'s> for CursorSystem {
         WriteStorage<'s, Transform>,
         ReadStorage<'s, Camera>,
         ReadExpect<'s, ScreenDimensions>,
-        ReadExpect<'s, Map>,
+        WriteExpect<'s, TerrainLoader>,
         ReadExpect<'s, MapRenderer>,
     );
 
@@ -36,7 +36,7 @@ impl<'s> System<'s> for CursorSystem {
             mut transforms,
             cameras,
             screen,
-            map,
+            mut map,
             map_render,
         ): Self::SystemData,
     ) {
@@ -77,21 +77,20 @@ impl<'s> System<'s> for CursorSystem {
             let mut valid_pt = current_pt;
 
             // Start at the highest point
-            for z in 0..64 {
+            for z in 0..63 {
                 current_pt.z = z;
-
                 // Pointer to terrain above the current tile.
                 above_pt.x = current_pt.x;
                 above_pt.y = current_pt.y;
                 above_pt.z = z + 1;
 
                 // Loop until we find the first piece of visible terrain.
-                if map.is_inside_map(current_pt) && map.is_inside_map(above_pt) {
-                    let biome = map.terrain_at(current_pt);
-                    let above = map.terrain_at(above_pt);
+                let biome = map.get(&current_pt);
+                let above = map.get(&above_pt);
 
-                    if biome.is_some() && above.is_none() {
-                        pick_info.terrain = biome;
+                if biome.is_some() && above.is_none() {
+                    if let Some(ChunkEntity::Terrain(biome_type)) = biome {
+                        pick_info.terrain = Some(biome_type);
                         // Last valid point we've seen.
                         valid_pt.x = current_pt.x;
                         valid_pt.y = current_pt.y;
@@ -125,19 +124,17 @@ impl<'s> System<'s> for CursorSystem {
             pick_info.position = Some(valid_pt);
 
             // Move cursor to new position.
-            let new_transform = map_render.place(
-                &Point3::new(valid_pt.x as u32, valid_pt.y as u32, valid_pt.z as u32),
-                0.1,
-            );
+            let new_transform =
+                map_render.place(&WorldPos::new(valid_pt.x, valid_pt.y, valid_pt.z), 0.1);
 
             *cursor_transform = new_transform;
 
             // If there are worker/objects at this location, show debug info about
             // those
             valid_pt.z += 1;
-            if map.is_inside_map(valid_pt) {
-                pick_info.worker = map.worker_at(valid_pt);
-                pick_info.object = map.objects_at(valid_pt);
+            // pick_info.worker = map.worker_at(valid_pt);
+            if let Some(ChunkEntity::Object(uuid, object)) = map.get(&valid_pt) {
+                pick_info.object = Some(1); //Some(object);
             }
 
             cursor_selected.hover_selected = Some(pick_info);

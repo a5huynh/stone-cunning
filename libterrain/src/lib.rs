@@ -87,7 +87,6 @@ impl TerrainLoader {
     pub fn get(&mut self, pt: &WorldPos) -> Option<ChunkEntity> {
         // Grab the chunk this point would be in.
         let coord = self.to_chunk_coord(pt);
-
         // Transform world coordinate to chunk coordinate
         let chunk = self.get_chunk(coord.0, coord.1);
         let chunk_coord = self.world_to_chunk(pt);
@@ -205,6 +204,15 @@ impl TerrainLoader {
         }
 
         ChunkPos::new(local_x as u32, local_y as u32, pt.z as u32)
+    }
+
+    pub fn set(&mut self, pt: &WorldPos, entity: Option<ChunkEntity>) {
+        let coord = self.to_chunk_coord(pt);
+        // Transform world coordinate to chunk coordinate
+        let mut chunk = self.get_chunk(coord.0, coord.1);
+        let chunk_coord = self.world_to_chunk(pt);
+
+        chunk.set(&chunk_coord, entity);
     }
 
     pub fn move_worker(&mut self, entity: u32, old_pt: WorldPos, new_pt: WorldPos) {

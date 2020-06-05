@@ -1,12 +1,12 @@
 use core::amethyst::{
     core::{timing::Time, transform::Transform},
-    ecs::{Join, Read, ReadExpect, System, WriteStorage},
+    ecs::{Join, Read, ReadExpect, System, WriteStorage, WriteExpect},
     input::{InputHandler, StringBindings},
 };
 
 use crate::game::{components::Player, config::PlayerConfig, resources::MapRenderer};
-use core::Point3;
-use libdwarf::resources::Map;
+use core::WorldPos;
+use libterrain::TerrainLoader;
 
 pub struct PlayerMovement;
 impl<'s> System<'s> for PlayerMovement {
@@ -16,7 +16,7 @@ impl<'s> System<'s> for PlayerMovement {
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<StringBindings>>,
         Read<'s, Time>,
-        ReadExpect<'s, Map>,
+        WriteExpect<'s, TerrainLoader>,
         ReadExpect<'s, MapRenderer>,
     );
 
@@ -28,7 +28,7 @@ impl<'s> System<'s> for PlayerMovement {
         mut transforms,
         input,
         time,
-        map,
+        mut map,
         map_render,
     ): Self::SystemData,
     ) {
@@ -50,10 +50,9 @@ impl<'s> System<'s> for PlayerMovement {
                 (map_x + x_move as i32, map_y + y_move as i32)
             };
 
-            let pt = Point3::new(new_x, new_y, 0);
-            if !map.has_collision(pt) {
-                let new_transform =
-                    map_render.place(&Point3::new(pt.x as u32, pt.y as u32, pt.z as u32), 1.0);
+            let pt = WorldPos::new(new_x, new_y, 0);
+            if map.get(&pt).is_none() {
+                let new_transform = map_render.place(&WorldPos::new(pt.x, pt.y, pt.z), 1.0);
                 transform.set_translation_x(new_transform.translation().x);
                 transform.set_translation_y(new_transform.translation().y);
                 transform.set_translation_z(new_transform.translation().z);

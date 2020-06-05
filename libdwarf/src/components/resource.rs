@@ -38,12 +38,12 @@ pub struct ResourceType {
 #[cfg(test)]
 mod test {
     use super::{ResourceAttribute, ResourceType};
-    use std::collections::HashMap;
 
     #[test]
     fn test_resource_creation() {
         let tree = ResourceType {
             name: String::from("tree"),
+            sprite: 0,
             attributes: vec![
                 ResourceAttribute::Health(10),
                 // Can have multiple drops

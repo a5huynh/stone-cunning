@@ -106,7 +106,7 @@ impl Worker {
                     Condition::Has(_) => {
                         // Queue picking up this resource
                         let resource = map.get(&action.target_pos);
-                        if let Some(ChunkEntity::Object(resource)) = resource {
+                        if let Some(ChunkEntity::Object(uuid, resource)) = resource {
                             tasks.add_world(TriggerType::Take {
                                 target: 1,
                                 owner: self.id,
