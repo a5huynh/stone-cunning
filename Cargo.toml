@@ -17,9 +17,7 @@ libdwarf = { path = "libdwarf" }
 libterrain = { path = "libterrain" }
 
 [dependencies.amethyst-imgui]
-# Using forked repo until mainline is updated to amethyst 0.15
-git = "https://github.com/a5huynh/amethyst-imgui"
-# version = "0.6.1"
+version = "0.7.0"
 # amethyst-imgui by default uses vulkan, however since we
 # primarily work in OSX, we need to turn this off.
 default-features = false
