@@ -1,17 +1,16 @@
 use core::{
     amethyst::ecs::{Entities, ReadExpect, System, WriteExpect, WriteStorage},
-    log,
-    Uuid
+    log, Uuid,
 };
 
 use crate::{
     components::{EntityInfo, MapObject, Worker},
     config::ResourceConfig,
-    resources::TaskQueue,
+    resources::{TaskQueue, World},
     trigger::TriggerType,
 };
 
-use libterrain::{ChunkEntity, TerrainLoader, ObjectType};
+use libterrain::{ChunkEntity, ObjectType};
 
 #[derive(Default)]
 pub struct WorldUpdateSystem;
@@ -22,13 +21,13 @@ impl<'a> System<'a> for WorldUpdateSystem {
         WriteStorage<'a, MapObject>,
         WriteStorage<'a, EntityInfo>,
         WriteExpect<'a, TaskQueue>,
-        WriteExpect<'a, TerrainLoader>,
+        WriteExpect<'a, World>,
         ReadExpect<'a, ResourceConfig>,
     );
 
     fn run(
         &mut self,
-        (entities, mut workers, mut objects, mut entity_infos, mut tasks, mut map, resources): Self::SystemData,
+        (entities, mut workers, mut objects, mut entity_infos, mut tasks, mut world, resources): Self::SystemData,
     ) {
         let queue = &mut tasks.world;
         while let Some(event) = queue.pop_front() {
@@ -38,36 +37,49 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     log::info!("Adding object '{}' @ ({:?})", name, pt);
                     let resource = resources.map.get(&name).unwrap().clone();
 
-                    let new_entity = entities.create();
                     let uuid = Uuid::new_v4();
-
-                    objects
-                        .insert(new_entity, MapObject::new(&resource))
-                        .unwrap();
-                    entity_infos
-                        .insert(
-                            new_entity,
+                    let new_entity = entities
+                        .build_entity()
+                        .with(MapObject::new(&resource), &mut objects)
+                        .with(
                             EntityInfo {
                                 uuid,
                                 pos: pt,
                                 z_offset: 1.0,
+                                needs_delete: false,
+                                needs_update: false,
                             },
+                            &mut entity_infos,
                         )
-                        .unwrap();
+                        .build();
 
-                    map.set(&pt, Some(ChunkEntity::Object(uuid, ObjectType::TREE)));
+                    world.add(
+                        &pt,
+                        new_entity.id(),
+                        uuid,
+                        ChunkEntity::Object(uuid, ObjectType::TREE),
+                    );
                 }
                 TriggerType::AddWorker(pos) => {
                     log::info!("Adding worker @ ({:?})", pos);
-                    let entity = entities.create();
+
                     let uuid = Uuid::new_v4();
+                    let entity = entities
+                        .build_entity()
+                        .with(Worker::new(), &mut workers)
+                        .with(
+                            EntityInfo {
+                                uuid,
+                                pos,
+                                z_offset: 1.0,
+                                needs_delete: false,
+                                needs_update: false,
+                            },
+                            &mut entity_infos,
+                        )
+                        .build();
 
-                    workers.insert(entity, Worker::new(entity.id())).unwrap();
-                    entity_infos
-                        .insert(entity, EntityInfo { uuid, pos, z_offset: 1.0 })
-                        .unwrap();
-
-                    map.set(&pos, Some(ChunkEntity::Worker(uuid)));
+                    world.add(&pos, entity.id(), uuid, ChunkEntity::Worker(uuid));
                 }
                 // Deal damage to a particular object
                 TriggerType::DealDamage {
@@ -85,11 +97,13 @@ impl<'a> System<'a> for WorldUpdateSystem {
                     // Remove from map
                     let entity = entities.entity(id);
                     if objects.get(entity).is_some() {
-                        if let Some(entity_info) = entity_infos.get(entity) {
-                            map.set(&entity_info.pos, None);
+                        if let Some(entity_info) = entity_infos.get_mut(entity) {
+                            world.destroy(&entity_info.pos, entity_info.uuid);
                         }
                     }
                     // Remove from world
+                    // TODO: Use entity_info.needs_delete = true so that cleanup happens
+                    // all at once.
                     entities.delete(entity).unwrap();
                 }
                 TriggerType::Take { target, owner } => {
@@ -98,8 +112,8 @@ impl<'a> System<'a> for WorldUpdateSystem {
                         if let Some(worker) = workers.get_mut(entities.entity(owner)) {
                             worker.inventory.push(target);
                             if let Some(entity_info) = entity_infos.get(target_entity) {
-                                map.remove_object(target_entity.id(), entity_info.pos);
-                                entity_infos.remove(target_entity);
+                                world.destroy(&entity_info.pos, entity_info.uuid);
+                                entities.delete(target_entity).unwrap();
                             }
                         }
                     }

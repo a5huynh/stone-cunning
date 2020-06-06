@@ -11,7 +11,8 @@ use crate::game::{
     resources::MapRenderer,
 };
 use core::{Point3, Vector2, WorldPos};
-use libterrain::{ChunkEntity, TerrainLoader};
+use libdwarf::resources::World;
+use libterrain::ChunkEntity;
 
 pub struct CursorSystem;
 
@@ -23,7 +24,7 @@ impl<'s> System<'s> for CursorSystem {
         WriteStorage<'s, Transform>,
         ReadStorage<'s, Camera>,
         ReadExpect<'s, ScreenDimensions>,
-        WriteExpect<'s, TerrainLoader>,
+        WriteExpect<'s, World>,
         ReadExpect<'s, MapRenderer>,
     );
 
@@ -36,7 +37,7 @@ impl<'s> System<'s> for CursorSystem {
             mut transforms,
             cameras,
             screen,
-            mut map,
+            mut world,
             map_render,
         ): Self::SystemData,
     ) {
@@ -85,8 +86,8 @@ impl<'s> System<'s> for CursorSystem {
                 above_pt.z = z + 1;
 
                 // Loop until we find the first piece of visible terrain.
-                let biome = map.get(&current_pt);
-                let above = map.get(&above_pt);
+                let biome = world.terrain.get(&current_pt);
+                let above = world.terrain.get(&above_pt);
 
                 if biome.is_some() && above.is_none() {
                     if let Some(ChunkEntity::Terrain(biome_type)) = biome {
@@ -133,8 +134,8 @@ impl<'s> System<'s> for CursorSystem {
             // those
             valid_pt.z += 1;
             // pick_info.worker = map.worker_at(valid_pt);
-            if let Some(ChunkEntity::Object(uuid, object)) = map.get(&valid_pt) {
-                pick_info.object = Some(1); //Some(object);
+            if let Some(ChunkEntity::Object(uuid, _object)) = world.terrain.get(&valid_pt) {
+                pick_info.object = Some(uuid);
             }
 
             cursor_selected.hover_selected = Some(pick_info);

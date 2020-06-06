@@ -9,12 +9,7 @@ const MAP_WIDTH: u32 = 10;
 const MAP_HEIGHT: u32 = 10;
 
 use core::Point3;
-use libdwarf::{
-    resources::TaskQueue,
-    systems,
-    trigger::TriggerType,
-    world::WorldSim,
-};
+use libdwarf::{resources::TaskQueue, systems, trigger::TriggerType, world::WorldSim};
 
 use libterrain::{TerrainChunk, TerrainLoader};
 

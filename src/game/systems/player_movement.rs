@@ -1,12 +1,12 @@
 use core::amethyst::{
     core::{timing::Time, transform::Transform},
-    ecs::{Join, Read, ReadExpect, System, WriteStorage, WriteExpect},
+    ecs::{Join, Read, ReadExpect, System, WriteExpect, WriteStorage},
     input::{InputHandler, StringBindings},
 };
 
 use crate::game::{components::Player, config::PlayerConfig, resources::MapRenderer};
 use core::WorldPos;
-use libterrain::TerrainLoader;
+use libdwarf::resources::World;
 
 pub struct PlayerMovement;
 impl<'s> System<'s> for PlayerMovement {
@@ -16,7 +16,7 @@ impl<'s> System<'s> for PlayerMovement {
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<StringBindings>>,
         Read<'s, Time>,
-        WriteExpect<'s, TerrainLoader>,
+        WriteExpect<'s, World>,
         ReadExpect<'s, MapRenderer>,
     );
 
@@ -28,7 +28,7 @@ impl<'s> System<'s> for PlayerMovement {
         mut transforms,
         input,
         time,
-        mut map,
+        mut world,
         map_render,
     ): Self::SystemData,
     ) {
@@ -51,7 +51,7 @@ impl<'s> System<'s> for PlayerMovement {
             };
 
             let pt = WorldPos::new(new_x, new_y, 0);
-            if map.get(&pt).is_none() {
+            if world.terrain.get(&pt).is_none() {
                 let new_transform = map_render.place(&WorldPos::new(pt.x, pt.y, pt.z), 1.0);
                 transform.set_translation_x(new_transform.translation().x);
                 transform.set_translation_y(new_transform.translation().y);

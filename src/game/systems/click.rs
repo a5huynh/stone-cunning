@@ -9,7 +9,7 @@ use crate::game::components::{Cursor, CursorDown, CursorSelected};
 use core::log;
 use libdwarf::{
     components::{EntityInfo, MapObject},
-    resources::TaskQueue,
+    resources::{TaskQueue, World},
     trigger::TriggerType,
 };
 
@@ -26,6 +26,7 @@ impl<'s> System<'s> for ClickSystem {
         Read<'s, InputHandler<StringBindings>>,
         WriteStorage<'s, Transform>,
         Write<'s, TaskQueue>,
+        ReadExpect<'s, World>,
     );
 
     fn run(
@@ -40,6 +41,7 @@ impl<'s> System<'s> for ClickSystem {
             input,
             mut transforms,
             mut task_queue,
+            world,
         ): Self::SystemData,
     ) {
         // Capture mouse down events.
@@ -62,19 +64,21 @@ impl<'s> System<'s> for ClickSystem {
         if let Some((entity, _, _, _)) = cursor_transform {
             if !input.mouse_button_is_down(MouseButton::Left) {
                 if let Some(pick) = &cursor_selected.hover_selected {
-                    if let Some(obj_entity) = pick.object {
-                        let obj_info = map_objects.get(entities.entity(obj_entity));
-                        let obj_pos = map_pos.get(entities.entity(obj_entity));
+                    if let Some(uuid) = pick.object {
+                        if let Some(obj_entity) = world.entity_map.get(&uuid) {
+                            let obj_info = map_objects.get(entities.entity(*obj_entity));
+                            let obj_pos = map_pos.get(entities.entity(*obj_entity));
 
-                        if let Some(info) = obj_info {
-                            if let Some(pos) = obj_pos {
-                                log::debug!("click! {:?}", info);
-                                // Add to task queue
-                                task_queue.add(TriggerType::HarvestResource {
-                                    target: obj_entity,
-                                    position: pos.pos,
-                                    resource: String::from("wood"),
-                                });
+                            if let Some(info) = obj_info {
+                                if let Some(pos) = obj_pos {
+                                    log::debug!("click! {:?}", info);
+                                    // Add to task queue
+                                    task_queue.add(TriggerType::HarvestResource {
+                                        target: *obj_entity,
+                                        position: pos.pos,
+                                        resource: String::from("wood"),
+                                    });
+                                }
                             }
                         }
                     }

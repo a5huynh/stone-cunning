@@ -1,7 +1,6 @@
 use core::{
     amethyst::ecs::{Component, VecStorage},
-    WorldPos,
-    Uuid,
+    Uuid, WorldPos,
 };
 
 mod object;

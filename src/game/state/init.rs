@@ -1,13 +1,8 @@
-use core::{
-    amethyst::{ecs::Write, prelude::*},
-    Point3,
-};
 /// Loading/initialization state.
 /// In this state, we're initializing the resources necessary to begin simulation.
 /// This can either be starting the terrain generation or loading the necessary
 /// terrain chunks from disk.
 ///
-
 use crate::game::{
     components::{Cursor, CursorSelected, Object, Player},
     config::GameConfig,
@@ -15,7 +10,16 @@ use crate::game::{
     sprite::SpriteSheetStorage,
     state::RunningState,
 };
-use libdwarf::{resources::TaskQueue, trigger::TriggerType, world::WorldSim};
+use core::{
+    amethyst::{ecs::Write, prelude::*},
+    Point3,
+};
+
+use libdwarf::{
+    resources::{TaskQueue, World},
+    trigger::TriggerType,
+    world::WorldSim,
+};
 use libterrain::TerrainLoader;
 
 pub struct InitState {
@@ -48,7 +52,8 @@ impl SimpleState for InitState {
         };
 
         let terloader = TerrainLoader::new(chunk_width, chunk_height);
-        world.insert(terloader);
+        let simworld = World::new(terloader);
+        world.insert(simworld);
 
         // Render map
         let map_render = MapRenderer::initialize(world);

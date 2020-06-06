@@ -4,10 +4,8 @@
 /// - Minimizes the amount of processing the agents need to do to respond
 ///   to these events.
 ///
-use core::WorldPos;
+use core::{EntityId, WorldPos};
 use libterrain::Path;
-
-type EntityId = u32;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum TriggerType {

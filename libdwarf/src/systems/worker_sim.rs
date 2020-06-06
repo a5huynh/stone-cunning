@@ -6,11 +6,10 @@ use crate::{
     components::{EntityInfo, MapObject, Worker, WorkerAction},
     config::WorldConfig,
     planner::{Condition, Planner, State},
-    resources::{time::Time, TaskQueue},
+    resources::{time::Time, TaskQueue, World},
     trigger::TriggerType,
 };
 use core::utils::is_near;
-use libterrain::TerrainLoader;
 
 pub struct WorkerSystem;
 impl<'a> System<'a> for WorkerSystem {
@@ -19,7 +18,7 @@ impl<'a> System<'a> for WorkerSystem {
         WriteStorage<'a, Worker>,
         ReadStorage<'a, MapObject>,
         WriteStorage<'a, EntityInfo>,
-        WriteExpect<'a, TerrainLoader>,
+        WriteExpect<'a, World>,
         WriteExpect<'a, Planner>,
         Write<'a, TaskQueue>,
         ReadExpect<'a, Time>,
@@ -33,14 +32,14 @@ impl<'a> System<'a> for WorkerSystem {
             mut workers,
             objects,
             mut entity_infos,
-            mut map,
+            mut world,
             planner,
             mut tasks,
             time,
             config,
         ): Self::SystemData,
     ) {
-        for (_entity, worker, entity_info) in (&*entities, &mut workers, &mut entity_infos).join() {
+        for (entity, worker, entity_info) in (&*entities, &mut workers, &mut entity_infos).join() {
             // Regen worker energy.
             if worker.energy < config.worker_stamina {
                 // NOTE: This might need to be revisited. Pausing the simulation would
@@ -102,7 +101,7 @@ impl<'a> System<'a> for WorkerSystem {
                     target_obj = objects.get(entity);
                 }
 
-                worker.do_work(&mut tasks, &mut map, entity_info, target_obj);
+                worker.do_work(entity.id(), &mut tasks, &mut world, entity_info, target_obj);
             }
 
             worker.energy -= config.action_cost;

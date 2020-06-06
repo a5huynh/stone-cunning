@@ -88,18 +88,20 @@ impl TerrainGenerator {
                         // depth of the water will change.
                         Biome::OCEAN => {
                             if z >= terrain_height && z <= WATER_HEIGHT {
-                                self.terrain.set(&idx, Some(ChunkEntity::Terrain(biome.clone())));
+                                self.terrain
+                                    .set(&idx, Some(ChunkEntity::Terrain(biome.clone())));
                             } else if z < terrain_height {
-                                self.terrain.set(&idx, Some(ChunkEntity::Terrain(Biome::ROCK)));
+                                self.terrain
+                                    .set(&idx, Some(ChunkEntity::Terrain(Biome::ROCK)));
                             }
                         }
                         _ => match z.cmp(&terrain_height) {
-                            Ordering::Equal => {
-                                self.terrain.set(&idx, Some(ChunkEntity::Terrain(biome.clone())))
-                            }
-                            Ordering::Less => {
-                                self.terrain.set(&idx, Some(ChunkEntity::Terrain(Biome::ROCK)))
-                            }
+                            Ordering::Equal => self
+                                .terrain
+                                .set(&idx, Some(ChunkEntity::Terrain(biome.clone()))),
+                            Ordering::Less => self
+                                .terrain
+                                .set(&idx, Some(ChunkEntity::Terrain(Biome::ROCK))),
                             _ => {}
                         },
                     }
@@ -117,7 +119,10 @@ impl TerrainGenerator {
             if let Some(data) = &heightmap[idx as usize] {
                 if data.1 != Biome::OCEAN && data.0 < (ZLEVELS - 1) {
                     pt.z = data.0 + 1;
-                    self.terrain.set(pt, Some(ChunkEntity::Object(Uuid::new_v4(), ObjectType::TREE)));
+                    self.terrain.set(
+                        pt,
+                        Some(ChunkEntity::Object(Uuid::new_v4(), ObjectType::TREE)),
+                    );
                 }
             }
         }

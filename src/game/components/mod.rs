@@ -7,14 +7,14 @@ pub use cursor::*;
 pub use player::*;
 pub use terrain::*;
 
-use core::Point3;
+use core::{Point3, Uuid, WorldPos};
 use libterrain::Biome;
 
 #[derive(Clone, Debug, Default)]
 pub struct PickInfo {
-    pub worker: Option<u32>,
-    pub object: Option<u32>,
+    pub worker: Option<Uuid>,
+    pub object: Option<Uuid>,
     pub terrain: Option<Biome>,
     pub world_pos: Option<Point3<f32>>,
-    pub position: Option<Point3<i32>>,
+    pub position: Option<WorldPos>,
 }

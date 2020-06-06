@@ -1,10 +1,10 @@
 use amethyst_imgui::imgui::{im_str, Condition, Window};
 use core::amethyst::ecs::{Entities, Join, ReadExpect, ReadStorage, System, Write};
 
-use core::Point3;
+use core::WorldPos;
 use libdwarf::{
     components::{MapObject, Worker},
-    resources::TaskQueue,
+    resources::{TaskQueue, World},
     trigger::TriggerType,
 };
 
@@ -23,11 +23,12 @@ impl<'s> System<'s> for DebugUI {
         ReadExpect<'s, CursorSelected>,
         ReadExpect<'s, MapRenderer>,
         Write<'s, TaskQueue>,
+        ReadExpect<'s, World>,
     );
 
     fn run(
         &mut self,
-        (entities, objects, workers, cursor_selected, map, mut queue): Self::SystemData,
+        (entities, objects, workers, cursor_selected, map, mut queue, world): Self::SystemData,
     ) {
         amethyst_imgui::with(|ui| {
             Window::new(im_str!("Tasks"))
@@ -53,10 +54,10 @@ impl<'s> System<'s> for DebugUI {
                         .build();
 
                     if ui.button(im_str!("Add Worker"), [0.0, 0.0]) {
-                        queue.add_world(TriggerType::AddWorker(Point3::new(
-                            self.new_worker_pos[0] as u32,
-                            self.new_worker_pos[1] as u32,
-                            self.new_worker_pos[2] as u32,
+                        queue.add_world(TriggerType::AddWorker(WorldPos::new(
+                            self.new_worker_pos[0],
+                            self.new_worker_pos[1],
+                            self.new_worker_pos[2],
                         )));
                     }
 
@@ -89,8 +90,8 @@ impl<'s> System<'s> for DebugUI {
                     if let Some(pick_info) = selected {
                         let worker_label = pick_info
                             .worker
-                            .and_then(|worker_id| {
-                                let entity = entities.entity(worker_id);
+                            .and_then(|uuid| {
+                                let entity = entities.entity(world.entity(&uuid));
                                 workers.get(entity)
                             })
                             .map(|worker| format!("Worker: {}", worker.to_string()))
@@ -99,8 +100,8 @@ impl<'s> System<'s> for DebugUI {
 
                         let object_label = pick_info
                             .object
-                            .and_then(|object_id| {
-                                let entity = entities.entity(object_id);
+                            .and_then(|uuid| {
+                                let entity = entities.entity(world.entity(&uuid));
                                 objects.get(entity)
                             })
                             .map(|object| format!("Object: {}", object.to_string()))

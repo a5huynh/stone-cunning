@@ -1,14 +1,16 @@
 use core::amethyst::ecs::{Component, VecStorage};
+use core::EntityId;
+
 use std::collections::VecDeque;
 use std::fmt;
 
 use core::{log::info, utils::is_near, WorldPos};
-use libterrain::{Path, TerrainLoader, ChunkEntity};
+use libterrain::{ChunkEntity, Path};
 
 use crate::{
     components::{EntityInfo, MapObject},
     planner::{Action, Condition, State},
-    resources::TaskQueue,
+    resources::{TaskQueue, World},
     trigger::TriggerType,
 };
 
@@ -28,7 +30,6 @@ impl fmt::Debug for WorkerAction {
 #[derive(Clone, Component, Debug)]
 #[storage(VecStorage)]
 pub struct Worker {
-    pub id: u32,
     /// Energy a worker has. Each action depletes energy. One it reaches, 0
     /// it'll have to wait a couple frames before it can do something else.
     pub energy: f32,
@@ -48,9 +49,8 @@ pub struct Worker {
 }
 
 impl Worker {
-    pub fn new(id: u32) -> Self {
+    pub fn new() -> Self {
         Worker {
-            id,
             energy: 1.0,
             current_action: None,
             current_path: None,
@@ -71,8 +71,9 @@ impl Worker {
     #[allow(clippy::unnecessary_unwrap, clippy::nonminimal_bool)]
     pub fn do_work(
         &mut self,
+        entity_id: EntityId,
         tasks: &mut TaskQueue,
-        map: &mut TerrainLoader,
+        world: &mut World,
         entity_info: &mut EntityInfo,
         target_obj: Option<&MapObject>,
     ) {
@@ -94,7 +95,7 @@ impl Worker {
                             if !target_obj.is_destroyed() {
                                 // Queue damage to this entity
                                 tasks.add_world(TriggerType::DealDamage {
-                                    source: self.id,
+                                    source: entity_id,
                                     target: *target_id,
                                     damage: 10,
                                 });
@@ -105,11 +106,12 @@ impl Worker {
                     // Pickup item
                     Condition::Has(_) => {
                         // Queue picking up this resource
-                        let resource = map.get(&action.target_pos);
-                        if let Some(ChunkEntity::Object(uuid, resource)) = resource {
+                        let resource = world.terrain.get(&action.target_pos);
+                        if let Some(ChunkEntity::Object(uuid, _resource)) = resource {
+                            // Find the entity with this id.
                             tasks.add_world(TriggerType::Take {
-                                target: 1,
-                                owner: self.id,
+                                target: world.entity(&uuid),
+                                owner: entity_id,
                             });
                         } else {
                             info!("Unable to pickup item");
@@ -122,8 +124,11 @@ impl Worker {
                             && !is_near(&entity_info.pos, &action.target_pos)
                         {
                             // If not, path from it's current position to the entity.
-                            self.current_path =
-                                Some(map.find_path(&entity_info.pos, &action.target_pos));
+                            self.current_path = Some(
+                                world
+                                    .terrain
+                                    .find_path(&entity_info.pos, &action.target_pos),
+                            );
                         }
 
                         // Move worker to next location in path!
@@ -133,10 +138,16 @@ impl Worker {
                                     // Finished!
                                     finished = finished && true;
                                 } else {
-                                    // Move laong path.
+                                    // Move along path.
                                     let current_pos = entity_info.pos;
+                                    // Update position for renderer
                                     entity_info.pos = new_pt;
-                                    // map.move_worker(self.id, current_pos, new_pt);
+                                    // Update position in chunk data.
+                                    world.terrain.move_to(
+                                        entity_info.uuid,
+                                        &current_pos,
+                                        &action.target_pos,
+                                    );
                                     finished = false;
                                 }
                             }
