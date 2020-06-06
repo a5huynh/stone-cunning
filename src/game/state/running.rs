@@ -14,7 +14,7 @@ use crate::game::{
     resources::MapRenderer,
     systems::{
         camera, debug, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
-        RenderNPCSystem, RenderObjectSystem,
+        render,
     },
 };
 use core::log;
@@ -51,8 +51,9 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
 
         // Render systems. Takes entities from the simulations and assigns sprites
         // to them as they get added.
-        dispatcher_builder.add(RenderObjectSystem, "render_obj_system", &["world_updates"]);
-        dispatcher_builder.add(RenderNPCSystem, "render_npc_system", &["world_updates"]);
+        dispatcher_builder.add(render::RenderObjectSystem, "render_obj_system", &["world_updates"]);
+        dispatcher_builder.add(render::RenderNPCSystem, "render_npc_system", &["world_updates"]);
+        dispatcher_builder.add(render::RenderTerrainSystem, "render_terrain_system", &["world_updates"]);
 
         let mut input_db = DispatcherBuilder::new();
         // Cursor selection

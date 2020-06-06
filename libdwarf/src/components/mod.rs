@@ -3,6 +3,8 @@ use core::{
     Uuid, WorldPos,
 };
 
+use libterrain::Biome;
+
 mod object;
 mod resource;
 mod worker;
@@ -17,4 +19,12 @@ pub struct EntityInfo {
     pub uuid: Uuid,
     pub pos: WorldPos,
     pub z_offset: f32,
+    pub needs_update: bool,
+    pub needs_delete: bool,
+}
+
+#[derive(Clone, Component, Debug)]
+#[storage(VecStorage)]
+pub struct Terrain {
+    pub biome: Biome,
 }

@@ -34,7 +34,7 @@ impl Default for InitState {
 
 impl SimpleState for InitState {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-        let world = data.world;
+        let mut world = data.world;
         world.register::<Cursor>();
         world.register::<Object>();
         world.register::<Player>();
@@ -42,18 +42,18 @@ impl SimpleState for InitState {
         let storage = SpriteSheetStorage::new(world);
         world.insert(storage);
 
-        // Initialize simulation;
-        WorldSim::new(world);
-
         // Load the terrain for this game.
         let (chunk_height, chunk_width) = {
             let config = &world.read_resource::<GameConfig>();
             (config.chunk_height, config.chunk_width)
         };
 
+        WorldSim::new(world);
         let terloader = TerrainLoader::new(chunk_width, chunk_height);
-        let simworld = World::new(terloader);
+        let simworld = World::new(&mut world, terloader);
         world.insert(simworld);
+        // Initialize simulation. Will also load visible chunks and prep
+        // for rendering.
 
         // Render map
         let map_render = MapRenderer::initialize(world);

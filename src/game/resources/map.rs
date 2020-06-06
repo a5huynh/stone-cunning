@@ -1,16 +1,13 @@
-use crate::game::{components::Direction, config::GameConfig, sprite::SpriteSheetStorage};
-
-use core::amethyst::{
-    core::{math::Point3, transform::Transform, Hidden},
-    prelude::*,
-    renderer::{SpriteRender, Transparent},
-};
+// TODO: dynamic rendering as a system
 use std::f32::consts::{FRAC_PI_2, PI};
 
-use libdwarf::{components::EntityInfo, resources::Map};
-use libterrain::Biome;
+use core::amethyst::{
+    core::{math::Point3, transform::Transform},
+    prelude::*,
+};
 
-/// Map resource used to convert coordinates into map coordinates, check for
+use crate::game::{components::Direction, config::GameConfig};
+/// Map resource used to convert screen coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
 pub struct MapRenderer {
     /// rotation - which direction along the map the camera is looking.
@@ -34,58 +31,6 @@ impl MapRenderer {
             tile_height: tile_height as f32,
             tile_width: tile_width as f32,
         };
-
-        // Load terrain map from sim
-        let sprite_sheet = {
-            let sheets = world.read_resource::<SpriteSheetStorage>();
-            sheets.terrain.clone()
-        };
-
-        let (terrain, width, height) = {
-            let map = world.read_resource::<Map>();
-            (map.terrain.clone(), map.width, map.height)
-        };
-
-        for y in 0..height {
-            for x in 0..width {
-                for z in 32..64 {
-                    let pt = Point3::new(x, y, z);
-                    if let Some(biome) = terrain.get(x as u32, y as u32, z as u32) {
-                        let mut block = world.create_entity();
-                        let sprite_idx = match biome {
-                            Biome::TAIGA => 0,
-                            Biome::SNOW | Biome::TUNDRA => 1,
-                            Biome::GRASSLAND => 2,
-                            Biome::OCEAN => 3,
-                            Biome::BEACH => 4,
-                            Biome::ROCK => 5,
-                        };
-
-                        let terrain_render = SpriteRender {
-                            sprite_sheet: sprite_sheet.clone(),
-                            sprite_number: sprite_idx,
-                        };
-
-                        block = block
-                            .with(terrain_render)
-                            // Grid position
-                            .with(EntityInfo {
-                                pos: pt,
-                                z_offset: 0.0,
-                            })
-                            // Rendered position
-                            .with(map_render.place(&pt, 0.0))
-                            .with(Transparent);
-
-                        if !terrain.is_visible(x as u32, y as u32, z as u32) {
-                            block = block.with(Hidden);
-                        }
-
-                        block.build();
-                    }
-                }
-            }
-        }
 
         map_render
     }

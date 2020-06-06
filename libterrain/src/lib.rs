@@ -53,15 +53,10 @@ impl TerrainLoader {
         path
     }
 
-    pub fn get_chunk(&mut self, x: i32, y: i32) -> TerrainChunk {
-        if let Some(chunk) = self.chunks.get(&(x, y)) {
-            return chunk.clone();
+    pub fn get_chunk(&mut self, x: i32, y: i32) -> &mut TerrainChunk {
+        if self.chunks.contains_key(&(x, y)) {
+            return self.chunks.get_mut(&(x, y)).unwrap();
         }
-
-        // TODO: Check file system
-        // if let Some(chunk) = self.loader.loader(&(x, y)) {
-        //     return chunk.clone();
-        // }
 
         let now = SystemTime::now();
         let tergen = TerrainGenerator::new(self.chunk_width, self.chunk_height)
@@ -69,18 +64,18 @@ impl TerrainLoader {
             .build();
 
         let chunk = tergen.get_terrain();
-        self.chunks.insert((x, y), chunk.clone());
+        self.chunks.insert((x, y), chunk);
         info!("Terrain gen took: {}ms", now.elapsed().unwrap().as_millis());
 
-        chunk.clone()
+        self.chunks.get_mut(&(x, y)).unwrap()
     }
 
     pub fn get(&mut self, pt: &WorldPos) -> Option<ChunkEntity> {
         // Grab the chunk this point would be in.
+        let chunk_coord = self.world_to_chunk(pt);
         let coord = self.to_chunk_coord(pt);
         // Transform world coordinate to chunk coordinate
         let chunk = self.get_chunk(coord.0, coord.1);
-        let chunk_coord = self.world_to_chunk(pt);
 
         chunk.get(&chunk_coord)
     }
@@ -206,10 +201,10 @@ impl TerrainLoader {
 
     pub fn set(&mut self, pt: &WorldPos, entity: Option<ChunkEntity>) {
         let coord = self.to_chunk_coord(pt);
-        // Transform world coordinate to chunk coordinate
-        let mut chunk = self.get_chunk(coord.0, coord.1);
         let chunk_coord = self.world_to_chunk(pt);
 
+        // Transform world coordinate to chunk coordinate
+        let chunk = self.get_chunk(coord.0, coord.1);
         chunk.set(&chunk_coord, entity);
     }
 }

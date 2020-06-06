@@ -1,11 +1,10 @@
-use core::amethyst::ecs::{World, WorldExt};
-
 use crate::{
-    components::{EntityInfo, MapObject, Worker},
+    components::{EntityInfo, MapObject, Terrain, Worker},
     config::{ResourceConfig, WorldConfig},
     planner::Planner,
     resources::{time, TaskQueue},
 };
+use core::amethyst::ecs::{World, WorldExt};
 
 #[derive(Default)]
 pub struct WorldSim;
@@ -14,6 +13,7 @@ impl WorldSim {
         world.register::<EntityInfo>();
         world.register::<MapObject>();
         world.register::<Worker>();
+        world.register::<Terrain>();
 
         // Initialize planner
         let planner = Planner::load("./resources/data/actions.ron");
