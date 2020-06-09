@@ -1,7 +1,7 @@
 use std::{collections::HashMap, time::SystemTime};
 
 mod chunk;
-pub use chunk::{Biome, ChunkEntity, ChunkPos, ObjectType, TerrainChunk, ZLEVELS};
+pub use chunk::{Biome, ChunkEntity, ChunkId, ChunkPos, ObjectType, TerrainChunk, ZLEVELS};
 
 mod generator;
 pub use generator::TerrainGenerator;
@@ -28,7 +28,7 @@ pub struct TerrainLoader {
     pub half_width: f32,
     pub half_height: f32,
     /// Currently loaded chunks
-    pub chunks: HashMap<(i32, i32), TerrainChunk>,
+    pub chunks: HashMap<ChunkId, TerrainChunk>,
 }
 
 impl TerrainLoader {
@@ -59,7 +59,7 @@ impl TerrainLoader {
         }
 
         let now = SystemTime::now();
-        let tergen = TerrainGenerator::new(self.chunk_width, self.chunk_height)
+        let tergen = TerrainGenerator::new((x, y), self.chunk_width, self.chunk_height)
             .chunk_coord(x, y)
             .build();
 
@@ -71,17 +71,15 @@ impl TerrainLoader {
     }
 
     pub fn get(&mut self, pt: &WorldPos) -> Option<ChunkEntity> {
-        // Grab the chunk this point would be in.
-        let chunk_coord = self.world_to_chunk(pt);
-        let coord = self.to_chunk_coord(pt);
         // Transform world coordinate to chunk coordinate
+        let coord = self.to_chunk_coord(pt);
+        // Get the chunk
         let chunk = self.get_chunk(coord.0, coord.1);
-
-        chunk.get(&chunk_coord)
+        chunk.get_world(pt)
     }
 
     pub fn get_topo(&self, x: i32, y: i32) -> Vec<Option<Biome>> {
-        let tergen = TerrainGenerator::new(self.chunk_width, self.chunk_height)
+        let tergen = TerrainGenerator::new((x, y), self.chunk_width, self.chunk_height)
             .chunk_coord(x, y)
             .build();
 
@@ -163,7 +161,7 @@ impl TerrainLoader {
         neighbors.push(WorldPos::new(x, y + 1, zlevel));
     }
 
-    pub fn to_chunk_coord(&self, pt: &WorldPos) -> (i32, i32) {
+    pub fn to_chunk_coord(&self, pt: &WorldPos) -> ChunkId {
         // world point to chunk coordinate
         let mut chunk_x = pt.x / self.chunk_width as i32;
         if (pt.x % self.chunk_width as i32) < 0 {
@@ -178,20 +176,6 @@ impl TerrainLoader {
         (chunk_x, chunk_y)
     }
 
-    pub fn world_to_chunk(&self, pt: &WorldPos) -> ChunkPos {
-        let mut local_x = pt.x % self.chunk_width as i32;
-        if local_x < 0 {
-            local_x += self.chunk_width as i32;
-        }
-
-        let mut local_y = pt.y % self.chunk_height as i32;
-        if local_y < 0 {
-            local_y += self.chunk_height as i32;
-        }
-
-        ChunkPos::new(local_x as u32, local_y as u32, pt.z as u32)
-    }
-
     /// Move entity with <id> from <src> -> <dest>
     pub fn move_to(&mut self, _id: Uuid, src: &WorldPos, dest: &WorldPos) {
         let entity = self.get(src);
@@ -200,11 +184,10 @@ impl TerrainLoader {
     }
 
     pub fn set(&mut self, pt: &WorldPos, entity: Option<ChunkEntity>) {
-        let coord = self.to_chunk_coord(pt);
-        let chunk_coord = self.world_to_chunk(pt);
-
         // Transform world coordinate to chunk coordinate
+        let coord = self.to_chunk_coord(pt);
+        // Grab chunk and set value in chunk
         let chunk = self.get_chunk(coord.0, coord.1);
-        chunk.set(&chunk_coord, entity);
+        chunk.set_world(pt, entity);
     }
 }

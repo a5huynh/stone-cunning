@@ -2,7 +2,7 @@ use core::Uuid;
 use noise::{NoiseFn, Perlin};
 use std::cmp::Ordering;
 
-use crate::chunk::{Biome, ChunkEntity, ChunkPos, ObjectType, TerrainChunk};
+use crate::chunk::{Biome, ChunkEntity, ChunkId, ChunkPos, ObjectType, TerrainChunk};
 use crate::poisson::PoissonDisk;
 
 #[derive(Clone)]
@@ -27,13 +27,13 @@ const WATER_HEIGHT: u32 = GROUND_HEIGHT + (0.2 * GROUND_HEIGHT as f64) as u32;
 // To current chunk, we need to have a constant chunk size used as the width / height for each
 // chunk. Then as we move around in x, y
 impl TerrainGenerator {
-    pub fn new(width: u32, height: u32) -> Self {
+    pub fn new(id: ChunkId, width: u32, height: u32) -> Self {
         TerrainGenerator {
             chunk_x: 0,
             chunk_y: 0,
             width: width as usize,
             height: height as usize,
-            terrain: TerrainChunk::new(width, height),
+            terrain: TerrainChunk::new(id, width, height),
             topo: vec![None; (width * height) as usize],
         }
     }
