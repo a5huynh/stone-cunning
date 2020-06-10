@@ -20,22 +20,22 @@ fn test_chunk_coord() {
 
 #[test]
 fn test_world_to_chunk() {
-    let terloader = TerrainLoader::new(64, 64);
+    let chunk = TerrainChunk::new((0, 0), 64, 64);
 
     assert_eq!(
-        terloader.world_to_chunk(&WorldPos::new(0, 0, 0)),
+        chunk.world_to_local(&WorldPos::new(0, 0, 0)),
         ChunkPos::new(0, 0, 0)
     );
 
     // On the border of the next chunk over.
     assert_eq!(
-        terloader.world_to_chunk(&WorldPos::new(64, 64, 0)),
+        chunk.world_to_local(&WorldPos::new(64, 64, 0)),
         ChunkPos::new(0, 0, 0)
     );
 
     // Chunks in the negative world pos.
     assert_eq!(
-        terloader.world_to_chunk(&WorldPos::new(-1, -1, 0)),
+        chunk.world_to_local(&WorldPos::new(-1, -1, 0)),
         ChunkPos::new(63, 63, 0)
     );
 }
@@ -43,12 +43,21 @@ fn test_world_to_chunk() {
 #[test]
 fn test_is_walkable() {
     let mut terloader = TerrainLoader::new(3, 3);
-    let mut chunk = TerrainChunk::new(3, 3);
+    let mut chunk = TerrainChunk::new((0, 0), 3, 3);
 
     // Test a single block high wall, should be passable.
-    chunk.set(&ChunkPos::new(0, 2, 0), ChunkEntity::Terrain(Biome::ROCK));
-    chunk.set(&ChunkPos::new(1, 2, 0), ChunkEntity::Terrain(Biome::ROCK));
-    chunk.set(&ChunkPos::new(2, 2, 0), ChunkEntity::Terrain(Biome::ROCK));
+    chunk.set(
+        &ChunkPos::new(0, 2, 0),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
+    chunk.set(
+        &ChunkPos::new(1, 2, 0),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
+    chunk.set(
+        &ChunkPos::new(2, 2, 0),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
     terloader.chunks.insert((0, 0), chunk);
 
     let pt = WorldPos::new(1, 2, 0);
@@ -58,7 +67,7 @@ fn test_is_walkable() {
 #[test]
 fn test_basic_neighbors() {
     let mut terloader = TerrainLoader::new(3, 3);
-    let chunk = TerrainChunk::new(3, 3);
+    let chunk = TerrainChunk::new((0, 0), 3, 3);
     terloader.chunks.insert((0, 0), chunk);
 
     let neighbors = terloader.neighbors(&WorldPos::new(1, 1, 0));
@@ -70,12 +79,22 @@ fn test_basic_neighbors() {
 #[test]
 fn test_passable_neighbors() {
     let mut terloader = TerrainLoader::new(3, 3);
-    let mut chunk = TerrainChunk::new(3, 3);
+    let mut chunk = TerrainChunk::new((0, 0), 3, 3);
 
     // Test a single block high wall, should be passable.
-    chunk.set(&ChunkPos::new(0, 2, 0), ChunkEntity::Terrain(Biome::ROCK));
-    chunk.set(&ChunkPos::new(1, 2, 0), ChunkEntity::Terrain(Biome::ROCK));
-    chunk.set(&ChunkPos::new(2, 2, 0), ChunkEntity::Terrain(Biome::ROCK));
+    chunk.set(
+        &ChunkPos::new(0, 2, 0),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
+    chunk.set(
+        &ChunkPos::new(1, 2, 0),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
+
+    chunk.set(
+        &ChunkPos::new(2, 2, 0),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
     terloader.chunks.insert((0, 0), chunk);
 
     let neighbors = terloader.neighbors(&WorldPos::new(1, 1, 0));
@@ -90,15 +109,33 @@ fn test_passable_neighbors() {
 #[test]
 fn test_blocked_neighbors() {
     let mut terloader = TerrainLoader::new(3, 3);
-    let mut chunk = TerrainChunk::new(3, 3);
+    let mut chunk = TerrainChunk::new((0, 0), 3, 3);
 
     // Test a chunk with a two block high wall
-    chunk.set(&ChunkPos::new(0, 2, 0), ChunkEntity::Terrain(Biome::ROCK));
-    chunk.set(&ChunkPos::new(1, 2, 0), ChunkEntity::Terrain(Biome::ROCK));
-    chunk.set(&ChunkPos::new(2, 2, 0), ChunkEntity::Terrain(Biome::ROCK));
-    chunk.set(&ChunkPos::new(0, 2, 1), ChunkEntity::Terrain(Biome::ROCK));
-    chunk.set(&ChunkPos::new(1, 2, 1), ChunkEntity::Terrain(Biome::ROCK));
-    chunk.set(&ChunkPos::new(2, 2, 1), ChunkEntity::Terrain(Biome::ROCK));
+    chunk.set(
+        &ChunkPos::new(0, 2, 0),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
+    chunk.set(
+        &ChunkPos::new(1, 2, 0),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
+    chunk.set(
+        &ChunkPos::new(2, 2, 0),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
+    chunk.set(
+        &ChunkPos::new(0, 2, 1),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
+    chunk.set(
+        &ChunkPos::new(1, 2, 1),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
+    chunk.set(
+        &ChunkPos::new(2, 2, 1),
+        Some(ChunkEntity::Terrain(Biome::ROCK)),
+    );
     terloader.chunks.insert((0, 0), chunk);
 
     // Since there is a wall in the way, we should only get 3 points
