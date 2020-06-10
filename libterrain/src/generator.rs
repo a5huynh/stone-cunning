@@ -88,20 +88,38 @@ impl TerrainGenerator {
                         // depth of the water will change.
                         Biome::OCEAN => {
                             if z >= terrain_height && z <= WATER_HEIGHT {
-                                self.terrain
-                                    .set(&idx, Some(ChunkEntity::Terrain(biome.clone())));
+                                self.terrain.set(
+                                    &idx,
+                                    Some(ChunkEntity::Terrain {
+                                        biome: biome.clone(),
+                                        visible: true,
+                                    }),
+                                );
                             } else if z < terrain_height {
-                                self.terrain
-                                    .set(&idx, Some(ChunkEntity::Terrain(Biome::ROCK)));
+                                self.terrain.set(
+                                    &idx,
+                                    Some(ChunkEntity::Terrain {
+                                        biome: Biome::ROCK,
+                                        visible: false,
+                                    }),
+                                );
                             }
                         }
                         _ => match z.cmp(&terrain_height) {
-                            Ordering::Equal => self
-                                .terrain
-                                .set(&idx, Some(ChunkEntity::Terrain(biome.clone()))),
-                            Ordering::Less => self
-                                .terrain
-                                .set(&idx, Some(ChunkEntity::Terrain(Biome::ROCK))),
+                            Ordering::Equal => self.terrain.set(
+                                &idx,
+                                Some(ChunkEntity::Terrain {
+                                    biome: biome.clone(),
+                                    visible: true,
+                                }),
+                            ),
+                            Ordering::Less => self.terrain.set(
+                                &idx,
+                                Some(ChunkEntity::Terrain {
+                                    biome: Biome::ROCK,
+                                    visible: false,
+                                }),
+                            ),
                             _ => {}
                         },
                     }

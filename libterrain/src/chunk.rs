@@ -22,7 +22,10 @@ pub enum ObjectType {
 
 #[derive(Clone, Debug)]
 pub enum ChunkEntity {
-    Terrain(Biome),
+    Terrain {
+        biome: Biome,
+        visible: bool,
+    },
     /// TODO: Handle multiple objects per tile.
     Object(Uuid, ObjectType),
     Worker(Uuid),

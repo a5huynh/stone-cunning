@@ -13,8 +13,7 @@ use crate::game::{
     components::CameraFollow,
     resources::MapRenderer,
     systems::{
-        camera, debug, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
-        render,
+        camera, debug, render, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
     },
 };
 use core::log;
@@ -51,9 +50,21 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
 
         // Render systems. Takes entities from the simulations and assigns sprites
         // to them as they get added.
-        dispatcher_builder.add(render::RenderObjectSystem, "render_obj_system", &["world_updates"]);
-        dispatcher_builder.add(render::RenderNPCSystem, "render_npc_system", &["world_updates"]);
-        dispatcher_builder.add(render::RenderTerrainSystem, "render_terrain_system", &["world_updates"]);
+        dispatcher_builder.add(
+            render::RenderObjectSystem,
+            "render_obj_system",
+            &["world_updates"],
+        );
+        dispatcher_builder.add(
+            render::RenderNPCSystem,
+            "render_npc_system",
+            &["world_updates"],
+        );
+        dispatcher_builder.add(
+            render::RenderTerrainSystem,
+            "render_terrain_system",
+            &["world_updates"],
+        );
 
         let mut input_db = DispatcherBuilder::new();
         // Cursor selection
@@ -97,8 +108,6 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
             map_render.place(&Point3::new(8, 8, 42), 0.0)
         };
 
-        // let mut transform = Transform::default();
-        // transform.set_translation_xyz(0.0, 0.0, 2000.0);
         cam_transform.set_translation_z(0.0);
         initialize_camera(world, cam_transform);
 

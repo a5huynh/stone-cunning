@@ -3,24 +3,24 @@
 /// This can either be starting the terrain generation or loading the necessary
 /// terrain chunks from disk.
 ///
-use crate::game::{
-    components::{Cursor, CursorSelected, Object, Player},
-    config::GameConfig,
-    resources::MapRenderer,
-    sprite::SpriteSheetStorage,
-    state::RunningState,
-};
 use core::{
     amethyst::{ecs::Write, prelude::*},
     Point3,
 };
-
 use libdwarf::{
     resources::{TaskQueue, World},
     trigger::TriggerType,
     world::WorldSim,
 };
 use libterrain::TerrainLoader;
+
+use crate::game::{
+    components::{Cursor, CursorSelected, Object, Player},
+    config::GameConfig,
+    resources::{MapRenderer, ViewShed},
+    sprite::SpriteSheetStorage,
+    state::RunningState,
+};
 
 pub struct InitState {
     finished: bool,
@@ -55,9 +55,12 @@ impl SimpleState for InitState {
         // Initialize simulation. Will also load visible chunks and prep
         // for rendering.
 
-        // Render map
+        // Utils for map rendering
         let map_render = MapRenderer::initialize(world);
         world.insert(map_render);
+
+        // Initialize an empty viewshed, this will update one we get a camera
+        world.insert(ViewShed::default());
 
         // Initialize cursor sprite.
         Cursor::initialize(world);
