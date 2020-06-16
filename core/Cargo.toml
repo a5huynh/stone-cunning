@@ -11,4 +11,4 @@ uuid = { version = "0.8", features = ["serde", "v4"] }
 [dependencies.amethyst]
 version = "0.15.0"
 default-features = false
-features = ["audio", "metal", "renderer", "no-slow-safety-checks"]
+features = ["audio", "metal", "renderer", "shader-compiler", "no-slow-safety-checks"]

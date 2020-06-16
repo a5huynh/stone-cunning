@@ -50,7 +50,7 @@ impl<'s> System<'s> for MapMovementSystem {
             transform.append_translation(Vector3::new(
                 x_move as f32 * map_move,
                 y_move as f32 * map_move,
-                0.0
+                0.0,
             ));
         }
 

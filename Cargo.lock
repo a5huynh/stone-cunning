@@ -2935,6 +2935,7 @@ dependencies = [
  "rendy-factory 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rendy-util 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.111 (registry+https://github.com/rust-lang/crates.io-index)",
+ "shaderc 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "smallvec 0.6.13 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -3203,6 +3204,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "shaderc"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.2.71 (registry+https://github.com/rust-lang/crates.io-index)",
+ "shaderc-sys 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "shaderc-sys"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "cmake 0.1.44 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.71 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "shlex"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3369,6 +3388,9 @@ version = "0.1.0"
 dependencies = [
  "amethyst-imgui 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "core 0.1.0",
+ "failure 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "glsl-layout 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "libdwarf 0.1.0",
  "libterrain 0.1.0",
  "objc 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -4211,6 +4233,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum servo-fontconfig 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a088f8d775a5c5314aae09bd77340bc9c67d72b9a45258be34c83548b4814cd9"
 "checksum servo-fontconfig-sys 4.0.9 (registry+https://github.com/rust-lang/crates.io-index)" = "62b3e166450f523f4db06c14f02a2d39e76d49b5d8cbd224338d93e3595c156c"
 "checksum servo-freetype-sys 4.0.5 (registry+https://github.com/rust-lang/crates.io-index)" = "2c4ccb6d0d32d277d3ef7dea86203d8210945eb7a45fba89dd445b3595dd0dfc"
+"checksum shaderc 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "b7edff43a83e12343b7908b4ee4cef1c886460fc721d868ee69d6a45ae902c22"
+"checksum shaderc-sys 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "1a3d04ede135a5d6d66451f6ed501da68f8a63e0477185ab4e7d459cd78a6e34"
 "checksum shlex 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "7fdf1b9db47230893d76faad238fd6097fd6d6a9245cd7a4d90dbd639536bbd2"
 "checksum shred 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)" = "c5f08237e667ac94ad20f8878b5943d91a93ccb231428446c57c21c57779016d"
 "checksum shred-derive 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)" = "a1f37080f2751fbf091dbdebaa95bd6cf9dbf74ad1d50396b1908518a1747fdf"

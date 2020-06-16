@@ -6,6 +6,9 @@ edition = "2018"
 publish = false
 
 [dependencies]
+failure = "0.1.5"
+glsl-layout = "0.3.2"
+lazy_static = "1.4.0"
 objc = "0.2.7"
 rand = "0.7.3"
 serde = "1.0.104"
