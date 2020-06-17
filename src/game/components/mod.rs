@@ -18,3 +18,9 @@ pub struct PickInfo {
     pub world_pos: Option<Point3<f32>>,
     pub position: Option<WorldPos>,
 }
+
+#[derive(Clone, Debug, Default)]
+pub struct PassInfo {
+    pub num_entities: Option<usize>,
+    pub walltime: Option<u128>,
+}

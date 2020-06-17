@@ -15,7 +15,7 @@ use libdwarf::{
 use libterrain::TerrainLoader;
 
 use crate::game::{
-    components::{Cursor, CursorSelected, Object, Player},
+    components::{Cursor, CursorSelected, Object, PassInfo, Player},
     config::GameConfig,
     resources::{MapRenderer, ViewShed},
     sprite::SpriteSheetStorage,
@@ -38,6 +38,8 @@ impl SimpleState for InitState {
         world.register::<Cursor>();
         world.register::<Object>();
         world.register::<Player>();
+
+        world.insert(PassInfo::default());
 
         let storage = SpriteSheetStorage::new(world);
         world.insert(storage);

@@ -8,7 +8,10 @@ use libdwarf::{
     trigger::TriggerType,
 };
 
-use crate::game::{components::CursorSelected, resources::MapRenderer};
+use crate::game::{
+    components::{CursorSelected, PassInfo},
+    resources::MapRenderer,
+};
 
 #[derive(Default)]
 pub struct DebugUI {
@@ -24,13 +27,30 @@ impl<'s> System<'s> for DebugUI {
         ReadExpect<'s, MapRenderer>,
         Write<'s, TaskQueue>,
         ReadExpect<'s, World>,
+        ReadExpect<'s, PassInfo>,
     );
 
     fn run(
         &mut self,
-        (entities, objects, workers, cursor_selected, map, mut queue, world): Self::SystemData,
+        (entities, objects, workers, cursor_selected, map, mut queue, world, passinfo): Self::SystemData,
     ) {
         amethyst_imgui::with(|ui| {
+            Window::new(im_str!("Render Info"))
+                .size([300.0, 500.0], Condition::FirstUseEver)
+                .build(ui, || {
+                    let label = passinfo
+                        .num_entities
+                        .and_then(|num| Some(format!("Entities Processed: {}", num)))
+                        .unwrap_or_else(|| "Entities Processed: N/A".to_string());
+                    ui.text(label);
+
+                    let label = passinfo
+                        .walltime
+                        .and_then(|num| Some(format!("Walltime: {}ms", num)))
+                        .unwrap_or_else(|| "Walltime: N/A".to_string());
+                    ui.text(label);
+                });
+
             Window::new(im_str!("Tasks"))
                 .size([300.0, 500.0], Condition::FirstUseEver)
                 .build(ui, || {

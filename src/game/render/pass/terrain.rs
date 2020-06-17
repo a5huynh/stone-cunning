@@ -1,7 +1,7 @@
 use core::amethyst::{
     assets::AssetStorage,
     core::{
-        ecs::{Join, Read, ReadExpect, ReadStorage, SystemData, World},
+        ecs::{Join, Read, ReadExpect, ReadStorage, SystemData, World, WriteExpect},
         transform::Transform,
     },
     renderer::{
@@ -21,18 +21,22 @@ use core::amethyst::{
         sprite::SpriteSheet,
         submodules::{DynamicVertexBuffer, FlatEnvironmentSub, TextureId, TextureSub},
         types::{Backend, Texture},
-        util,
+        util, Camera,
     },
+    window::ScreenDimensions,
 };
+use core::{Point3, Vector2};
+use std::time::SystemTime;
 
 use crate::game::{
+    components::PassInfo,
     render::{
         pod::{SpriteArgs, TerrainArgs},
         SPRITE_FRAGMENT, SPRITE_VERTEX,
     },
     sprite::SpriteSheetStorage,
 };
-use libdwarf::components::Terrain;
+use libdwarf::components::{EntityInfo, Terrain};
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DrawTerrainDesc;
@@ -107,14 +111,30 @@ impl<B: Backend> RenderGroup<B, World> for DrawTerrain<B> {
         #[cfg(feature = "profiler")]
         profile_scope!("prepare terrain pass");
 
-        let (sheet_storage, spritesheet, tex_storage, terrain, transforms) =
-            <(
-                Option<Read<'_, SpriteSheetStorage>>,
-                Read<'_, AssetStorage<SpriteSheet>>,
-                Read<'_, AssetStorage<Texture>>,
-                ReadStorage<'_, Terrain>,
-                ReadStorage<'_, Transform>,
-            )>::fetch(world);
+        let (
+            sheet_storage,
+            spritesheet,
+            tex_storage,
+            cameras,
+            screen,
+            terrain,
+            entity_infos,
+            transforms,
+            passinfo,
+        ) = <(
+            Option<Read<'_, SpriteSheetStorage>>,
+            Read<'_, AssetStorage<SpriteSheet>>,
+            Read<'_, AssetStorage<Texture>>,
+            ReadStorage<'_, Camera>,
+            ReadExpect<'_, ScreenDimensions>,
+            ReadStorage<'_, Terrain>,
+            ReadStorage<'_, EntityInfo>,
+            ReadStorage<'_, Transform>,
+            Option<WriteExpect<'_, PassInfo>>,
+        )>::fetch(world);
+
+        // No camera? Skip render.
+        let camera_info = (&cameras, &transforms).join().next().or(None);
 
         self.env.process(factory, index, world);
         self.sprites.swap_clear();
@@ -123,14 +143,60 @@ impl<B: Backend> RenderGroup<B, World> for DrawTerrain<B> {
         let sprites_ref = &mut self.sprites;
         let textures_ref = &mut self.textures;
 
-        if let Some(sheet_storage) = sheet_storage {
+        if camera_info.is_some() && sheet_storage.is_some() {
+            let now = SystemTime::now();
+
             #[cfg(feature = "profiler")]
             profile_scope!("gather_sprites_trans");
 
-            (&terrain, &transforms)
-                .join()
-                .into_iter()
-                .filter_map(|(terrain, transform)| {
+            let sheet_storage = sheet_storage.unwrap();
+            let screen_dim = Vector2::new(screen.width(), screen.height());
+            let (camera, cam_transform) = camera_info.unwrap();
+            let top_left = camera.projection().screen_to_world_point(
+                Point3::new(0.0, 0.0, cam_transform.translation().z),
+                screen_dim,
+                cam_transform,
+            );
+
+            let bottom_right = camera.projection().screen_to_world_point(
+                Point3::new(
+                    screen.width() as f32,
+                    screen.height() as f32,
+                    cam_transform.translation().z,
+                ),
+                screen_dim,
+                cam_transform,
+            );
+
+            // TODO: Filter out tiles no in view
+            let mut entities: Vec<(&Terrain, &EntityInfo, &Transform)> =
+                (&terrain, &entity_infos, &transforms)
+                    .join()
+                    .into_iter()
+                    .collect();
+
+            // Depth sort tiles
+            entities.sort_by(|(_, a, _), (_, b, _)| {
+                let ta = a.pos;
+                let tb = b.pos;
+
+                (ta.x + ta.y + ta.z)
+                    .partial_cmp(&(tb.x + tb.y + tb.z))
+                    .unwrap()
+                    .reverse()
+            });
+
+            entities
+                .iter()
+                .filter_map(|(terrain, _, transform)| {
+                    if (transform.translation().x < top_left.x
+                        || transform.translation().x > bottom_right.x)
+                        && (transform.translation().y < top_left.y
+                            || transform.translation().y > bottom_right.y)
+                    {
+                        return None;
+                    }
+
                     if let Some((batch_data, texture)) = TerrainArgs::from_data(
                         &tex_storage,
                         spritesheet.get(&sheet_storage.terrain).unwrap(),
@@ -153,6 +219,11 @@ impl<B: Backend> RenderGroup<B, World> for DrawTerrain<B> {
                 .for_each_group(|tex_id, batch_data| {
                     sprites_ref.insert(tex_id, batch_data.drain(..))
                 });
+
+            if let Some(mut passinfo) = passinfo {
+                passinfo.num_entities = Some(entities.len());
+                passinfo.walltime = Some(now.elapsed().unwrap().as_millis());
+            }
         }
 
         self.textures.maintain(factory, world);

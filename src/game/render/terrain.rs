@@ -10,7 +10,7 @@ use core::amethyst::{
 };
 
 use crate::game::render::pass::DrawTerrainDesc;
-use libdwarf::components::Terrain;
+use libdwarf::components::{EntityInfo, Terrain};
 
 /// A [RenderPlugin] for drawing 2d objects with flat shading.
 /// Required to display sprites defined with [SpriteRender] component.
@@ -19,7 +19,7 @@ pub struct RenderTerrain {
     target: Target,
 }
 
-type TerrainSetupData<'a> = (ReadStorage<'a, Terrain>,);
+type TerrainSetupData<'a> = (ReadStorage<'a, EntityInfo>, ReadStorage<'a, Terrain>);
 
 impl RenderTerrain {
     /// Set target to which 2d sprites will be rendered.
