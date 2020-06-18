@@ -1,6 +1,6 @@
 //! Set of predefined implementations of `RenderPlugin` for use with `RenderingBundle`.
 use core::amethyst::{
-    ecs::{prelude::*, DispatcherBuilder, ReadExpect, ReadStorage, World},
+    ecs::{prelude::*, DispatcherBuilder, ReadStorage, World},
     error::Error,
     renderer::{
         bundle::{RenderOrder, RenderPlan, RenderPlugin, Target},
@@ -23,6 +23,7 @@ type TerrainSetupData<'a> = (ReadStorage<'a, EntityInfo>, ReadStorage<'a, Terrai
 
 impl RenderTerrain {
     /// Set target to which 2d sprites will be rendered.
+    #[allow(dead_code)]
     pub fn with_target(mut self, target: Target) -> Self {
         self.target = target;
         self
@@ -33,7 +34,7 @@ impl<B: Backend> RenderPlugin<B> for RenderTerrain {
     fn on_build<'a, 'b>(
         &mut self,
         world: &mut World,
-        builder: &mut DispatcherBuilder<'a, 'b>,
+        _builder: &mut DispatcherBuilder<'a, 'b>,
     ) -> Result<(), Error> {
         // Since render passes at any time, we need to make sure it has access to
         // components that may be used. This initializes them in `specs`.

@@ -22,6 +22,7 @@ pub struct RenderSprites {
 
 impl RenderSprites {
     /// Set target to which 2d sprites will be rendered.
+    #[allow(dead_code)]
     pub fn with_target(mut self, target: Target) -> Self {
         self.target = target;
         self

@@ -1,7 +1,6 @@
 use core::amethyst::{
     core::transform::Transform,
     ecs::{Entities, ReadExpect, System, WriteExpect, WriteStorage},
-    renderer::{SpriteRender, Transparent},
 };
 
 use core::{Uuid, WorldPos};
@@ -11,10 +10,7 @@ use libdwarf::{
 };
 use libterrain::{ChunkEntity, ZLEVELS};
 
-use crate::game::{
-    resources::{MapRenderer, ViewShed},
-    sprite::SpriteSheetStorage,
-};
+use crate::game::resources::{MapRenderer, ViewShed};
 
 pub struct RenderTerrainSystem;
 impl<'a> System<'a> for RenderTerrainSystem {

@@ -7,24 +7,18 @@ mod terrain;
 pub use sprite::*;
 pub use terrain::*;
 
-use core::amethyst::renderer::rendy::shader::{
-    ShaderKind, SourceLanguage, SourceShaderInfo, SpirvShader,
-};
+use core::amethyst::renderer::rendy::{hal::pso::ShaderStageFlags, shader::SpirvShader};
 
 lazy_static::lazy_static! {
-    pub static ref SPRITE_VERTEX: SpirvShader = SourceShaderInfo::new(
-        include_str!("../../../resources/shaders/vertex/sprite.vert"),
-        "vertex/sprite.vert",
-        ShaderKind::Vertex,
-        SourceLanguage::GLSL,
+    pub static ref SPRITE_VERTEX: SpirvShader = SpirvShader::from_bytes(
+        include_bytes!("../../../resources/shaders/compiled/sprite.vert.spv"),
+        ShaderStageFlags::VERTEX,
         "main"
-    ).precompile().unwrap();
+    ).unwrap();
 
-    pub static ref SPRITE_FRAGMENT: SpirvShader = SourceShaderInfo::new(
-        include_str!("../../../resources/shaders/fragment/sprite.frag"),
-        "fragment/sprite.frag",
-        ShaderKind::Fragment,
-        SourceLanguage::GLSL,
+    pub static ref SPRITE_FRAGMENT: SpirvShader = SpirvShader::from_bytes(
+        include_bytes!("../../../resources/shaders/compiled/sprite.frag.spv"),
+        ShaderStageFlags::FRAGMENT,
         "main"
-    ).precompile().unwrap();
+    ).unwrap();
 }

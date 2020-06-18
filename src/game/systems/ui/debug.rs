@@ -40,13 +40,13 @@ impl<'s> System<'s> for DebugUI {
                 .build(ui, || {
                     let label = passinfo
                         .num_entities
-                        .and_then(|num| Some(format!("Entities Processed: {}", num)))
+                        .map(|num| format!("Entities Processed: {}", num))
                         .unwrap_or_else(|| "Entities Processed: N/A".to_string());
                     ui.text(label);
 
                     let label = passinfo
                         .walltime
-                        .and_then(|num| Some(format!("Walltime: {}ms", num)))
+                        .map(|num| format!("Walltime: {}ms", num))
                         .unwrap_or_else(|| "Walltime: N/A".to_string());
                     ui.text(label);
                 });
