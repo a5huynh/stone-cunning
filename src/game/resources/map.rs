@@ -25,14 +25,12 @@ impl MapRenderer {
             (config.tile_height, config.tile_width)
         };
 
-        let map_render = MapRenderer {
+        MapRenderer {
             rotation: Direction::NORTH,
             rotate_cooldown: false,
             tile_height: tile_height as f32,
             tile_width: tile_width as f32,
-        };
-
-        map_render
+        }
     }
 
     pub fn rotate_left(&mut self) {

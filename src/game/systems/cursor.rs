@@ -90,7 +90,7 @@ impl<'s> System<'s> for CursorSystem {
                 let above = world.terrain.get(&above_pt);
 
                 if biome.is_some() && above.is_none() {
-                    if let Some(ChunkEntity::Terrain { biome, visible: _ }) = biome {
+                    if let Some(ChunkEntity::Terrain { biome, .. }) = biome {
                         pick_info.terrain = Some(biome);
                         // Last valid point we've seen.
                         valid_pt.x = current_pt.x;

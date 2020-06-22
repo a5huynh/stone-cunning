@@ -6,3 +6,6 @@ pub use object::*;
 
 mod terrain;
 pub use terrain::*;
+
+mod sorting;
+pub use sorting::*;

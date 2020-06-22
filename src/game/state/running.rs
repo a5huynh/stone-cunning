@@ -66,6 +66,12 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
             &["world_updates"],
         );
 
+        dispatcher_builder.add(
+            render::SpriteSortingSystem::new(),
+            "sprite_sorting_system",
+            &[],
+        );
+
         let mut input_db = DispatcherBuilder::new();
         // Cursor selection
         input_db.add(CursorSystem, "cursor", &[]);
@@ -75,6 +81,7 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
         input_db.add(camera::CameraZoomSystem, "camera_zoom", &[]);
         input_db.add(camera::MapMovementSystem, "map_movement", &[]);
         input_db.add(camera::MapRotateSystem, "map_rotate", &[]);
+        input_db.add(camera::ViewshedUpdaterSystem, "viewshed_update", &[]);
         input_db.add(PlayerMovement, "player_movement", &[]);
 
         let mut ui_db = DispatcherBuilder::new();

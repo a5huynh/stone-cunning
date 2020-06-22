@@ -92,7 +92,7 @@ impl TerrainGenerator {
                                     &idx,
                                     Some(ChunkEntity::Terrain {
                                         biome: biome.clone(),
-                                        visible: true,
+                                        visible_faces: [true, false, false, false, false, false],
                                     }),
                                 );
                             } else if z < terrain_height {
@@ -100,7 +100,7 @@ impl TerrainGenerator {
                                     &idx,
                                     Some(ChunkEntity::Terrain {
                                         biome: Biome::ROCK,
-                                        visible: false,
+                                        visible_faces: Default::default(),
                                     }),
                                 );
                             }
@@ -110,14 +110,14 @@ impl TerrainGenerator {
                                 &idx,
                                 Some(ChunkEntity::Terrain {
                                     biome: biome.clone(),
-                                    visible: true,
+                                    visible_faces: [true, false, false, false, false, false],
                                 }),
                             ),
                             Ordering::Less => self.terrain.set(
                                 &idx,
                                 Some(ChunkEntity::Terrain {
                                     biome: Biome::ROCK,
-                                    visible: false,
+                                    visible_faces: Default::default(),
                                 }),
                             ),
                             _ => {}

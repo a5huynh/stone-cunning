@@ -37,14 +37,16 @@ impl<'a> System<'a> for RenderTerrainSystem {
         ): Self::SystemData,
     ) {
         // Should we check for chunks to load / remove?
-        if !viewshed.dirty {
+        if !viewshed.needs_chunking {
             return;
         }
 
-        let tl_chunk = world.terrain.to_chunk_coord(&viewshed.top_left.unwrap());
+        let tl_chunk = world
+            .terrain
+            .to_chunk_coord(&viewshed.top_left_world.unwrap());
         let br_chunk = world
             .terrain
-            .to_chunk_coord(&viewshed.bottom_right.unwrap());
+            .to_chunk_coord(&viewshed.bottom_right_world.unwrap());
 
         for x in br_chunk.0..=tl_chunk.0 {
             for y in br_chunk.1..=tl_chunk.1 {
@@ -67,8 +69,11 @@ impl<'a> System<'a> for RenderTerrainSystem {
                             for z in 32..ZLEVELS {
                                 let pt = WorldPos::new(x as i32, y as i32, z as i32);
                                 match chunk.get_world(&pt) {
-                                    Some(ChunkEntity::Terrain { biome, visible }) => {
-                                        if !visible {
+                                    Some(ChunkEntity::Terrain {
+                                        biome,
+                                        visible_faces,
+                                    }) => {
+                                        if !visible_faces.iter().any(|b| *b) {
                                             continue;
                                         }
 
@@ -100,7 +105,7 @@ impl<'a> System<'a> for RenderTerrainSystem {
                 // TODO: Clean up chunks that are no londer in view?
             }
 
-            viewshed.dirty = false;
+            viewshed.needs_chunking = false;
         }
     }
 }

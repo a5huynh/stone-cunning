@@ -20,11 +20,20 @@ pub enum ObjectType {
     TREE,
 }
 
+pub enum Faces {
+    TOP = 0,
+    BOTTOM = 1,
+    WEST = 2,
+    NORTH = 3,
+    EAST = 4,
+    SOUTH = 5,
+}
+
 #[derive(Clone, Debug)]
 pub enum ChunkEntity {
     Terrain {
         biome: Biome,
-        visible: bool,
+        visible_faces: [bool; 6],
     },
     /// TODO: Handle multiple objects per tile.
     Object(Uuid, ObjectType),
