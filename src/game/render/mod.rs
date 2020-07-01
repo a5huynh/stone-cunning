@@ -21,4 +21,16 @@ lazy_static::lazy_static! {
         ShaderStageFlags::FRAGMENT,
         "main"
     ).unwrap();
+
+    pub static ref ISO_VERTEX: SpirvShader = SpirvShader::from_bytes(
+        include_bytes!("../../../resources/shaders/compiled/iso.vert.spv"),
+        ShaderStageFlags::VERTEX,
+        "main"
+    ).unwrap();
+
+    pub static ref ISO_FRAGMENT: SpirvShader = SpirvShader::from_bytes(
+        include_bytes!("../../../resources/shaders/compiled/iso.frag.spv"),
+        ShaderStageFlags::FRAGMENT,
+        "main"
+    ).unwrap();
 }

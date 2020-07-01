@@ -29,8 +29,8 @@ use std::time::SystemTime;
 use crate::game::{
     components::PassInfo,
     render::{
-        pod::{SpriteArgs, TerrainArgs},
-        SPRITE_FRAGMENT, SPRITE_VERTEX,
+        pod::TerrainArgs,
+        ISO_FRAGMENT, ISO_VERTEX,
     },
     sprite::SpriteSheetStorage,
     systems::render::SpriteVisibility,
@@ -243,13 +243,13 @@ fn build_terrain_pipeline<B: Backend>(
             .create_pipeline_layout(layouts, None as Option<(_, _)>)
     }?;
 
-    let shader_vertex = unsafe { SPRITE_VERTEX.module(factory).unwrap() };
-    let shader_fragment = unsafe { SPRITE_FRAGMENT.module(factory).unwrap() };
+    let shader_vertex = unsafe { ISO_VERTEX.module(factory).unwrap() };
+    let shader_fragment = unsafe { ISO_FRAGMENT.module(factory).unwrap() };
 
     let pipes = PipelinesBuilder::new()
         .with_pipeline(
             PipelineDescBuilder::new()
-                .with_vertex_desc(&[(SpriteArgs::vertex(), pso::VertexInputRate::Instance(1))])
+                .with_vertex_desc(&[(TerrainArgs::vertex(), pso::VertexInputRate::Instance(1))])
                 .with_input_assembler(pso::InputAssemblerDesc::new(hal::Primitive::TriangleStrip))
                 .with_shaders(util::simple_shader_set(
                     &shader_vertex,
