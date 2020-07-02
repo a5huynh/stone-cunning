@@ -3,12 +3,17 @@
 use core::{
     amethyst::{
         core::Transform,
-        ecs::{prelude::Entity, Entities, Join, ReadStorage, System, Write, WriteExpect},
+        ecs::{
+            prelude::Entity, Entities, Join, ReadExpect, ReadStorage, System, Write, WriteExpect,
+        },
     },
     WorldPos,
 };
 
-use crate::game::resources::ViewShed;
+use crate::game::{
+    components::Direction,
+    resources::{MapRenderer, ViewShed},
+};
 use libdwarf::components::{EntityInfo, Terrain};
 
 #[derive(Default, Debug)]
@@ -40,11 +45,12 @@ impl<'s> System<'s> for SpriteSortingSystem {
         ReadStorage<'s, EntityInfo>,
         ReadStorage<'s, Terrain>,
         ReadStorage<'s, Transform>,
+        ReadExpect<'s, MapRenderer>,
     );
 
     fn run(
         &mut self,
-        (entities, mut visibility, mut viewshed, entity_infos, terrains, transforms): Self::SystemData,
+        (entities, mut visibility, mut viewshed, entity_infos, terrains, transforms, map_render): Self::SystemData,
     ) {
         if !viewshed.needs_sort {
             return;
@@ -87,10 +93,32 @@ impl<'s> System<'s> for SpriteSortingSystem {
             let ta = a.pos;
             let tb = b.pos;
 
-            (ta.x + ta.y + ta.z)
-                .partial_cmp(&(tb.x + tb.y + tb.z))
-                .unwrap()
-                .reverse()
+            match map_render.rotation {
+                Direction::SOUTH => {
+                    return (ta.x + ta.y + ta.z)
+                        .partial_cmp(&(tb.x + tb.y + tb.z))
+                        .unwrap();
+                }
+                // Just SOUTH, but reversed.
+                Direction::NORTH => {
+                    return (ta.x + ta.y + ta.z)
+                        .partial_cmp(&(tb.x + tb.y + tb.z))
+                        .unwrap()
+                        .reverse();
+                }
+                Direction::WEST => {
+                    return (ta.x - ta.y + ta.z)
+                        .partial_cmp(&(tb.x - tb.y + tb.z))
+                        .unwrap();
+                },
+                // Just WEST but reversed.
+                Direction::EAST => {
+                    return (ta.x - ta.y + ta.z)
+                        .partial_cmp(&(tb.x - tb.y + tb.z))
+                        .unwrap()
+                        .reverse();
+                }
+            }
         });
 
         visibility
