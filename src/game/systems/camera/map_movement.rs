@@ -26,12 +26,7 @@ impl<'s> System<'s> for MapMovementSystem {
         let x_move = input.axis_value("move_x").unwrap();
         let y_move = input.axis_value("move_y").unwrap();
 
-        if x_move == 0.0
-            && y_move == 0.0
-            // If viewshed has not been set, run through this system.
-            && viewshed.top_left.is_some()
-            && viewshed.bottom_right.is_some()
-        {
+        if x_move == 0.0 && y_move == 0.0 {
             return;
         }
 

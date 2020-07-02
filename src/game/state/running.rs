@@ -11,7 +11,7 @@ use core::amethyst::{
 
 use crate::game::{
     components::CameraFollow,
-    resources::MapRenderer,
+    resources::{MapRenderer, ViewShed},
     systems::{
         camera, debug, render, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
     },
@@ -78,10 +78,18 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
         // We handle click after the cursor is correctly transformed on the map.
         input_db.add(ClickSystem, "click", &["cursor"]);
         // Moving around the map
-        input_db.add(camera::CameraZoomSystem, "camera_zoom", &[]);
-        input_db.add(camera::MapMovementSystem, "map_movement", &[]);
-        input_db.add(camera::MapRotateSystem, "map_rotate", &[]);
         input_db.add(camera::ViewshedUpdaterSystem, "viewshed_update", &[]);
+        input_db.add(
+            camera::CameraZoomSystem,
+            "camera_zoom",
+            &["viewshed_update"],
+        );
+        input_db.add(
+            camera::MapMovementSystem,
+            "map_movement",
+            &["viewshed_update"],
+        );
+        input_db.add(camera::MapRotateSystem, "map_rotate", &["viewshed_update"]);
         input_db.add(PlayerMovement, "player_movement", &[]);
 
         let mut ui_db = DispatcherBuilder::new();
@@ -117,6 +125,10 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
 
         cam_transform.set_translation_z(0.0);
         initialize_camera(world, cam_transform);
+        {
+            let mut viewshed = world.write_resource::<ViewShed>();
+            viewshed.request_update = true;
+        }
 
         // Create the ui
         world.exec(|mut creator: UiCreator<'_>| {

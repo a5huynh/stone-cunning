@@ -28,10 +28,7 @@ use std::time::SystemTime;
 
 use crate::game::{
     components::PassInfo,
-    render::{
-        pod::TerrainArgs,
-        ISO_FRAGMENT, ISO_VERTEX,
-    },
+    render::{pod::TerrainArgs, ISO_FRAGMENT, ISO_VERTEX},
     sprite::SpriteSheetStorage,
     systems::render::SpriteVisibility,
 };

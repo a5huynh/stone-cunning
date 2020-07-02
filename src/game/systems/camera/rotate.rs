@@ -4,7 +4,10 @@ use core::amethyst::{
     input::{InputHandler, StringBindings},
 };
 
-use crate::game::{config::GameConfig, resources::MapRenderer};
+use crate::game::{
+    config::GameConfig,
+    resources::{MapRenderer, ViewShed},
+};
 use libdwarf::components::EntityInfo;
 
 pub struct MapRotateSystem;
@@ -15,9 +18,13 @@ impl<'s> System<'s> for MapRotateSystem {
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<StringBindings>>,
         Read<'s, GameConfig>,
+        WriteExpect<'s, ViewShed>,
     );
 
-    fn run(&mut self, (mut map, mut map_things, mut transforms, input, _config): Self::SystemData) {
+    fn run(
+        &mut self,
+        (mut map, mut map_things, mut transforms, input, _config, mut viewshed): Self::SystemData,
+    ) {
         let rotate_left = input.action_is_down("rotate_world_left").unwrap_or(false);
         let rotate_right = input.action_is_down("rotate_world_right").unwrap_or(false);
 
@@ -38,6 +45,8 @@ impl<'s> System<'s> for MapRotateSystem {
                 let pos = &thing.pos;
                 *transform = map.place(&pos, thing.z_offset);
             }
+
+            viewshed.request_update = true;
         }
     }
 }

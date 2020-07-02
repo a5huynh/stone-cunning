@@ -110,7 +110,7 @@ impl<'s> System<'s> for SpriteSortingSystem {
                     return (ta.x - ta.y + ta.z)
                         .partial_cmp(&(tb.x - tb.y + tb.z))
                         .unwrap();
-                },
+                }
                 // Just WEST but reversed.
                 Direction::EAST => {
                     return (ta.x - ta.y + ta.z)

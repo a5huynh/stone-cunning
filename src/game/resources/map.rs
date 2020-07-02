@@ -7,6 +7,7 @@ use core::amethyst::{
 };
 
 use crate::game::{components::Direction, config::GameConfig};
+
 /// Map resource used to convert screen coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
 pub struct MapRenderer {

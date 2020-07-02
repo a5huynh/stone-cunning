@@ -22,6 +22,10 @@ impl<'s> System<'s> for ViewshedUpdaterSystem {
     );
 
     fn run(&mut self, (cameras, transforms, map_render, screen, mut viewshed): Self::SystemData) {
+        if !viewshed.request_update {
+            return;
+        }
+
         if let Some((camera, transform)) = (&cameras, &transforms).join().next().or(None) {
             let screen_dim = Vector2::new(screen.width(), screen.height());
             let top_left = camera.projection().screen_to_world_point(
@@ -76,5 +80,7 @@ impl<'s> System<'s> for ViewshedUpdaterSystem {
 
             viewshed.dirty();
         }
+
+        viewshed.request_update = false;
     }
 }

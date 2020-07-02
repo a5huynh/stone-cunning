@@ -10,7 +10,7 @@ use libdwarf::{
 
 use crate::game::{
     components::{CursorSelected, PassInfo},
-    resources::MapRenderer,
+    resources::{MapRenderer, ViewShed},
 };
 
 #[derive(Default)]
@@ -28,13 +28,36 @@ impl<'s> System<'s> for DebugUI {
         Write<'s, TaskQueue>,
         ReadExpect<'s, World>,
         ReadExpect<'s, PassInfo>,
+        ReadExpect<'s, ViewShed>,
     );
 
     fn run(
         &mut self,
-        (entities, objects, workers, cursor_selected, map, mut queue, world, passinfo): Self::SystemData,
+        (entities, objects, workers, cursor_selected, map, mut queue, world, passinfo, viewshed): Self::SystemData,
     ) {
         amethyst_imgui::with(|ui| {
+            Window::new(im_str!("Viewshed"))
+                .size([300.0, 500.0], Condition::FirstUseEver)
+                .build(ui, || {
+                    let label = viewshed
+                        .top_left_world
+                        .map(|pt| format!("Top Left (World): ({}, {}, {})", pt.x, pt.y, pt.z))
+                        .unwrap_or_else(|| "Top Left (World): None".to_string());
+                    ui.text(label);
+
+                    let label = viewshed
+                        .bottom_right_world
+                        .map(|pt| format!("Bottom Right (World): ({}, {}, {})", pt.x, pt.y, pt.z))
+                        .unwrap_or_else(|| "Bottom Right (World): None".to_string());
+                    ui.text(label);
+
+                    let label = viewshed
+                        .center_world
+                        .map(|pt| format!("Center (World): ({}, {}, {})", pt.x, pt.y, pt.z))
+                        .unwrap_or_else(|| "Center (World): None".to_string());
+                    ui.text(label);
+                });
+
             Window::new(im_str!("Render Info"))
                 .size([300.0, 500.0], Condition::FirstUseEver)
                 .build(ui, || {
