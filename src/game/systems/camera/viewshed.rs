@@ -1,3 +1,5 @@
+use std::cmp::{max, min};
+
 use core::amethyst::{
     core::transform::Transform,
     ecs::{Join, ReadExpect, ReadStorage, System, WriteExpect},
@@ -28,6 +30,18 @@ impl<'s> System<'s> for ViewshedUpdaterSystem {
                 transform,
             );
 
+            let top_right = camera.projection().screen_to_world_point(
+                Point3::new(screen.width(), 0.0, transform.translation().z),
+                screen_dim,
+                transform,
+            );
+
+            let bottom_left = camera.projection().screen_to_world_point(
+                Point3::new(0.0, screen.height(), transform.translation().z),
+                screen_dim,
+                transform,
+            );
+
             let bottom_right = camera.projection().screen_to_world_point(
                 Point3::new(
                     screen.width() as f32,
@@ -38,13 +52,27 @@ impl<'s> System<'s> for ViewshedUpdaterSystem {
                 transform,
             );
 
-            let tl_pos = map_render.to_map_coords(top_left.x, top_left.y);
+            // Used in view culling.
             viewshed.top_left = Some(top_left);
-            viewshed.top_left_world = Some(WorldPos::new(tl_pos.0, tl_pos.1, 0));
-
-            let br_pos = map_render.to_map_coords(bottom_right.x, bottom_right.y);
             viewshed.bottom_right = Some(bottom_right);
-            viewshed.bottom_right_world = Some(WorldPos::new(br_pos.0, br_pos.1, 0));
+
+            // Used to determine next chunks to load, if any.
+            let tl_pos = map_render.to_map_coords(top_left.x, top_left.y);
+            let tr_pos = map_render.to_map_coords(top_right.x, top_right.y);
+            let bl_pos = map_render.to_map_coords(bottom_left.x, bottom_left.y);
+            let br_pos = map_render.to_map_coords(bottom_right.x, bottom_right.y);
+
+            viewshed.top_left_world = Some(WorldPos::new(
+                max(tl_pos.0, max(tr_pos.0, max(bl_pos.0, br_pos.0))),
+                max(tl_pos.1, max(tr_pos.1, max(bl_pos.1, br_pos.1))),
+                0,
+            ));
+
+            viewshed.bottom_right_world = Some(WorldPos::new(
+                min(tl_pos.0, min(tr_pos.0, min(bl_pos.0, br_pos.0))),
+                min(tl_pos.1, min(tr_pos.1, min(bl_pos.1, br_pos.1))),
+                0,
+            ));
 
             viewshed.dirty();
         }
