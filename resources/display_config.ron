@@ -1,6 +1,6 @@
 (
   title: "Stone Cunning",
-  dimensions: Some((928, 768)),
+  dimensions: Some((1280, 800)),
   max_dimensions: None,
   min_dimensions: None,
   multisampling: 0,

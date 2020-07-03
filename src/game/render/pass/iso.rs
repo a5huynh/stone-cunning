@@ -1,7 +1,7 @@
 use core::amethyst::{
     assets::AssetStorage,
     core::{
-        ecs::{Join, Read, ReadExpect, ReadStorage, SystemData, World},
+        ecs::{Read, ReadStorage, SystemData, World, WriteExpect},
         transform::Transform,
     },
     renderer::{
@@ -18,26 +18,29 @@ use core::amethyst::{
             mesh::AsVertex,
             shader::Shader,
         },
-        resources::Tint,
         sprite::{SpriteRender, SpriteSheet},
-        sprite_visibility::SpriteVisibility,
         submodules::{DynamicVertexBuffer, FlatEnvironmentSub, TextureId, TextureSub},
         types::{Backend, Texture},
         util,
     },
 };
+use std::time::SystemTime;
 
-use crate::game::render::{pod::SpriteArgs, SPRITE_FRAGMENT, SPRITE_VERTEX};
+use crate::game::{
+    components::PassInfo,
+    render::{pod::TerrainArgs, ISO_FRAGMENT, ISO_VERTEX},
+    systems::render::SpriteVisibility,
+};
 
 #[derive(Clone, Debug, Default, PartialEq)]
-pub struct DrawSpritesDesc;
-impl DrawSpritesDesc {
+pub struct DrawTerrainDesc;
+impl DrawTerrainDesc {
     pub fn new() -> Self {
         Default::default()
     }
 }
 
-impl<B: Backend> RenderGroupDesc<B, World> for DrawSpritesDesc {
+impl<B: Backend> RenderGroupDesc<B, World> for DrawTerrainDesc {
     fn build(
         self,
         _ctx: &GraphContext<B>,
@@ -57,7 +60,7 @@ impl<B: Backend> RenderGroupDesc<B, World> for DrawSpritesDesc {
         let textures = TextureSub::new(factory)?;
         let vertex = DynamicVertexBuffer::new();
 
-        let (pipeline, pipeline_layout) = build_sprite_pipeline(
+        let (pipeline, pipeline_layout) = build_terrain_pipeline(
             factory,
             subpass,
             framebuffer_width,
@@ -66,7 +69,7 @@ impl<B: Backend> RenderGroupDesc<B, World> for DrawSpritesDesc {
             vec![env.raw_layout(), textures.raw_layout()],
         )?;
 
-        Ok(Box::new(DrawSprites::<B> {
+        Ok(Box::new(DrawTerrain::<B> {
             pipeline,
             pipeline_layout,
             env,
@@ -80,17 +83,17 @@ impl<B: Backend> RenderGroupDesc<B, World> for DrawSpritesDesc {
 
 /// Draws triangles to the screen.
 #[derive(Debug)]
-pub struct DrawSprites<B: Backend> {
+pub struct DrawTerrain<B: Backend> {
     pipeline: B::GraphicsPipeline,
     pipeline_layout: B::PipelineLayout,
     env: FlatEnvironmentSub<B>,
     textures: TextureSub<B>,
-    vertex: DynamicVertexBuffer<B, SpriteArgs>,
-    sprites: OrderedOneLevelBatch<TextureId, SpriteArgs>,
+    vertex: DynamicVertexBuffer<B, TerrainArgs>,
+    sprites: OrderedOneLevelBatch<TextureId, TerrainArgs>,
     change: util::ChangeDetection,
 }
 
-impl<B: Backend> RenderGroup<B, World> for DrawSprites<B> {
+impl<B: Backend> RenderGroup<B, World> for DrawTerrain<B> {
     fn prepare(
         &mut self,
         factory: &Factory<B>,
@@ -100,16 +103,16 @@ impl<B: Backend> RenderGroup<B, World> for DrawSprites<B> {
         world: &World,
     ) -> PrepareResult {
         #[cfg(feature = "profiler")]
-        profile_scope!("prepare transparent");
+        profile_scope!("prepare terrain pass");
 
-        let (sprite_sheet_storage, tex_storage, visibility, sprite_renders, transforms, tints) =
+        let (visibility, sprite_sheet_storage, tex_storage, sprites, transforms, passinfo) =
             <(
+                Option<Read<'_, SpriteVisibility>>,
                 Read<'_, AssetStorage<SpriteSheet>>,
                 Read<'_, AssetStorage<Texture>>,
-                ReadExpect<'_, SpriteVisibility>,
                 ReadStorage<'_, SpriteRender>,
                 ReadStorage<'_, Transform>,
-                ReadStorage<'_, Tint>,
+                Option<WriteExpect<'_, PassInfo>>,
             )>::fetch(world);
 
         self.env.process(factory, index, world);
@@ -119,36 +122,52 @@ impl<B: Backend> RenderGroup<B, World> for DrawSprites<B> {
         let sprites_ref = &mut self.sprites;
         let textures_ref = &mut self.textures;
 
-        {
+        if let Some(visibility) = visibility {
+            let now = SystemTime::now();
+
             #[cfg(feature = "profiler")]
             profile_scope!("gather_sprites_trans");
 
-            let mut joined = (&sprite_renders, &transforms, tints.maybe()).join();
             visibility
-                .visible_ordered
+                .order
                 .iter()
-                .filter_map(|e| joined.get_unchecked(e.id()))
-                .filter_map(|(sprite_render, global, tint)| {
-                    let (batch_data, texture) = SpriteArgs::from_data(
+                .filter_map(|entity| {
+                    let transform = transforms.get(*entity);
+                    let sprite = sprites.get(*entity);
+
+                    if transform.is_none() || sprite.is_none() {
+                        return None;
+                    }
+
+                    if let Some((batch_data, texture)) = TerrainArgs::from_data(
                         &tex_storage,
                         &sprite_sheet_storage,
-                        &sprite_render,
-                        &global,
-                        tint,
-                    )?;
-                    let (tex_id, this_changed) = textures_ref.insert(
-                        factory,
-                        world,
-                        texture,
-                        hal::image::Layout::ShaderReadOnlyOptimal,
-                    )?;
-                    changed = changed || this_changed;
-                    Some((tex_id, batch_data))
+                        &sprite.unwrap(),
+                        transform.unwrap(),
+                        None,
+                    ) {
+                        if let Some((tex_id, this_changed)) = textures_ref.insert(
+                            factory,
+                            world,
+                            texture,
+                            hal::image::Layout::ShaderReadOnlyOptimal,
+                        ) {
+                            changed = changed || this_changed;
+                            return Some((tex_id, batch_data));
+                        }
+                    }
+                    None
                 })
                 .for_each_group(|tex_id, batch_data| {
-                    sprites_ref.insert(tex_id, batch_data.drain(..));
+                    sprites_ref.insert(tex_id, batch_data.drain(..))
                 });
+
+            if let Some(mut passinfo) = passinfo {
+                passinfo.num_entities = Some(visibility.order.len());
+                passinfo.walltime = Some(now.elapsed().unwrap().as_millis());
+            }
         }
+
         self.textures.maintain(factory, world);
         changed = changed || self.sprites.changed();
 
@@ -201,7 +220,7 @@ impl<B: Backend> RenderGroup<B, World> for DrawSprites<B> {
     }
 }
 
-fn build_sprite_pipeline<B: Backend>(
+fn build_terrain_pipeline<B: Backend>(
     factory: &Factory<B>,
     subpass: hal::pass::Subpass<'_, B>,
     framebuffer_width: u32,
@@ -215,13 +234,13 @@ fn build_sprite_pipeline<B: Backend>(
             .create_pipeline_layout(layouts, None as Option<(_, _)>)
     }?;
 
-    let shader_vertex = unsafe { SPRITE_VERTEX.module(factory).unwrap() };
-    let shader_fragment = unsafe { SPRITE_FRAGMENT.module(factory).unwrap() };
+    let shader_vertex = unsafe { ISO_VERTEX.module(factory).unwrap() };
+    let shader_fragment = unsafe { ISO_FRAGMENT.module(factory).unwrap() };
 
     let pipes = PipelinesBuilder::new()
         .with_pipeline(
             PipelineDescBuilder::new()
-                .with_vertex_desc(&[(SpriteArgs::vertex(), pso::VertexInputRate::Instance(1))])
+                .with_vertex_desc(&[(TerrainArgs::vertex(), pso::VertexInputRate::Instance(1))])
                 .with_input_assembler(pso::InputAssemblerDesc::new(hal::Primitive::TriangleStrip))
                 .with_shaders(util::simple_shader_set(
                     &shader_vertex,

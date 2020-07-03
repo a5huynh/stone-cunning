@@ -5,14 +5,17 @@ use core::amethyst::{
     core::{math::Point3, transform::Transform},
     prelude::*,
 };
+use core::WorldPos;
 
-use crate::game::{components::Direction, config::GameConfig};
+use crate::game::config::GameConfig;
+use libdwarf::Direction;
 
 /// Map resource used to convert screen coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
 pub struct MapRenderer {
     /// rotation - which direction along the map the camera is looking.
     pub rotation: Direction,
+    pub prev_rotation: Direction,
     pub rotate_cooldown: bool,
 
     pub tile_width: f32,
@@ -28,25 +31,40 @@ impl MapRenderer {
 
         MapRenderer {
             rotation: Direction::NORTH,
+            prev_rotation: Direction::NORTH,
             rotate_cooldown: false,
             tile_height: tile_height as f32,
             tile_width: tile_width as f32,
         }
     }
 
-    pub fn rotate_left(&mut self) {
-        let new_rotation = match self.rotation {
-            Direction::NORTH => Direction::EAST,
-            Direction::EAST => Direction::SOUTH,
-            Direction::SOUTH => Direction::WEST,
-            Direction::WEST => Direction::NORTH,
+    pub fn rotate_camera(&mut self, pt: &WorldPos) -> WorldPos {
+        let t = 60;
+        let dir = match self.prev_rotation {
+            Direction::NORTH => WorldPos::new(-1, -1, 0),
+            Direction::EAST => WorldPos::new(-1, 1, 0),
+            Direction::SOUTH => WorldPos::new(1, 1, 0),
+            Direction::WEST => WorldPos::new(1, -1, 0),
         };
 
-        self.rotate_cooldown = true;
-        self.rotation = new_rotation;
+        // Find true center
+        let center = WorldPos::new(pt.x + t * dir.x, pt.y + t * dir.y, pt.z + t * dir.z);
+
+        let dir = match self.rotation {
+            Direction::NORTH => WorldPos::new(1, 1, 0),
+            Direction::EAST => WorldPos::new(1, -1, 0),
+            Direction::SOUTH => WorldPos::new(-1, -1, 0),
+            Direction::WEST => WorldPos::new(-1, 1, 0),
+        };
+        // Extend out to new direction
+        WorldPos::new(
+            center.x + t * dir.x,
+            center.y + t * dir.y,
+            center.z + t * dir.z,
+        )
     }
 
-    pub fn rotate_right(&mut self) {
+    pub fn rotate_cw(&mut self) {
         let new_rotation = match self.rotation {
             Direction::NORTH => Direction::WEST,
             Direction::WEST => Direction::SOUTH,
@@ -55,6 +73,20 @@ impl MapRenderer {
         };
 
         self.rotate_cooldown = true;
+        self.prev_rotation = self.rotation;
+        self.rotation = new_rotation;
+    }
+
+    pub fn rotate_ccw(&mut self) {
+        let new_rotation = match self.rotation {
+            Direction::NORTH => Direction::EAST,
+            Direction::EAST => Direction::SOUTH,
+            Direction::SOUTH => Direction::WEST,
+            Direction::WEST => Direction::NORTH,
+        };
+
+        self.rotate_cooldown = true;
+        self.prev_rotation = self.rotation;
         self.rotation = new_rotation;
     }
 
@@ -80,8 +112,10 @@ impl MapRenderer {
         let cos_rot = rotation.cos();
         let sin_rot = rotation.sin();
 
-        let mx = ((px - 32.0) * cos_rot) - ((py - 32.0) * sin_rot) + 32.0;
-        let my = ((px - 32.0) * sin_rot) + ((py - 32.0) * cos_rot) + 32.0;
+        let cx = 0.0; // self.center_offset.x as f32;
+        let cy = 0.0; // self.center_offset.y as f32;
+        let mx = cx + (px - cx) * cos_rot - (py - cy) * sin_rot;
+        let my = cy + (px - cx) * sin_rot + (py - cy) * cos_rot;
 
         (mx.trunc() as i32, my.trunc() as i32)
     }
@@ -110,11 +144,12 @@ impl MapRenderer {
 
         let cos_rot = rotation.cos();
         let sin_rot = rotation.sin();
+        let cx = 0.0; // self.center_offset.x as f32;
+        let cy = 0.0; // self.center_offset.y as f32;
 
         // Center in window, rotate around new origin, and then translate back.
-        // TODO: keep track of window
-        let px = ((fx - 32.0) * cos_rot) - ((fy - 32.0) * sin_rot) + 32.0;
-        let py = ((fx - 32.0) * sin_rot) + ((fy - 32.0) * cos_rot) + 32.0;
+        let px = cx + (fx - cx) * cos_rot - (fy - cy) * sin_rot;
+        let py = cy + (fx - cx) * sin_rot + (fy - cy) * cos_rot;
 
         // Scale and convert to iso coordinates
         let tx = (px - py) * self.tile_width / 2.0;
@@ -124,5 +159,63 @@ impl MapRenderer {
         // Set translation
         transform.set_translation_xyz(tx, ty, tz);
         transform
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::game::resources::MapRenderer;
+    use core::WorldPos;
+    use libdwarf::Direction;
+
+    #[test]
+    fn test_map_place() {
+        let map = MapRenderer {
+            rotation: Direction::NORTH,
+            prev_rotation: Direction::NORTH,
+            rotate_cooldown: false,
+            tile_height: 16.0,
+            tile_width: 32.0,
+        };
+
+        let pt_a = map.place(&WorldPos::new(50, 50, 0), 0.0);
+        let pt_b = map.place(&WorldPos::new(5, 5, 45), 0.0);
+        assert_eq!(pt_a.translation().xy(), pt_b.translation().xy());
+    }
+
+    #[test]
+    fn test_map_rotate() {
+        let mut map = MapRenderer {
+            rotation: Direction::NORTH,
+            prev_rotation: Direction::NORTH,
+            rotate_cooldown: false,
+            tile_height: 16.0,
+            tile_width: 32.0,
+        };
+
+        map.rotate_cw();
+
+        assert_eq!(map.prev_rotation, Direction::NORTH);
+        assert_eq!(map.rotation, Direction::WEST);
+
+        let pt_a = map.place(&WorldPos::new(5, 5, 45), 0.0);
+        assert_eq!(pt_a.translation().x, 160.0);
+        assert_eq!(pt_a.translation().y, 720.0);
+        assert_eq!(pt_a.translation().z, 0.0);
+    }
+
+    #[test]
+    fn test_rotate_camera() {
+        let mut map = MapRenderer {
+            rotation: Direction::NORTH,
+            prev_rotation: Direction::NORTH,
+            rotate_cooldown: false,
+            tile_height: 16.0,
+            tile_width: 32.0,
+        };
+
+        map.rotate_cw();
+        let new_center = map.rotate_camera(&WorldPos::new(50, 50, 0));
+        assert_eq!(new_center, WorldPos::new(0, 0, 0));
     }
 }

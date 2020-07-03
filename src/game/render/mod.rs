@@ -1,11 +1,8 @@
 pub mod pass;
 pub mod pod;
 
-mod sprite;
-mod terrain;
-
-pub use sprite::*;
-pub use terrain::*;
+mod iso;
+pub use iso::*;
 
 use core::amethyst::renderer::rendy::{hal::pso::ShaderStageFlags, shader::SpirvShader};
 

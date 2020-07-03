@@ -1,5 +1,2 @@
-mod sprite;
-mod terrain;
-
-pub use sprite::*;
-pub use terrain::*;
+mod iso;
+pub use iso::*;

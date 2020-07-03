@@ -1,3 +1,10 @@
+use crate::game::{
+    components::CameraFollow,
+    resources::{MapRenderer, ViewShed},
+    systems::{
+        camera, debug, render, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
+    },
+};
 use core::amethyst::{
     core::{math::Point3, transform::Transform, ArcThreadPool, Parent, SystemBundle, Time},
     ecs::{Dispatcher, DispatcherBuilder},
@@ -8,15 +15,6 @@ use core::amethyst::{
     utils::fps_counter::FpsCounter,
     window::DisplayConfig,
 };
-
-use crate::game::{
-    components::CameraFollow,
-    resources::{MapRenderer, ViewShed},
-    systems::{
-        camera, debug, render, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
-    },
-};
-use core::log;
 use libdwarf::WorldSimBundle;
 
 pub struct RunningState<'a, 'b> {
@@ -152,12 +150,6 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
                 if is_key_down(&event, VirtualKeyCode::Space) {
                     self.paused = !self.paused;
                 }
-            }
-            StateEvent::Ui(ui_event) => {
-                log::info!(
-                    "[HANDLE_EVENT] You just interacted with a ui element: {:?}",
-                    ui_event
-                );
             }
             _ => {}
         }

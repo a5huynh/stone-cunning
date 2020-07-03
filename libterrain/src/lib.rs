@@ -71,6 +71,10 @@ impl TerrainLoader {
     }
 
     pub fn get(&mut self, pt: &WorldPos) -> Option<ChunkEntity> {
+        if pt.z >= (ZLEVELS - 1) as i32 {
+            return None;
+        }
+
         // Transform world coordinate to chunk coordinate
         let coord = self.to_chunk_coord(pt);
         // Get the chunk

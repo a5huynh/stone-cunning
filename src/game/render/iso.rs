@@ -15,13 +15,13 @@ use libdwarf::components::{EntityInfo, Terrain};
 /// A [RenderPlugin] for drawing 2d objects with flat shading.
 /// Required to display sprites defined with [SpriteRender] component.
 #[derive(Default, Debug)]
-pub struct RenderTerrain {
+pub struct RenderIso {
     target: Target,
 }
 
 type TerrainSetupData<'a> = (ReadStorage<'a, EntityInfo>, ReadStorage<'a, Terrain>);
 
-impl RenderTerrain {
+impl RenderIso {
     /// Set target to which 2d sprites will be rendered.
     #[allow(dead_code)]
     pub fn with_target(mut self, target: Target) -> Self {
@@ -30,7 +30,7 @@ impl RenderTerrain {
     }
 }
 
-impl<B: Backend> RenderPlugin<B> for RenderTerrain {
+impl<B: Backend> RenderPlugin<B> for RenderIso {
     fn on_build<'a, 'b>(
         &mut self,
         world: &mut World,

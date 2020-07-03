@@ -1,16 +1,20 @@
 use core::amethyst::{
     core::transform::Transform,
     ecs::{Entities, ReadExpect, System, WriteExpect, WriteStorage},
+    renderer::SpriteRender,
 };
-
+use core::log::info;
 use core::{Uuid, WorldPos};
 use libdwarf::{
     components::{EntityInfo, Terrain},
     resources::World,
 };
-use libterrain::{ChunkEntity, ZLEVELS};
+use libterrain::{Biome, ChunkEntity, ZLEVELS};
 
-use crate::game::resources::{MapRenderer, ViewShed};
+use crate::game::{
+    resources::{MapRenderer, ViewShed},
+    sprite::SpriteSheetStorage,
+};
 
 pub struct RenderTerrainSystem;
 impl<'a> System<'a> for RenderTerrainSystem {
@@ -22,6 +26,8 @@ impl<'a> System<'a> for RenderTerrainSystem {
         WriteExpect<'a, World>,
         ReadExpect<'a, MapRenderer>,
         WriteExpect<'a, ViewShed>,
+        WriteStorage<'a, SpriteRender>,
+        ReadExpect<'a, SpriteSheetStorage>,
     );
 
     fn run(
@@ -34,6 +40,8 @@ impl<'a> System<'a> for RenderTerrainSystem {
             mut world,
             map_render,
             mut viewshed,
+            mut sprites,
+            sheets,
         ): Self::SystemData,
     ) {
         // Should we check for chunks to load / remove?
@@ -57,7 +65,7 @@ impl<'a> System<'a> for RenderTerrainSystem {
                 if world.visible_chunks.contains(&(x, y)) {
                     continue;
                 } else {
-                    println!("Loading chunk: {:?}", (x, y));
+                    info!("Loading chunk: {:?}", (x, y));
                     // Track chunk as visible.
                     world.visible_chunks.insert((x, y));
                     let chunk = world.terrain.get_chunk(x, y);
@@ -77,6 +85,16 @@ impl<'a> System<'a> for RenderTerrainSystem {
                                             continue;
                                         }
 
+                                        // Determine which sprite to use
+                                        let sprite_idx = match biome {
+                                            Biome::TAIGA => 0,
+                                            Biome::SNOW | Biome::TUNDRA => 1,
+                                            Biome::GRASSLAND => 2,
+                                            Biome::OCEAN => 3,
+                                            Biome::BEACH => 4,
+                                            Biome::ROCK => 5,
+                                        };
+
                                         entities
                                             .build_entity()
                                             // Grid position
@@ -89,6 +107,13 @@ impl<'a> System<'a> for RenderTerrainSystem {
                                                     needs_update: true,
                                                 },
                                                 &mut entity_info,
+                                            )
+                                            .with(
+                                                SpriteRender {
+                                                    sprite_sheet: sheets.terrain.clone(),
+                                                    sprite_number: sprite_idx,
+                                                },
+                                                &mut sprites,
                                             )
                                             .with(Terrain { biome }, &mut terrain_storage)
                                             .with(map_render.place(&pt, 0.0), &mut transforms)

@@ -3,7 +3,7 @@ use core::amethyst::{
     core::transform::Transform,
     ecs::prelude::{Component, DenseVecStorage, NullStorage},
     prelude::*,
-    renderer::{SpriteRender, Transparent},
+    renderer::SpriteRender,
 };
 use specs_derive::*;
 
@@ -28,7 +28,6 @@ impl Cursor {
             .with(sprite_render)
             .with(Cursor::default())
             .with(Transform::default())
-            .with(Transparent)
             .build();
     }
 }

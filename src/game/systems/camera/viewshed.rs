@@ -16,7 +16,7 @@ impl<'s> System<'s> for ViewshedUpdaterSystem {
     type SystemData = (
         ReadStorage<'s, Camera>,
         ReadStorage<'s, Transform>,
-        ReadExpect<'s, MapRenderer>,
+        WriteExpect<'s, MapRenderer>,
         ReadExpect<'s, ScreenDimensions>,
         WriteExpect<'s, ViewShed>,
     );
@@ -56,9 +56,21 @@ impl<'s> System<'s> for ViewshedUpdaterSystem {
                 transform,
             );
 
+            let center = camera.projection().screen_to_world_point(
+                Point3::new(
+                    screen.width() / 2.0,
+                    screen.height() / 2.0,
+                    transform.translation().z,
+                ),
+                screen_dim,
+                transform,
+            );
+
             // Used in view culling.
             viewshed.top_left = Some(top_left);
             viewshed.bottom_right = Some(bottom_right);
+            let center_pos = map_render.to_map_coords(center.x, center.y);
+            viewshed.center_world = Some(WorldPos::new(center_pos.0, center_pos.1, 0));
 
             // Used to determine next chunks to load, if any.
             let tl_pos = map_render.to_map_coords(top_left.x, top_left.y);

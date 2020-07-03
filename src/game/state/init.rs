@@ -74,7 +74,7 @@ impl SimpleState for InitState {
 
         // Initialize workers
         world.exec(|mut queue: Write<'_, TaskQueue>| {
-            queue.add_world(TriggerType::AddWorker(Point3::new(8, 8, 42)));
+            queue.add_world(TriggerType::AddWorker(Point3::new(3, 0, 46)));
         });
 
         self.finished = true;

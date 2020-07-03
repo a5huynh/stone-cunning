@@ -11,6 +11,15 @@ use core::amethyst::core::{
     SystemBundle,
 };
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// Direction the map is facing.
+pub enum Direction {
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST,
+}
+
 #[derive(Default)]
 pub struct WorldSimBundle;
 impl<'a, 'b> SystemBundle<'a, 'b> for WorldSimBundle {

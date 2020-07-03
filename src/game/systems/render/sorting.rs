@@ -1,20 +1,13 @@
 /// System to correctly handle sprite sorting order. This only needs to happen when
 /// the camera view changes in anyway.
-use core::{
-    amethyst::{
-        core::Transform,
-        ecs::{
-            prelude::Entity, Entities, Join, ReadExpect, ReadStorage, System, Write, WriteExpect,
-        },
-    },
-    WorldPos,
+use core::amethyst::{
+    core::Transform,
+    ecs::{prelude::Entity, Entities, Join, ReadStorage, System, Write, WriteExpect},
+    renderer::sprite::SpriteRender,
 };
+use core::Vector3;
 
-use crate::game::{
-    components::Direction,
-    resources::{MapRenderer, ViewShed},
-};
-use libdwarf::components::{EntityInfo, Terrain};
+use crate::game::resources::ViewShed;
 
 #[derive(Default, Debug)]
 pub struct SpriteVisibility {
@@ -23,7 +16,7 @@ pub struct SpriteVisibility {
 
 struct Internal {
     pub entity: Entity,
-    pub pos: WorldPos,
+    pub pos: Vector3<f32>,
 }
 
 #[derive(Default)]
@@ -42,15 +35,13 @@ impl<'s> System<'s> for SpriteSortingSystem {
         Entities<'s>,
         Write<'s, SpriteVisibility>,
         WriteExpect<'s, ViewShed>,
-        ReadStorage<'s, EntityInfo>,
-        ReadStorage<'s, Terrain>,
+        ReadStorage<'s, SpriteRender>,
         ReadStorage<'s, Transform>,
-        ReadExpect<'s, MapRenderer>,
     );
 
     fn run(
         &mut self,
-        (entities, mut visibility, mut viewshed, entity_infos, terrains, transforms, map_render): Self::SystemData,
+        (entities, mut visibility, mut viewshed, sprites, transforms): Self::SystemData,
     ) {
         if !viewshed.needs_sort {
             return;
@@ -69,21 +60,18 @@ impl<'s> System<'s> for SpriteSortingSystem {
         // Filter out non-visible entities.
         if let Some(top_left) = top_left {
             if let Some(bottom_right) = bottom_right {
-                for (entity, entity_info, _, transform) in
-                    (&entities, &entity_infos, &terrains, &transforms).join()
-                {
+                for (entity, _, transform) in (&entities, &sprites, &transforms).join() {
+                    let pos = transform.translation();
                     // Not within view? Skip it
-                    if (transform.translation().x < top_left.x
-                        || transform.translation().x > bottom_right.x)
-                        && (transform.translation().y < top_left.y
-                            || transform.translation().y > bottom_right.y)
+                    if (pos.x < top_left.x || pos.x > bottom_right.x)
+                        && (pos.y < top_left.y || pos.y > bottom_right.y)
                     {
                         continue;
                     }
 
                     self.filtered.push(Internal {
                         entity,
-                        pos: entity_info.pos,
+                        pos: Vector3::new(pos.x, pos.y, pos.z),
                     });
                 }
             }
@@ -93,32 +81,7 @@ impl<'s> System<'s> for SpriteSortingSystem {
             let ta = a.pos;
             let tb = b.pos;
 
-            match map_render.rotation {
-                Direction::SOUTH => {
-                    return (ta.x + ta.y + ta.z)
-                        .partial_cmp(&(tb.x + tb.y + tb.z))
-                        .unwrap();
-                }
-                // Just SOUTH, but reversed.
-                Direction::NORTH => {
-                    return (ta.x + ta.y + ta.z)
-                        .partial_cmp(&(tb.x + tb.y + tb.z))
-                        .unwrap()
-                        .reverse();
-                }
-                Direction::WEST => {
-                    return (ta.x - ta.y + ta.z)
-                        .partial_cmp(&(tb.x - tb.y + tb.z))
-                        .unwrap();
-                }
-                // Just WEST but reversed.
-                Direction::EAST => {
-                    return (ta.x - ta.y + ta.z)
-                        .partial_cmp(&(tb.x - tb.y + tb.z))
-                        .unwrap()
-                        .reverse();
-                }
-            }
+            ta.z.partial_cmp(&tb.z).unwrap()
         });
 
         visibility

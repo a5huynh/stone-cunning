@@ -40,21 +40,33 @@ impl<'s> System<'s> for DebugUI {
                 .size([300.0, 500.0], Condition::FirstUseEver)
                 .build(ui, || {
                     let label = viewshed
+                        .top_left
+                        .map(|pt| format!("TL (World): ({}, {}, {})", pt.x, pt.y, pt.z))
+                        .unwrap_or_else(|| "TL (World): None".to_string());
+                    ui.text(label);
+
+                    let label = viewshed
+                        .bottom_right
+                        .map(|pt| format!("BR (World): ({}, {}, {})", pt.x, pt.y, pt.z))
+                        .unwrap_or_else(|| "BR (World): None".to_string());
+                    ui.text(label);
+
+                    let label = viewshed
                         .top_left_world
-                        .map(|pt| format!("Top Left (World): ({}, {}, {})", pt.x, pt.y, pt.z))
-                        .unwrap_or_else(|| "Top Left (World): None".to_string());
+                        .map(|pt| format!("TL (Map): ({}, {}, {})", pt.x, pt.y, pt.z))
+                        .unwrap_or_else(|| "TL (Map): None".to_string());
                     ui.text(label);
 
                     let label = viewshed
                         .bottom_right_world
-                        .map(|pt| format!("Bottom Right (World): ({}, {}, {})", pt.x, pt.y, pt.z))
-                        .unwrap_or_else(|| "Bottom Right (World): None".to_string());
+                        .map(|pt| format!("BR (Map): ({}, {}, {})", pt.x, pt.y, pt.z))
+                        .unwrap_or_else(|| "BR (Map): None".to_string());
                     ui.text(label);
 
                     let label = viewshed
                         .center_world
-                        .map(|pt| format!("Center (World): ({}, {}, {})", pt.x, pt.y, pt.z))
-                        .unwrap_or_else(|| "Center (World): None".to_string());
+                        .map(|pt| format!("Center (Map): ({}, {}, {})", pt.x, pt.y, pt.z))
+                        .unwrap_or_else(|| "Center (Map): None".to_string());
                     ui.text(label);
                 });
 

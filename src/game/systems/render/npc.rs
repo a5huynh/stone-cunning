@@ -1,12 +1,14 @@
 use core::amethyst::{
     core::transform::Transform,
     ecs::{Entities, Entity, Join, ReadExpect, ReadStorage, System, WriteStorage},
-    renderer::{SpriteRender, Transparent},
+    renderer::SpriteRender,
 };
 
 use libdwarf::components::{EntityInfo, Worker};
 
 use crate::game::{resources::MapRenderer, sprite::SpriteSheetStorage};
+
+const NPC_Z_OFFSET: f32 = 1.0;
 
 pub struct RenderNPCSystem;
 impl<'a> System<'a> for RenderNPCSystem {
@@ -16,7 +18,6 @@ impl<'a> System<'a> for RenderNPCSystem {
         ReadStorage<'a, EntityInfo>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, SpriteRender>,
-        WriteStorage<'a, Transparent>,
         ReadExpect<'a, MapRenderer>,
         ReadExpect<'a, SpriteSheetStorage>,
     );
@@ -29,7 +30,6 @@ impl<'a> System<'a> for RenderNPCSystem {
             positions,
             mut transforms,
             mut sprites,
-            mut transparents,
             map_render,
             sheets,
         ): Self::SystemData,
@@ -41,12 +41,12 @@ impl<'a> System<'a> for RenderNPCSystem {
                 .collect();
 
         for (entity, _, map_pos, _) in invisible {
-            // Appply transformation
+            // Apply transformation
             let pos = map_pos.pos;
             transforms
-                .insert(entity, map_render.place(&pos, 1.0))
+                .insert(entity, map_render.place(&pos, NPC_Z_OFFSET))
                 .unwrap();
-            // Assign sprite to entity
+
             sprites
                 .insert(
                     entity,
@@ -56,13 +56,12 @@ impl<'a> System<'a> for RenderNPCSystem {
                     },
                 )
                 .unwrap();
-            transparents.insert(entity, Transparent).unwrap();
         }
 
         // Update object positions
         for (_, map_pos, transform) in (&mut workers, &positions, &mut transforms).join() {
             let pos = map_pos.pos;
-            let new_transform = map_render.place(&pos, 0.9);
+            let new_transform = map_render.place(&pos, NPC_Z_OFFSET);
             transform.set_translation_xyz(
                 new_transform.translation().x,
                 new_transform.translation().y,
