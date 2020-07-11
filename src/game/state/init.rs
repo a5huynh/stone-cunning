@@ -17,7 +17,7 @@ use libterrain::TerrainLoader;
 use crate::game::{
     components::{Cursor, CursorSelected, Object, PassInfo, Player},
     config::GameConfig,
-    resources::{MapRenderer, ViewShed},
+    resources::{MapResource, ViewShed},
     sprite::SpriteSheetStorage,
     state::RunningState,
 };
@@ -58,7 +58,7 @@ impl SimpleState for InitState {
         // for rendering.
 
         // Utils for map rendering
-        let map_render = MapRenderer::initialize(world);
+        let map_render = MapResource::initialize(world);
         world.insert(map_render);
 
         // Initialize an empty viewshed, this will update one we get a camera

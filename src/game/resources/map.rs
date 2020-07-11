@@ -12,7 +12,7 @@ use libdwarf::Direction;
 
 /// Map resource used to convert screen coordinates into map coordinates, check for
 /// collisions amongst objects, represent the current terrain.
-pub struct MapRenderer {
+pub struct MapResource {
     /// rotation - which direction along the map the camera is looking.
     pub rotation: Direction,
     pub prev_rotation: Direction,
@@ -22,14 +22,14 @@ pub struct MapRenderer {
     pub tile_height: f32,
 }
 
-impl MapRenderer {
+impl MapResource {
     pub fn initialize(world: &mut World) -> Self {
         let (tile_height, tile_width) = {
             let config = &world.read_resource::<GameConfig>();
             (config.tile_height, config.tile_width)
         };
 
-        MapRenderer {
+        MapResource {
             rotation: Direction::NORTH,
             prev_rotation: Direction::NORTH,
             rotate_cooldown: false,
@@ -164,13 +164,13 @@ impl MapRenderer {
 
 #[cfg(test)]
 mod test {
-    use crate::game::resources::MapRenderer;
+    use crate::game::resources::MapResource;
     use core::WorldPos;
     use libdwarf::Direction;
 
     #[test]
     fn test_map_place() {
-        let map = MapRenderer {
+        let map = MapResource {
             rotation: Direction::NORTH,
             prev_rotation: Direction::NORTH,
             rotate_cooldown: false,
@@ -185,7 +185,7 @@ mod test {
 
     #[test]
     fn test_map_rotate() {
-        let mut map = MapRenderer {
+        let mut map = MapResource {
             rotation: Direction::NORTH,
             prev_rotation: Direction::NORTH,
             rotate_cooldown: false,
@@ -206,7 +206,7 @@ mod test {
 
     #[test]
     fn test_rotate_camera() {
-        let mut map = MapRenderer {
+        let mut map = MapResource {
             rotation: Direction::NORTH,
             prev_rotation: Direction::NORTH,
             rotate_cooldown: false,

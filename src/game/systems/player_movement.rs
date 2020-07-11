@@ -4,7 +4,7 @@ use core::amethyst::{
     input::{InputHandler, StringBindings},
 };
 
-use crate::game::{components::Player, config::PlayerConfig, resources::MapRenderer};
+use crate::game::{components::Player, config::PlayerConfig, resources::MapResource};
 use core::WorldPos;
 use libdwarf::resources::World;
 
@@ -17,7 +17,7 @@ impl<'s> System<'s> for PlayerMovement {
         Read<'s, InputHandler<StringBindings>>,
         Read<'s, Time>,
         WriteExpect<'s, World>,
-        ReadExpect<'s, MapRenderer>,
+        ReadExpect<'s, MapResource>,
     );
 
     fn run(

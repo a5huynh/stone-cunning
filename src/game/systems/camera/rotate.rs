@@ -8,14 +8,14 @@ use core::WorldPos;
 use crate::game::{
     components::CameraFollow,
     config::GameConfig,
-    resources::{MapRenderer, ViewShed},
+    resources::{MapResource, ViewShed},
 };
 use libdwarf::components::EntityInfo;
 
 pub struct MapRotateSystem;
 impl<'s> System<'s> for MapRotateSystem {
     type SystemData = (
-        WriteExpect<'s, MapRenderer>,
+        WriteExpect<'s, MapResource>,
         WriteStorage<'s, EntityInfo>,
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<StringBindings>>,

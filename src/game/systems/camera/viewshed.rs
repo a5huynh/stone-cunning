@@ -8,7 +8,7 @@ use core::amethyst::{
 };
 use core::{Point3, Vector2, WorldPos};
 
-use crate::game::resources::{MapRenderer, ViewShed};
+use crate::game::resources::{MapResource, ViewShed};
 
 pub struct ViewshedUpdaterSystem;
 
@@ -16,7 +16,7 @@ impl<'s> System<'s> for ViewshedUpdaterSystem {
     type SystemData = (
         ReadStorage<'s, Camera>,
         ReadStorage<'s, Transform>,
-        WriteExpect<'s, MapRenderer>,
+        WriteExpect<'s, MapResource>,
         ReadExpect<'s, ScreenDimensions>,
         WriteExpect<'s, ViewShed>,
     );

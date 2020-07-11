@@ -1,6 +1,6 @@
 use crate::game::{
     components::CameraFollow,
-    resources::{MapRenderer, ViewShed},
+    resources::{MapResource, ViewShed},
     systems::{
         camera, debug, render, ui::debug::DebugUI, ClickSystem, CursorSystem, PlayerMovement,
     },
@@ -117,7 +117,7 @@ impl<'a, 'b> SimpleState for RunningState<'a, 'b> {
 
         // Initialize the camera
         let mut cam_transform = {
-            let map_render = world.read_resource::<MapRenderer>();
+            let map_render = world.read_resource::<MapResource>();
             map_render.place(&Point3::new(8, 8, 42), 0.0)
         };
 

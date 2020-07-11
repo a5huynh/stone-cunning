@@ -6,7 +6,7 @@ use core::amethyst::{
 
 use libdwarf::components::{EntityInfo, MapObject};
 
-use crate::game::{resources::MapRenderer, sprite::SpriteSheetStorage};
+use crate::game::{resources::MapResource, sprite::SpriteSheetStorage};
 
 pub struct RenderObjectSystem;
 impl<'a> System<'a> for RenderObjectSystem {
@@ -17,7 +17,7 @@ impl<'a> System<'a> for RenderObjectSystem {
         WriteStorage<'a, Transform>,
         WriteStorage<'a, SpriteRender>,
         WriteStorage<'a, Transparent>,
-        ReadExpect<'a, MapRenderer>,
+        ReadExpect<'a, MapResource>,
         ReadExpect<'a, SpriteSheetStorage>,
     );
 

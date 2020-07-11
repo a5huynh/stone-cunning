@@ -8,7 +8,7 @@ use core::amethyst::{
 
 use crate::game::{
     components::{Cursor, CursorSelected, PickInfo},
-    resources::MapRenderer,
+    resources::MapResource,
 };
 use core::{Point3, Vector2, WorldPos};
 use libdwarf::resources::World;
@@ -26,7 +26,7 @@ impl<'s> System<'s> for CursorSystem {
         ReadStorage<'s, Camera>,
         ReadExpect<'s, ScreenDimensions>,
         WriteExpect<'s, World>,
-        ReadExpect<'s, MapRenderer>,
+        ReadExpect<'s, MapResource>,
     );
 
     fn run(

@@ -10,7 +10,7 @@ use libdwarf::{
 
 use crate::game::{
     components::{CursorSelected, PassInfo},
-    resources::{MapRenderer, ViewShed},
+    resources::{MapResource, ViewShed},
 };
 
 #[derive(Default)]
@@ -24,7 +24,7 @@ impl<'s> System<'s> for DebugUI {
         ReadStorage<'s, MapObject>,
         ReadStorage<'s, Worker>,
         ReadExpect<'s, CursorSelected>,
-        ReadExpect<'s, MapRenderer>,
+        ReadExpect<'s, MapResource>,
         Write<'s, TaskQueue>,
         ReadExpect<'s, World>,
         ReadExpect<'s, PassInfo>,

@@ -8,7 +8,7 @@ use core::amethyst::{
 };
 use specs_derive::*;
 
-use crate::game::{resources::MapRenderer, sprite::SpriteSheetStorage};
+use crate::game::{resources::MapResource, sprite::SpriteSheetStorage};
 use libdwarf::components::Worker;
 
 #[derive(Component, Default)]
@@ -22,7 +22,7 @@ impl<'a> System<'a> for PathDebugSystem {
         Entities<'a>,
         ReadStorage<'a, Worker>,
         WriteStorage<'a, PathDebugComponent>,
-        ReadExpect<'a, MapRenderer>,
+        ReadExpect<'a, MapResource>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, SpriteRender>,
         WriteStorage<'a, Transparent>,

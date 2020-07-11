@@ -6,7 +6,7 @@ use core::amethyst::{
 
 use libdwarf::components::{EntityInfo, Worker};
 
-use crate::game::{resources::MapRenderer, sprite::SpriteSheetStorage};
+use crate::game::{resources::MapResource, sprite::SpriteSheetStorage};
 
 const NPC_Z_OFFSET: f32 = 1.0;
 
@@ -18,7 +18,7 @@ impl<'a> System<'a> for RenderNPCSystem {
         ReadStorage<'a, EntityInfo>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, SpriteRender>,
-        ReadExpect<'a, MapRenderer>,
+        ReadExpect<'a, MapResource>,
         ReadExpect<'a, SpriteSheetStorage>,
     );
 

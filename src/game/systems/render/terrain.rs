@@ -12,7 +12,7 @@ use libdwarf::{
 use libterrain::{Biome, ChunkEntity, ZLEVELS};
 
 use crate::game::{
-    resources::{MapRenderer, ViewShed},
+    resources::{MapResource, ViewShed},
     sprite::SpriteSheetStorage,
 };
 
@@ -24,7 +24,7 @@ impl<'a> System<'a> for RenderTerrainSystem {
         WriteStorage<'a, Terrain>,
         WriteStorage<'a, Transform>,
         WriteExpect<'a, World>,
-        ReadExpect<'a, MapRenderer>,
+        ReadExpect<'a, MapResource>,
         WriteExpect<'a, ViewShed>,
         WriteStorage<'a, SpriteRender>,
         ReadExpect<'a, SpriteSheetStorage>,
